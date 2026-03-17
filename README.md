@@ -1,5 +1,3 @@
-[mobile fun.html](https://github.com/user-attachments/files/26061402/mobile.fun.html)
-<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
