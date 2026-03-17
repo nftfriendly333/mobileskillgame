@@ -1,5 +1,4 @@
-
-[mobile fun.html](https://github.com/user-attachments/files/26060910/mobile.fun.html)
+[mobile fun.html](https://github.com/user-attachments/files/26061213/mobile.fun.html)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -93,14 +92,45 @@
     margin: 0 0.5rem;
   }
 
-  /* Main layout */
+  /* ── LAYOUT: mobile-first single column ── */
   .game-container {
-    max-width: 1200px;
+    max-width: 860px;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Order: 1=arena, 2=shop, 3=skills */
+  .arena-col   { order: 1; }
+  .shop-panel  { order: 2; }
+  .skills-panel{ order: 3; }
+
+  /* Skills grid: 2 columns on mobile */
+  .skills-grid {
     display: grid;
-    grid-template-columns: 260px 1fr 260px;
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* Desktop: side-by-side for shop + skills, arena full width on top */
+  @media (min-width: 700px) {
+    .game-container {
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 1.2rem;
+    }
+    .arena-col    { grid-column: 1 / -1; order: 1; }
+    .shop-panel   { grid-column: 1; order: 2; }
+    .skills-panel { grid-column: 2; order: 3; }
+    .skills-grid  { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (min-width: 1000px) {
+    .game-container { max-width: 1200px; gap: 1.5rem; }
   }
 
   /* PANEL styles */
@@ -709,60 +739,22 @@
   .tier-legendary{ background: rgba(201,168,76,0.15); border: 1px solid var(--gold); color: var(--gold2); }
   .tier-mythic   { background: rgba(192,57,43,0.2);   border: 1px solid #e74c3c; color: #ff6b6b; }
 
-  /* ── RESPONSIVE / MOBILE ── */
-
-  /* Tablet */
-  @media (max-width: 1000px) {
-    .game-container { grid-template-columns: 240px 1fr; }
-    .shop-panel { grid-column: 2; grid-row: 2; }
-    .arena-col  { grid-column: 2; grid-row: 1; }
-  }
-
-  /* Mobile: single-column stack */
-  @media (max-width: 700px) {
-    .game-header { padding: 1rem 0.8rem 0.7rem; }
-    .game-header h1 { font-size: 1.95rem; letter-spacing: 0.08em; }
-    .game-header p  { font-size: 0.95rem; }
-    .game-container { grid-template-columns: 1fr; padding: 0.7rem; gap: 0.8rem; }
-    .arena-col  { grid-column: 1; grid-row: auto; }
-    .skills-panel { grid-column: 1; }
-    .shop-panel { grid-column: 1; grid-row: auto; }
-    .panel { padding: 0.9rem; }
-    .skill-row { margin-bottom: 0.8rem; }
-    .btn-levelup { padding: 0.5rem; font-size: 0.9rem; }
-    .combatants { grid-template-columns: 1fr; gap: 0.5rem; }
+  /* ── MOBILE POLISH ── */
+  @media (max-width: 480px) {
+    .game-header h1 { font-size: 1.4rem; }
+    .panel { padding: 0.8rem; }
+    .combatants { grid-template-columns: 1fr; }
     .vs-divider { display: none; }
-    .combatant-card { padding: 0.8rem; }
-    .combatant-sprite { font-size: 2.8rem; }
-    .action-buttons { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .combatant-sprite { font-size: 2.5rem; }
+    .action-buttons { grid-template-columns: 1fr 1fr; }
     .action-buttons .btn-heavy { grid-column: 1 / -1; }
-    .action-btn { padding: 0.7rem 0.3rem; }
-    .action-btn .btn-icon { font-size: 1.8rem; }
-    .action-btn .btn-name { font-size: 0.85rem; }
-    .action-btn .btn-cost { font-size: 0.7rem; }
-    .btn-one-strike { font-size: 0.85rem; padding: 0.6rem 0.4rem; }
-    .battle-log { height: 120px; font-size: 0.95rem; }
-    .status-row { flex-wrap: wrap; gap: 0.4rem; }
-    .main-btn { font-size: 0.95rem; padding: 0.7rem; }
-    .xp-popup { padding: 1.2rem; width: 90vw; max-width: 380px; }
-    .xp-popup h2 { font-size: 1.65rem; }
-    .shop-tab { font-size: 0.75rem; padding: 0.3rem 0.1rem; letter-spacing: 0.05em; }
-    .skin-card { padding: 0.4rem; }
-    .skin-emoji { font-size: 1.6rem; }
-    .name-input { font-size: 0.9rem; }
-    .one-strike-banner .big-icon { font-size: 2rem; }
-    .one-strike-banner h3 { font-size: 1.05rem; }
+    .battle-log { height: 130px; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .skin-grid { grid-template-columns: repeat(2, 1fr); }
+    .xp-popup { width: 92vw; padding: 1rem; }
+    .main-btn { font-size: 0.85rem; }
   }
 
-  /* Very small phones */
-  @media (max-width: 380px) {
-    .game-header h1 { font-size: 1.65rem; }
-    .action-buttons { grid-template-columns: 1fr; }
-    .action-buttons .btn-heavy { grid-column: 1; }
-    .combatant-sprite { font-size: 2.2rem; }
-    .shop-tabs { flex-wrap: wrap; }
-    .shop-tab { flex: 0 0 48%; }
-  }
 
   /* Particle effects */
   .particle {
@@ -866,120 +858,24 @@
 
 <div class="game-container">
 
-  <!-- LEFT: Skills Panel -->
-  <div class="panel skills-panel">
-    <div class="panel-title">⚡ Skill Training</div>
-
-    <!-- Stamina -->
-    <div class="skill-row" id="skill-stamina">
-      <div class="skill-label">
-        <span class="skill-name"><span class="skill-icon">💚</span> Stamina</span>
-        <span class="skill-val" id="lv-stamina">LV 1</span>
-      </div>
-      <div class="skill-bar-bg"><div class="skill-bar-fill bar-stamina" id="bar-stamina" style="width:10%"></div></div>
-      <div class="skill-xp-row">
-        <span id="xp-stamina-label">0/25 XP</span>
-        <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-stamina-bar" style="width:0%"></div></div>
-        <span>Next LV</span>
-      </div>
-      <button class="btn-levelup" id="btn-stamina" onclick="clickSkill('stamina')">
-        LEVEL UP <span id="clicks-stamina"></span>
-        <div class="progress-bar" id="cd-bar-stamina" style="width:0%"></div>
-      </button>
-      <div class="cooldown-text" id="cd-text-stamina"></div>
-    </div>
-
-    <!-- Attack -->
-    <div class="skill-row" id="skill-attack">
-      <div class="skill-label">
-        <span class="skill-name"><span class="skill-icon">⚔️</span> Attack</span>
-        <span class="skill-val" id="lv-attack">LV 1</span>
-      </div>
-      <div class="skill-bar-bg"><div class="skill-bar-fill bar-attack" id="bar-attack" style="width:10%"></div></div>
-      <div class="skill-xp-row">
-        <span id="xp-attack-label">0/25 XP</span>
-        <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-attack-bar" style="width:0%"></div></div>
-        <span>Next LV</span>
-      </div>
-      <button class="btn-levelup" id="btn-attack" onclick="clickSkill('attack')">
-        LEVEL UP <span id="clicks-attack"></span>
-        <div class="progress-bar" id="cd-bar-attack" style="width:0%"></div>
-      </button>
-      <div class="cooldown-text" id="cd-text-attack"></div>
-    </div>
-
-    <!-- Defense -->
-    <div class="skill-row" id="skill-defense">
-      <div class="skill-label">
-        <span class="skill-name"><span class="skill-icon">🛡️</span> Defense</span>
-        <span class="skill-val" id="lv-defense">LV 1</span>
-      </div>
-      <div class="skill-bar-bg"><div class="skill-bar-fill bar-defense" id="bar-defense" style="width:10%"></div></div>
-      <div class="skill-xp-row">
-        <span id="xp-defense-label">0/25 XP</span>
-        <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-defense-bar" style="width:0%"></div></div>
-        <span>Next LV</span>
-      </div>
-      <button class="btn-levelup" id="btn-defense" onclick="clickSkill('defense')">
-        LEVEL UP <span id="clicks-defense"></span>
-        <div class="progress-bar" id="cd-bar-defense" style="width:0%"></div>
-      </button>
-      <div class="cooldown-text" id="cd-text-defense"></div>
-    </div>
-
-    <!-- Crit -->
-    <div class="skill-row" id="skill-crit">
-      <div class="skill-label">
-        <span class="skill-name"><span class="skill-icon">💥</span> Critical</span>
-        <span class="skill-val" id="lv-crit">LV 1</span>
-      </div>
-      <div class="skill-bar-bg"><div class="skill-bar-fill bar-crit" id="bar-crit" style="width:10%"></div></div>
-      <div class="skill-xp-row">
-        <span id="xp-crit-label">0/25 XP</span>
-        <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-crit-bar" style="width:0%"></div></div>
-        <span>Next LV</span>
-      </div>
-      <button class="btn-levelup" id="btn-crit" onclick="clickSkill('crit')">
-        LEVEL UP <span id="clicks-crit"></span>
-        <div class="progress-bar" id="cd-bar-crit" style="width:0%"></div>
-      </button>
-      <div class="cooldown-text" id="cd-text-crit"></div>
-    </div>
-
-    <div id="skill-clicks-info">Click 25 times to level up — 1 min cooldown after each level</div>
-  </div>
-
-  <!-- RIGHT: Arena -->
+  <!-- ══ SECTION 1: FIGHT ARENA (top) ══ -->
   <div class="arena-col">
 
     <!-- Combatants -->
-    <div class="panel" style="padding: 1.2rem;">
+    <div class="panel arena-panel">
       <div class="combatants">
-
         <!-- Player -->
         <div class="combatant-card" id="player-card">
           <span class="combatant-sprite" id="player-sprite">🧙</span>
           <div class="combatant-name">THE WARRIOR</div>
           <div class="combatant-title" id="player-title">Novice Wanderer</div>
-
           <div class="stat-bar-row">
-            <div class="stat-bar-label">
-              <span>❤️ HP</span>
-              <span id="player-hp-txt">100 / 100</span>
-            </div>
-            <div class="stat-bar-outer">
-              <div class="stat-bar-inner hp-bar" id="player-hp-bar" style="width:100%"></div>
-            </div>
+            <div class="stat-bar-label"><span>❤️ HP</span><span id="player-hp-txt">100 / 100</span></div>
+            <div class="stat-bar-outer"><div class="stat-bar-inner hp-bar" id="player-hp-bar" style="width:100%"></div></div>
           </div>
-
           <div class="stat-bar-row">
-            <div class="stat-bar-label">
-              <span>💚 Stamina</span>
-              <span id="player-sta-txt">100 / 100</span>
-            </div>
-            <div class="stat-bar-outer">
-              <div class="stat-bar-inner stamina-bar" id="player-sta-bar" style="width:100%"></div>
-            </div>
+            <div class="stat-bar-label"><span>💚 Stamina</span><span id="player-sta-txt">100 / 100</span></div>
+            <div class="stat-bar-outer"><div class="stat-bar-inner stamina-bar" id="player-sta-bar" style="width:100%"></div></div>
           </div>
         </div>
 
@@ -991,44 +887,31 @@
           <span class="combatant-sprite" id="enemy-sprite">🐺</span>
           <div class="combatant-name" id="enemy-name">WILD WOLF</div>
           <div class="combatant-title" id="enemy-subtitle">A hungry beast of the wilds</div>
-
           <div class="stat-bar-row">
-            <div class="stat-bar-label">
-              <span>❤️ HP</span>
-              <span id="enemy-hp-txt">-- / --</span>
-            </div>
-            <div class="stat-bar-outer">
-              <div class="stat-bar-inner enemy-hp-bar" id="enemy-hp-bar" style="width:100%"></div>
-            </div>
+            <div class="stat-bar-label"><span>❤️ HP</span><span id="enemy-hp-txt">? / ?</span></div>
+            <div class="stat-bar-outer"><div class="stat-bar-inner enemy-hp-bar" id="enemy-hp-bar" style="width:100%"></div></div>
           </div>
-
           <div class="stat-bar-row">
-            <div class="stat-bar-label">
-              <span>⚔️ ATK</span><span id="enemy-atk-txt">--</span>
-            </div>
-            <div class="stat-bar-label" style="margin-top:0.2rem">
-              <span>🛡️ DEF</span><span id="enemy-def-txt">--</span>
-            </div>
+            <div class="stat-bar-label"><span>⚔️ ATK</span><span id="enemy-atk-txt">?</span></div>
+            <div class="stat-bar-label" style="margin-top:0.2rem"><span>🛡️ DEF</span><span id="enemy-def-txt">?</span></div>
           </div>
         </div>
       </div>
-
       <div class="turn-indicator" id="turn-indicator">— Prepare for Battle —</div>
     </div>
 
     <!-- Battle Log -->
-    <div class="panel" style="padding: 0.8rem;">
+    <div class="panel log-panel">
       <div class="panel-title">📜 Battle Chronicle</div>
       <div class="battle-log" id="battle-log">
         <div class="log-entry log-system">⚔ Welcome to the Iron Arena. Train your skills and face your enemies.</div>
-        <div class="log-entry log-system">💡 Click LEVEL UP 25 times per skill to advance. Each click has a 1-minute cooldown.</div>
+        <div class="log-entry log-system">💡 Click LEVEL UP 25 times per skill to advance. Each level-up triggers a 1-minute cooldown.</div>
       </div>
     </div>
 
     <!-- Actions -->
-    <div class="action-area" id="action-area">
+    <div class="action-area panel" id="action-area">
       <div class="action-title">— Choose Your Action —</div>
-
       <div class="action-buttons">
         <button class="action-btn btn-block" id="btn-action-block" onclick="playerAction('block')" disabled>
           <span class="btn-icon">🛡️</span>
@@ -1037,73 +920,70 @@
         </button>
         <button class="action-btn btn-light" id="btn-action-light" onclick="playerAction('light')" disabled>
           <span class="btn-icon">⚡</span>
-          <span class="btn-name">LIGHT ATTACK</span>
+          <span class="btn-name">LIGHT ATK</span>
           <span class="btn-cost">-10 Stamina</span>
         </button>
         <button class="action-btn btn-heavy" id="btn-action-heavy" onclick="playerAction('heavy')" disabled>
           <span class="btn-icon">💀</span>
-          <span class="btn-name">HEAVY ATTACK</span>
+          <span class="btn-name">HEAVY ATK</span>
           <span class="btn-cost">-25 Stamina</span>
         </button>
       </div>
 
+      <button class="btn-one-strike hidden" id="btn-one-strike" onclick="playerAction('onestrike')">
+        ☠ ONE STRIKE — KILL OR WOUND ☠
+        <div style="font-size:0.75rem;opacity:0.7;margin-top:0.2rem;font-family:'IM Fell English',serif;font-style:italic;">25% hit · Kills instantly · −75% Stamina · −50% HP</div>
+      </button>
+
       <div class="status-row">
         <span class="status-badge badge-idle" id="status-badge">⚙ IDLE</span>
-        <span class="wave-info">Wave <span id="wave-num">1</span> — Enemy <span id="enemy-count">0</span> Defeated</span>
-        <span class="wave-info" id="xp-total-display">Total XP: <span>0</span></span>
+        <span class="wave-info">Wave <span id="wave-num">1</span> · <span id="enemy-count">0</span> Defeated</span>
+        <span class="wave-info">XP: <span id="xp-total-display"><span>0</span></span></span>
       </div>
 
       <button class="main-btn btn-fight" id="btn-fight" onclick="startFight()">⚔ ENTER THE ARENA</button>
       <button class="main-btn btn-next hidden" id="btn-next" onclick="nextEnemy()">▶ NEXT CHALLENGER</button>
       <button class="main-btn btn-respawn hidden" id="btn-respawn" onclick="respawn()">♻ RESPAWN (Lose 10% XP)</button>
-
-      <!-- One Strike battle button (visible only during fight if unlocked) -->
-      <button class="btn-one-strike hidden" id="btn-one-strike" onclick="playerAction('onestrike')">
-        ☠ ONE STRIKE — KILL OR WOUND ☠
-        <div style="font-size:0.6rem;opacity:0.7;margin-top:0.2rem;font-family:'IM Fell English',serif;font-style:italic;">25% hit chance · Kills instantly · -75% Stamina · -50% HP</div>
-      </button>
     </div>
 
-  </div>
+  </div><!-- /arena-col -->
 
-  <!-- RIGHT: Shop Panel -->
-  <div class="panel shop-panel" style="grid-column:3; align-self:start;">
+  <!-- ══ SECTION 2: XP SHOP (middle) ══ -->
+  <div class="panel shop-panel">
     <div class="panel-title">🏪 The Iron Bazaar</div>
-
     <div style="text-align:center; margin-bottom:0.8rem;">
-      <span style="font-family:'Cinzel',serif; font-size:0.65rem; color:var(--text3);">Available XP: </span>
-      <span style="font-family:'Cinzel',serif; font-size:0.8rem; color:var(--gold);" id="shop-xp-display">0</span>
+      <span style="font-family:'Cinzel',serif; font-size:0.9rem; color:var(--text3);">Available XP: </span>
+      <span style="font-family:'Cinzel',serif; font-size:1.1rem; color:var(--gold); font-weight:bold;" id="shop-xp-display">0</span>
     </div>
-
     <div class="shop-tabs">
-      <button class="shop-tab active" onclick="switchShopTab('name')">Name</button>
-      <button class="shop-tab" onclick="switchShopTab('skins')">Skins</button>
-      <button class="shop-tab" onclick="switchShopTab('skills')">Skills</button>
-      <button class="shop-tab" onclick="switchShopTab('special')">Special</button>
+      <button class="shop-tab active" onclick="switchShopTab('name')">🏷 Name</button>
+      <button class="shop-tab" onclick="switchShopTab('skins')">🎭 Skins</button>
+      <button class="shop-tab" onclick="switchShopTab('skills')">📈 Skills</button>
+      <button class="shop-tab" onclick="switchShopTab('special')">☠ Special</button>
     </div>
 
     <!-- NAME TAB -->
     <div class="shop-section active" id="tab-name">
       <div class="shop-item">
         <div class="shop-item-name">🏷️ Hero Name</div>
-        <div class="shop-item-desc">Name your warrior. First name change is free — subsequent changes cost 10 XP.</div>
+        <div class="shop-item-desc">Name your warrior. First change is free — after that, 10 XP each.</div>
         <div class="name-input-row">
           <input class="name-input" id="hero-name-input" type="text" maxlength="16" placeholder="Enter name..." />
           <button class="btn-buy btn-buy-gold" id="btn-set-name" onclick="setHeroName()">SET</button>
         </div>
-        <div style="font-size:0.65rem; color:var(--text3); margin-top:0.4rem; font-style:italic;" id="name-cost-label">First change is free</div>
+        <div style="font-size:0.8rem; color:var(--text3); margin-top:0.4rem; font-style:italic;" id="name-cost-label">First change is free</div>
       </div>
     </div>
 
     <!-- SKINS TAB -->
     <div class="shop-section" id="tab-skins">
-      <div style="font-size:0.7rem; color:var(--text3); font-style:italic; margin-bottom:0.7rem;">Click an owned skin to equip it. Locked skins cost XP to unlock.</div>
+      <div style="font-size:0.85rem; color:var(--text3); font-style:italic; margin-bottom:0.7rem;">Tap an owned skin to equip it.</div>
       <div class="skin-grid" id="skin-grid"></div>
     </div>
 
     <!-- SKILLS XP TAB -->
     <div class="shop-section" id="tab-skills">
-      <div style="font-size:0.7rem; color:var(--text3); font-style:italic; margin-bottom:0.7rem;">Spend XP directly to boost a skill by 1 level instantly.</div>
+      <div style="font-size:0.85rem; color:var(--text3); font-style:italic; margin-bottom:0.7rem;">Spend XP to instantly boost a skill by 1 level.</div>
       <div id="xp-skill-list"></div>
     </div>
 
@@ -1117,14 +997,100 @@
           💀 Instantly kills any enemy<br>
           💚 Costs 75% of your stamina<br>
           ❤️ Costs 50% of your max HP<br>
-          ⚠ One use per match — if it misses, it's wasted
+          ⚠ One use per match
         </div>
         <div id="one-strike-shop-status"></div>
         <button class="btn-buy btn-buy-red" id="btn-buy-one-strike" onclick="buyOneStrike()">UNLOCK FOR 150 XP</button>
       </div>
     </div>
+  </div><!-- /shop-panel -->
 
-  </div>
+  <!-- ══ SECTION 3: SKILL TRAINING (bottom) ══ -->
+  <div class="panel skills-panel">
+    <div class="panel-title">⚡ Skill Training</div>
+
+    <div class="skills-grid">
+      <!-- Stamina -->
+      <div class="skill-row" id="skill-stamina">
+        <div class="skill-label">
+          <span class="skill-name"><span class="skill-icon">💚</span> Stamina</span>
+          <span class="skill-val" id="lv-stamina">LV 1</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill bar-stamina" id="bar-stamina" style="width:10%"></div></div>
+        <div class="skill-xp-row">
+          <span id="xp-stamina-label">0/25</span>
+          <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-stamina-bar" style="width:0%"></div></div>
+          <span>Next LV</span>
+        </div>
+        <button class="btn-levelup" id="btn-stamina" onclick="clickSkill('stamina')">
+          LEVEL UP <span id="clicks-stamina"></span>
+          <div class="progress-bar" id="cd-bar-stamina" style="width:0%"></div>
+        </button>
+        <div class="cooldown-text" id="cd-text-stamina"></div>
+      </div>
+
+      <!-- Attack -->
+      <div class="skill-row" id="skill-attack">
+        <div class="skill-label">
+          <span class="skill-name"><span class="skill-icon">⚔️</span> Attack</span>
+          <span class="skill-val" id="lv-attack">LV 1</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill bar-attack" id="bar-attack" style="width:10%"></div></div>
+        <div class="skill-xp-row">
+          <span id="xp-attack-label">0/25</span>
+          <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-attack-bar" style="width:0%"></div></div>
+          <span>Next LV</span>
+        </div>
+        <button class="btn-levelup" id="btn-attack" onclick="clickSkill('attack')">
+          LEVEL UP <span id="clicks-attack"></span>
+          <div class="progress-bar" id="cd-bar-attack" style="width:0%"></div>
+        </button>
+        <div class="cooldown-text" id="cd-text-attack"></div>
+      </div>
+
+      <!-- Defense -->
+      <div class="skill-row" id="skill-defense">
+        <div class="skill-label">
+          <span class="skill-name"><span class="skill-icon">🛡️</span> Defense</span>
+          <span class="skill-val" id="lv-defense">LV 1</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill bar-defense" id="bar-defense" style="width:10%"></div></div>
+        <div class="skill-xp-row">
+          <span id="xp-defense-label">0/25</span>
+          <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-defense-bar" style="width:0%"></div></div>
+          <span>Next LV</span>
+        </div>
+        <button class="btn-levelup" id="btn-defense" onclick="clickSkill('defense')">
+          LEVEL UP <span id="clicks-defense"></span>
+          <div class="progress-bar" id="cd-bar-defense" style="width:0%"></div>
+        </button>
+        <div class="cooldown-text" id="cd-text-defense"></div>
+      </div>
+
+      <!-- Crit -->
+      <div class="skill-row" id="skill-crit">
+        <div class="skill-label">
+          <span class="skill-name"><span class="skill-icon">💥</span> Critical</span>
+          <span class="skill-val" id="lv-crit">LV 1</span>
+        </div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill bar-crit" id="bar-crit" style="width:10%"></div></div>
+        <div class="skill-xp-row">
+          <span id="xp-crit-label">0/25</span>
+          <div class="xp-progress-bg"><div class="xp-progress-fill" id="xp-crit-bar" style="width:0%"></div></div>
+          <span>Next LV</span>
+        </div>
+        <button class="btn-levelup" id="btn-crit" onclick="clickSkill('crit')">
+          LEVEL UP <span id="clicks-crit"></span>
+          <div class="progress-bar" id="cd-bar-crit" style="width:0%"></div>
+        </button>
+        <div class="cooldown-text" id="cd-text-crit"></div>
+      </div>
+    </div><!-- /skills-grid -->
+
+    <div id="skill-clicks-info">Click 25 times to level up — 1 min cooldown after each level</div>
+  </div><!-- /skills-panel -->
+
+</div><!-- /game-container -->
 
 <!-- XP Reward Popup -->
 <div class="overlay hidden" id="overlay" onclick="closePopup()"></div>
@@ -1135,19 +1101,18 @@
   <button class="main-btn btn-next" onclick="closePopup()" style="margin-top:0.5rem; width:auto; padding:0.5rem 2rem;">Claim Rewards</button>
 </div>
 
+
 <script>
 // ============================================================
 // GAME STATE
 // ============================================================
 const SKILLS = ['stamina','attack','defense','crit'];
 const CLICKS_PER_LEVEL = 25;
-const COOLDOWN_MS = 60 * 1000; // 1 minute
+const COOLDOWN_MS = 60 * 1000;
 
 const state = {
   skills: { stamina:1, attack:1, defense:1, crit:1 },
-  skillXP: { stamina:0, attack:0, defense:0, crit:0 },
   skillClicks: { stamina:0, attack:0, defense:0, crit:0 },
-  lastClick: { stamina:0, attack:0, defense:0, crit:0 },
   cdTimers: { stamina:null, attack:null, defense:null, crit:null },
   totalXP: 0,
   enemiesDefeated: 0,
@@ -1160,11 +1125,7 @@ const state = {
     playerStamina: 100,
     playerMaxStamina: 100,
     blocking: false,
-    enemyHP: 0,
     enemyMaxHP: 0,
-    enemyAtk: 0,
-    enemyDef: 0,
-    enemy: null,
     turn: 0,
     won: false,
   }
@@ -1174,80 +1135,30 @@ const state = {
 // ENEMY DEFINITIONS
 // ============================================================
 const ENEMY_TIERS = [
-  // wave 1-3
-  {
-    name:'WILD WOLF', sprite:'🐺', title:'A hungry beast of the wilds',
-    tier:'COMMON', tierClass:'tier-common',
-    baseHP:30, baseAtk:4, baseDef:1, xpBase:8, wave:1
-  },
-  {
-    name:'GOBLIN SCOUT', sprite:'👺', title:'A sneaky creature from the shadows',
-    tier:'COMMON', tierClass:'tier-common',
-    baseHP:40, baseAtk:5, baseDef:2, xpBase:10, wave:1
-  },
-  // wave 4-6
-  {
-    name:'ORC WARRIOR', sprite:'👹', title:'A brutish orc with crude weapons',
-    tier:'UNCOMMON', tierClass:'tier-uncommon',
-    baseHP:70, baseAtk:9, baseDef:4, xpBase:20, wave:4
-  },
-  {
-    name:'DARK KNIGHT', sprite:'🗡️', title:'A fallen knight consumed by darkness',
-    tier:'RARE', tierClass:'tier-rare',
-    baseHP:100, baseAtk:13, baseDef:7, xpBase:35, wave:6
-  },
-  // wave 8+
-  {
-    name:'STONE GOLEM', sprite:'🪨', title:'Ancient earth magic given form',
-    tier:'RARE', tierClass:'tier-rare',
-    baseHP:140, baseAtk:11, baseDef:12, xpBase:45, wave:8
-  },
-  {
-    name:'SHADOW DRAGON', sprite:'🐉', title:'A dragon born of void and nightmares',
-    tier:'EPIC', tierClass:'tier-epic',
-    baseHP:180, baseAtk:18, baseDef:10, xpBase:70, wave:10
-  },
-  // wave 12+
-  {
-    name:'ARCANE LICH', sprite:'💀', title:'An immortal sorcerer of death magic',
-    tier:'EPIC', tierClass:'tier-epic',
-    baseHP:200, baseAtk:22, baseDef:14, xpBase:90, wave:12
-  },
-  {
-    name:'DEMON LORD', sprite:'😈', title:'A prince of the infernal planes',
-    tier:'LEGENDARY', tierClass:'tier-legendary',
-    baseHP:280, baseAtk:28, baseDef:18, xpBase:130, wave:15
-  },
-  // wave 18+
-  {
-    name:'CHAOS TITAN', sprite:'🔥', title:'An entity of pure destructive force',
-    tier:'LEGENDARY', tierClass:'tier-legendary',
-    baseHP:360, baseAtk:36, baseDef:22, xpBase:180, wave:18
-  },
-  {
-    name:'VOID EMPEROR', sprite:'🌑', title:'The sovereign of nothingness — destroyer of worlds',
-    tier:'MYTHIC', tierClass:'tier-mythic',
-    baseHP:500, baseAtk:50, baseDef:30, xpBase:300, wave:22
-  },
+  { name:'WILD WOLF',    sprite:'🐺', title:'A hungry beast of the wilds',            tier:'COMMON',    tierClass:'tier-common',    baseHP:30,  baseAtk:4,  baseDef:1,  xpBase:8,   wave:1  },
+  { name:'GOBLIN SCOUT', sprite:'👺', title:'A sneaky creature from the shadows',      tier:'COMMON',    tierClass:'tier-common',    baseHP:40,  baseAtk:5,  baseDef:2,  xpBase:10,  wave:1  },
+  { name:'ORC WARRIOR',  sprite:'👹', title:'A brutish orc with crude weapons',        tier:'UNCOMMON',  tierClass:'tier-uncommon',  baseHP:70,  baseAtk:9,  baseDef:4,  xpBase:20,  wave:4  },
+  { name:'DARK KNIGHT',  sprite:'🗡️', title:'A fallen knight consumed by darkness',    tier:'RARE',      tierClass:'tier-rare',      baseHP:100, baseAtk:13, baseDef:7,  xpBase:35,  wave:6  },
+  { name:'STONE GOLEM',  sprite:'🪨', title:'Ancient earth magic given form',          tier:'RARE',      tierClass:'tier-rare',      baseHP:140, baseAtk:11, baseDef:12, xpBase:45,  wave:8  },
+  { name:'SHADOW DRAGON',sprite:'🐉', title:'A dragon born of void and nightmares',    tier:'EPIC',      tierClass:'tier-epic',      baseHP:180, baseAtk:18, baseDef:10, xpBase:70,  wave:10 },
+  { name:'ARCANE LICH',  sprite:'💀', title:'An immortal sorcerer of death magic',     tier:'EPIC',      tierClass:'tier-epic',      baseHP:200, baseAtk:22, baseDef:14, xpBase:90,  wave:12 },
+  { name:'DEMON LORD',   sprite:'😈', title:'A prince of the infernal planes',         tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:280, baseAtk:28, baseDef:18, xpBase:130, wave:15 },
+  { name:'CHAOS TITAN',  sprite:'🔥', title:'An entity of pure destructive force',     tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:360, baseAtk:36, baseDef:22, xpBase:180, wave:18 },
+  { name:'VOID EMPEROR', sprite:'🌑', title:'The sovereign of nothingness',            tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:500, baseAtk:50, baseDef:30, xpBase:300, wave:22 },
 ];
 
 function getEnemyForWave(wave) {
   const eligible = ENEMY_TIERS.filter(e => e.wave <= wave);
-  // Bias toward harder enemies at higher waves
   const weights = eligible.map((e, i) => Math.pow(i + 1, 1.5));
   const total = weights.reduce((a,b)=>a+b, 0);
   let r = Math.random() * total;
-  for (let i = 0; i < eligible.length; i++) {
-    r -= weights[i];
-    if (r <= 0) return eligible[i];
-  }
+  for (let i = 0; i < eligible.length; i++) { r -= weights[i]; if (r <= 0) return eligible[i]; }
   return eligible[eligible.length - 1];
 }
 
 function scaleEnemy(base, wave) {
   const scale = 1 + (wave - 1) * 0.18;
-  return {
-    ...base,
+  return { ...base,
     hp: Math.round(base.baseHP * scale),
     atk: Math.round(base.baseAtk * scale),
     def: Math.round(base.baseDef * scale),
@@ -1256,48 +1167,32 @@ function scaleEnemy(base, wave) {
 }
 
 // ============================================================
-// PLAYER STATS (derived from skills)
+// PLAYER STATS
 // ============================================================
-function getPlayerMaxHP() {
-  return 60 + state.skills.defense * 8 + state.skills.stamina * 5;
-}
-function getPlayerMaxStamina() {
-  return 60 + state.skills.stamina * 10;
-}
+function getPlayerMaxHP()      { return 60 + state.skills.defense * 8 + state.skills.stamina * 5; }
+function getPlayerMaxStamina() { return 60 + state.skills.stamina * 10; }
 function getPlayerAttack(type) {
   const base = 3 + state.skills.attack * 2;
   if (type === 'light') return base;
   if (type === 'heavy') return Math.round(base * 1.9);
   return 0;
 }
-function getPlayerDefense() {
-  return 1 + state.skills.defense * 1.5;
-}
-function getCritChance() {
-  return Math.min(0.05 + (state.skills.crit - 1) * 0.035, 0.55);
-}
-function getCritMultiplier() {
-  return 1.5 + (state.skills.crit - 1) * 0.05;
-}
+function getPlayerDefense()    { return 1 + state.skills.defense * 1.5; }
+function getCritChance()       { return Math.min(0.05 + (state.skills.crit - 1) * 0.035, 0.55); }
+function getCritMultiplier()   { return 1.5 + (state.skills.crit - 1) * 0.05; }
 
 // ============================================================
 // SKILL SYSTEM
 // ============================================================
 function clickSkill(skill) {
-  // If currently on cooldown (button disabled), ignore
   if (state.cdTimers[skill]) return;
-
   state.skillClicks[skill]++;
-
   if (state.skillClicks[skill] >= CLICKS_PER_LEVEL) {
-    // Level up! Reset clicks and start the cooldown before next level
     state.skills[skill]++;
     state.skillClicks[skill] = 0;
     addLog(`🌟 <span class="log-win">${skill.toUpperCase()} leveled up to ${state.skills[skill]}!</span>`, 'system');
-    spawnParticles('lv-' + skill, '#c9a84c');
-    startCooldownTimer(skill); // cooldown only on level-up
+    startCooldownTimer(skill);
   }
-
   renderSkills();
 }
 
@@ -1305,13 +1200,10 @@ function startCooldownTimer(skill) {
   if (state.cdTimers[skill]) clearInterval(state.cdTimers[skill]);
   const btn = document.getElementById('btn-' + skill);
   btn.disabled = true;
-
   const start = Date.now();
   const duration = COOLDOWN_MS;
-
   state.cdTimers[skill] = setInterval(() => {
-    const elapsed = Date.now() - start;
-    const remain = duration - elapsed;
+    const remain = duration - (Date.now() - start);
     if (remain <= 0) {
       clearInterval(state.cdTimers[skill]);
       state.cdTimers[skill] = null;
@@ -1320,10 +1212,8 @@ function startCooldownTimer(skill) {
       document.getElementById('cd-text-' + skill).textContent = '';
       return;
     }
-    const pct = ((duration - remain) / duration * 100).toFixed(1);
-    document.getElementById('cd-bar-' + skill).style.width = pct + '%';
-    const secs = Math.ceil(remain / 1000);
-    document.getElementById('cd-text-' + skill).textContent = `⏳ ${secs}s cooldown`;
+    document.getElementById('cd-bar-' + skill).style.width = ((duration - remain) / duration * 100).toFixed(1) + '%';
+    document.getElementById('cd-text-' + skill).textContent = `⏳ ${Math.ceil(remain/1000)}s cooldown`;
   }, 100);
 }
 
@@ -1332,25 +1222,18 @@ function renderSkills() {
     const lv = state.skills[skill];
     const clicks = state.skillClicks[skill];
     const pct = (clicks / CLICKS_PER_LEVEL * 100).toFixed(0);
-    const barPct = Math.min(lv * 9, 100);
-
     document.getElementById('lv-' + skill).textContent = `LV ${lv}`;
-    document.getElementById('bar-' + skill).style.width = barPct + '%';
-    document.getElementById('xp-' + skill + '-label').textContent = `${clicks}/${CLICKS_PER_LEVEL} Clicks`;
+    document.getElementById('bar-' + skill).style.width = Math.min(lv * 9, 100) + '%';
+    document.getElementById('xp-' + skill + '-label').textContent = `${clicks}/25`;
     document.getElementById('xp-' + skill + '-bar').style.width = pct + '%';
-    document.getElementById('clicks-' + skill).textContent = clicks > 0 ? `(${clicks}/${CLICKS_PER_LEVEL})` : '';
+    document.getElementById('clicks-' + skill).textContent = clicks > 0 ? `(${clicks}/25)` : '';
   });
-
-  // Update player title based on total skill level
-  const totalLv = SKILLS.reduce((s, k) => s + state.skills[k], 0);
-  const titles = [
-    'Novice Wanderer', 'Apprentice Fighter', 'Battle-Hardened Soldier',
-    'Veteran Warrior', 'Elite Champion', 'Master of Combat',
-    'Legendary Slayer', 'Godlike Destroyer'
-  ];
-  const titleIdx = Math.min(Math.floor(totalLv / 8), titles.length - 1);
-  document.getElementById('player-title').textContent = titles[titleIdx];
-  document.getElementById('player-sprite').textContent = totalLv < 10 ? '🧙' : totalLv < 20 ? '⚔️' : totalLv < 35 ? '🥷' : '🦸';
+  const totalLv = SKILLS.reduce((s,k) => s + state.skills[k], 0);
+  const titles = ['Novice Wanderer','Apprentice Fighter','Battle-Hardened Soldier','Veteran Warrior','Elite Champion','Master of Combat','Legendary Slayer','Godlike Destroyer'];
+  document.getElementById('player-title').textContent = titles[Math.min(Math.floor(totalLv / 8), titles.length - 1)];
+  if (!shopState || shopState.equippedSkin === 0) {
+    document.getElementById('player-sprite').textContent = totalLv < 10 ? '🧙' : totalLv < 20 ? '⚔️' : totalLv < 35 ? '🥷' : '🦸';
+  }
 }
 
 // ============================================================
@@ -1360,28 +1243,19 @@ let currentEnemy = null;
 let actionLocked = false;
 
 function startFight() {
-  const wave = state.wave;
-  const base = getEnemyForWave(wave);
-  currentEnemy = scaleEnemy(base, wave);
-
-  // Init fight state
+  const base = getEnemyForWave(state.wave);
+  currentEnemy = scaleEnemy(base, state.wave);
   const maxHP = getPlayerMaxHP();
   const maxSta = getPlayerMaxStamina();
-  state.fight.playerHP = maxHP;
-  state.fight.playerMaxHP = maxHP;
-  state.fight.playerStamina = maxSta;
-  state.fight.playerMaxStamina = maxSta;
-  state.fight.blocking = false;
-  state.fight.enemyHP = currentEnemy.hp;
-  state.fight.enemyMaxHP = currentEnemy.hp;
-  state.fight.active = true;
-  state.fight.playerTurn = true;
-  state.fight.turn = 1;
-  state.fight.won = false;
+  const f = state.fight;
+  f.playerHP = maxHP; f.playerMaxHP = maxHP;
+  f.playerStamina = maxSta; f.playerMaxStamina = maxSta;
+  f.blocking = false;
+  f.enemyMaxHP = currentEnemy.hp;
+  f.active = true; f.playerTurn = true; f.turn = 1; f.won = false;
   actionLocked = false;
   shopState.oneStrikeUsedThisMatch = false;
 
-  // Update UI
   document.getElementById('enemy-name').textContent = currentEnemy.name;
   document.getElementById('enemy-subtitle').textContent = currentEnemy.title;
   document.getElementById('enemy-sprite').textContent = currentEnemy.sprite;
@@ -1389,67 +1263,45 @@ function startFight() {
   document.getElementById('enemy-tier-badge').className = 'enemy-tier ' + currentEnemy.tierClass;
   document.getElementById('enemy-atk-txt').textContent = currentEnemy.atk;
   document.getElementById('enemy-def-txt').textContent = currentEnemy.def;
-
   document.getElementById('btn-fight').classList.add('hidden');
   document.getElementById('btn-next').classList.add('hidden');
   document.getElementById('btn-respawn').classList.add('hidden');
-
   setActionButtons(true);
   setStatus('fight', '⚔ FIGHTING');
   updateBars();
   updateOneStrikeButton();
-
-  addLog(`--- Turn ${state.fight.turn} ---`, 'turn');
-  addLog(`⚔ ${currentEnemy.name} appears! HP: ${currentEnemy.hp} | ATK: ${currentEnemy.atk} | DEF: ${currentEnemy.def}`, 'system');
-  addLog(`💡 Your turn — choose your action!`, 'player');
+  addLog(`--- Turn ${f.turn} ---`, 'turn');
+  addLog(`⚔ ${currentEnemy.name} appears! HP:${currentEnemy.hp} ATK:${currentEnemy.atk} DEF:${currentEnemy.def}`, 'system');
   setTurnIndicator('player');
 }
 
 function playerAction(type) {
   if (!state.fight.active || !state.fight.playerTurn || actionLocked) return;
 
-  // ── ONE STRIKE special handling ──
   if (type === 'onestrike') {
     if (!shopState.oneStrikeUnlocked || shopState.oneStrikeUsedThisMatch) return;
     actionLocked = true;
     setActionButtons(false);
     state.fight.playerTurn = false;
     shopState.oneStrikeUsedThisMatch = true;
-
-    // Cost: -75% stamina, -50% max HP
     const f = state.fight;
-    const staCost = Math.floor(f.playerMaxStamina * 0.75);
-    const hpCost  = Math.floor(f.playerMaxHP * 0.5);
-    f.playerStamina = Math.max(0, f.playerStamina - staCost);
-    f.playerHP      = Math.max(1, f.playerHP - hpCost);
-
-    // Flash screen
-    const flash = document.createElement('div');
-    flash.className = 'os-flash';
-    document.body.appendChild(flash);
+    f.playerStamina = Math.max(0, f.playerStamina - Math.floor(f.playerMaxStamina * 0.75));
+    f.playerHP = Math.max(1, f.playerHP - Math.floor(f.playerMaxHP * 0.5));
+    const flash = document.createElement('div'); flash.className = 'os-flash'; document.body.appendChild(flash);
     setTimeout(() => flash.remove(), 900);
-
-    addLog(`☠ <span class="log-death">ONE STRIKE unleashed! The arena holds its breath...</span>`, 'death');
-
+    addLog(`☠ <span class="log-death">ONE STRIKE unleashed!</span>`, 'death');
     const hit = Math.random() < 0.25;
     setTimeout(() => {
       if (hit) {
         addLog(`💀 <span class="log-crit">ONE STRIKE CONNECTS! ${currentEnemy.name} is OBLITERATED!</span>`, 'crit');
         showDamage('enemy-card', '☠ INSTANT KILL', 'damage-crit');
         animateCard('enemy-card', 'taking-hit');
-        currentEnemy.hp = 0;
-        updateBars();
-        setTimeout(playerWins, 900);
+        currentEnemy.hp = 0; updateBars(); setTimeout(playerWins, 900);
       } else {
-        addLog(`💨 <span class="log-miss">ONE STRIKE MISSED... The energy fades. You stagger from the cost.</span>`, 'miss');
+        addLog(`💨 ONE STRIKE MISSED... energy fades.`, 'miss');
         showDamage('enemy-card', 'MISS', 'damage-miss');
-        showDamage('player-card', `-${hpCost} HP`, 'damage-enemy');
         updateBars();
-        if (f.playerHP <= 1) {
-          setTimeout(playerDies, 700);
-        } else {
-          setTimeout(enemyTurn, 1000);
-        }
+        f.playerHP <= 1 ? setTimeout(playerDies, 700) : setTimeout(enemyTurn, 1000);
       }
     }, 700);
     return;
@@ -1457,58 +1309,34 @@ function playerAction(type) {
 
   const f = state.fight;
   const stamCost = type === 'block' ? 5 : type === 'light' ? 10 : 25;
-
-  if (f.playerStamina < stamCost) {
-    addLog(`😤 Not enough stamina for ${type} attack!`, 'player');
-    return;
-  }
-
+  if (f.playerStamina < stamCost) { addLog(`😤 Not enough stamina!`, 'player'); return; }
   actionLocked = true;
   setActionButtons(false);
   f.playerTurn = false;
   f.blocking = false;
-
   f.playerStamina = Math.max(0, f.playerStamina - stamCost);
 
   if (type === 'block') {
     f.blocking = true;
-    addLog(`🛡️ You raise your shield — bracing for impact!`, 'block');
+    addLog(`🛡️ You raise your shield!`, 'block');
     showDamage('player-card', 'BLOCK!', 'damage-block');
-    document.getElementById('player-card').classList.add('active-turn');
-    setTimeout(() => {
-      document.getElementById('player-card').classList.remove('active-turn');
-      updateBars();
-      setTimeout(enemyTurn, 600);
-    }, 700);
+    updateBars();
+    setTimeout(enemyTurn, 700);
   } else {
-    // Attack!
     const rawAtk = getPlayerAttack(type);
     const isCrit = Math.random() < getCritChance();
-    let dmg = Math.max(1, rawAtk - currentEnemy.def * 0.4);
+    let dmg = Math.max(1, Math.round(rawAtk - currentEnemy.def * 0.4));
     if (isCrit) dmg = Math.round(dmg * getCritMultiplier());
-    dmg = Math.max(1, Math.round(dmg));
-
     currentEnemy.hp = Math.max(0, currentEnemy.hp - dmg);
-
-    const atkLabel = type === 'light' ? '⚡ Light Attack' : '💀 Heavy Attack';
-    if (isCrit) {
-      addLog(`${atkLabel} — <span class="log-crit">CRITICAL HIT!</span> ${dmg} damage to ${currentEnemy.name}!`, 'player');
-      showDamage('enemy-card', `💥 ${dmg}!`, 'damage-crit');
-    } else {
-      addLog(`${atkLabel} — ${dmg} damage to ${currentEnemy.name}.`, 'player');
-      showDamage('enemy-card', `-${dmg}`, 'damage-normal');
-    }
-
+    const label = type === 'light' ? '⚡ Light' : '💀 Heavy';
+    addLog(isCrit
+      ? `${label} — <span class="log-crit">CRITICAL HIT! ${dmg} damage!</span>`
+      : `${label} — ${dmg} damage to ${currentEnemy.name}.`, 'player');
+    showDamage('enemy-card', isCrit ? `💥 ${dmg}!` : `-${dmg}`, isCrit ? 'damage-crit' : 'damage-normal');
     animateCard('player-card', 'attacking');
     setTimeout(() => animateCard('enemy-card', 'taking-hit'), 200);
-
     updateBars();
-
-    if (currentEnemy.hp <= 0) {
-      setTimeout(playerWins, 800);
-      return;
-    }
-
+    if (currentEnemy.hp <= 0) { setTimeout(playerWins, 800); return; }
     setTimeout(enemyTurn, 1000);
   }
 }
@@ -1516,57 +1344,31 @@ function playerAction(type) {
 function enemyTurn() {
   const f = state.fight;
   if (!f.active) return;
-
   setTurnIndicator('enemy');
   addLog(`--- Enemy Turn ---`, 'turn');
-
-  // Enemy AI: simple attack
   let dmg = Math.max(1, currentEnemy.atk - getPlayerDefense() * 0.5);
-
   if (f.blocking) {
-    // Blocking reduces damage significantly
     const blockFactor = 0.15 + (state.skills.defense * 0.03);
     dmg = Math.max(1, Math.round(dmg * (1 - Math.min(blockFactor * 3, 0.75))));
-    addLog(`🛡️ <span class="log-block">You blocked! ${currentEnemy.name} deals only ${dmg} damage.</span>`, 'block');
+    addLog(`🛡️ <span class="log-block">Blocked! ${currentEnemy.name} deals only ${dmg}.</span>`, 'block');
     showDamage('player-card', `-${dmg}`, 'damage-block');
   } else {
-    // Occasional enemy crit
     const enemyCrit = Math.random() < 0.12;
-    if (enemyCrit) {
-      dmg = Math.round(dmg * 1.5);
-      addLog(`💜 <span class="log-enemy">${currentEnemy.name} lands a CRUSHING BLOW! ${dmg} damage!</span>`, 'enemy');
-      showDamage('player-card', `💜 -${dmg}`, 'damage-enemy');
-    } else {
-      dmg = Math.round(dmg);
-      addLog(`💜 <span class="log-enemy">${currentEnemy.name} attacks for ${dmg} damage.</span>`, 'enemy');
-      showDamage('player-card', `-${dmg}`, 'damage-enemy');
-    }
+    if (enemyCrit) dmg = Math.round(dmg * 1.5);
+    addLog(enemyCrit
+      ? `💜 <span class="log-enemy">${currentEnemy.name} lands a CRUSHING BLOW! ${dmg} damage!</span>`
+      : `💜 <span class="log-enemy">${currentEnemy.name} attacks for ${dmg}.</span>`, 'enemy');
+    showDamage('player-card', `-${dmg}`, 'damage-enemy');
   }
-
   f.playerHP = Math.max(0, f.playerHP - dmg);
   animateCard('enemy-card', 'attacking');
   setTimeout(() => animateCard('player-card', 'taking-hit'), 200);
-
-  // Stamina regen each turn
-  const regen = 8 + Math.floor(state.skills.stamina * 1.5);
-  f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + regen);
-
+  f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 8 + Math.floor(state.skills.stamina * 1.5));
   updateBars();
-
-  if (f.playerHP <= 0) {
-    setTimeout(playerDies, 700);
-    return;
-  }
-
-  // Next player turn
-  f.turn++;
-  f.playerTurn = true;
-  actionLocked = false;
-  f.blocking = false;
-
+  if (f.playerHP <= 0) { setTimeout(playerDies, 700); return; }
+  f.turn++; f.playerTurn = true; actionLocked = false; f.blocking = false;
   setTimeout(() => {
     addLog(`--- Turn ${f.turn} ---`, 'turn');
-    addLog(`💡 Your turn!`, 'player');
     setTurnIndicator('player');
     setActionButtons(true);
   }, 600);
@@ -1574,44 +1376,28 @@ function enemyTurn() {
 
 function playerWins() {
   const f = state.fight;
-  f.active = false;
-  f.won = true;
+  f.active = false; f.won = true; actionLocked = false;
   state.enemiesDefeated++;
-
   const xpGain = currentEnemy.xpReward;
   state.totalXP += xpGain;
-
-  addLog(`☠ <span class="log-death">${currentEnemy.name} has been slain!</span>`, 'death');
-  addLog(`<span class="log-win">🏆 VICTORY! You earned ${xpGain} XP!</span>`, 'win');
-
+  addLog(`☠ <span class="log-death">${currentEnemy.name} slain!</span>`, 'death');
+  addLog(`<span class="log-win">🏆 VICTORY! +${xpGain} XP!</span>`, 'win');
   setStatus('won', '✓ VICTORY');
   setActionButtons(false);
   setTurnIndicator('none');
   document.getElementById('btn-one-strike').classList.add('hidden');
-
-  // Distribute XP to skills
   const perSkill = Math.floor(xpGain / 4);
-  const xpDist = {stamina: perSkill, attack: perSkill, defense: perSkill, crit: xpGain - perSkill*3};
-
-  // Show popup
-  showVictoryPopup(xpDist, xpGain);
-
-  actionLocked = false;
-
-  // Advance wave and show next button
+  showVictoryPopup({stamina:perSkill,attack:perSkill,defense:perSkill,crit:xpGain-perSkill*3}, xpGain);
   state.wave++;
   document.getElementById('btn-next').classList.remove('hidden');
   document.getElementById('wave-num').textContent = state.wave;
   document.getElementById('enemy-count').textContent = state.enemiesDefeated;
-
   updateXPDisplay();
 }
 
 function playerDies() {
   const f = state.fight;
-  f.active = false;
-  actionLocked = false;
-
+  f.active = false; actionLocked = false;
   addLog(`💀 <span class="log-death">YOU HAVE BEEN DEFEATED...</span>`, 'death');
   setStatus('dead', '💀 DEFEATED');
   setActionButtons(false);
@@ -1630,11 +1416,9 @@ function nextEnemy() {
 }
 
 function respawn() {
-  // Lose 10% total XP penalty (visual only)
   const penalty = Math.floor(state.totalXP * 0.1);
   state.totalXP = Math.max(0, state.totalXP - penalty);
-  addLog(`♻ <span class="log-system">Respawned. Lost ${penalty} XP as tribute...</span>`, 'system');
-
+  addLog(`♻ Respawned. Lost ${penalty} XP.`, 'system');
   document.getElementById('btn-respawn').classList.add('hidden');
   document.getElementById('btn-fight').classList.remove('hidden');
   document.getElementById('btn-fight').textContent = `⚔ CHALLENGE WAVE ${state.wave} (REVENGE)`;
@@ -1647,23 +1431,15 @@ function respawn() {
 // ============================================================
 function updateBars() {
   const f = state.fight;
-
-  // Player HP
   const hpPct = Math.max(0, f.playerHP / f.playerMaxHP * 100);
   document.getElementById('player-hp-bar').style.width = hpPct + '%';
   document.getElementById('player-hp-txt').textContent = `${Math.max(0,f.playerHP)} / ${f.playerMaxHP}`;
-
-  // Player Stamina
   const staPct = Math.max(0, f.playerStamina / f.playerMaxStamina * 100);
   document.getElementById('player-sta-bar').style.width = staPct + '%';
   document.getElementById('player-sta-txt').textContent = `${Math.round(f.playerStamina)} / ${f.playerMaxStamina}`;
-
-  // Enemy HP
   if (currentEnemy) {
-    const ePct = Math.max(0, currentEnemy.hp / currentEnemy.baseHP * 100);
-    // Scale: use scaled max
-    const ePctReal = Math.max(0, currentEnemy.hp / f.enemyMaxHP * 100);
-    document.getElementById('enemy-hp-bar').style.width = ePctReal + '%';
+    const ePct = Math.max(0, currentEnemy.hp / f.enemyMaxHP * 100);
+    document.getElementById('enemy-hp-bar').style.width = ePct + '%';
     document.getElementById('enemy-hp-txt').textContent = `${Math.max(0,currentEnemy.hp)} / ${f.enemyMaxHP}`;
   }
 }
@@ -1672,12 +1448,8 @@ function setActionButtons(enabled) {
   ['block','light','heavy'].forEach(t => {
     document.getElementById('btn-action-' + t).disabled = !enabled;
   });
-  // One Strike button — only callable after shopState is initialized
   if (typeof shopState !== 'undefined') updateOneStrikeButton();
-  if (!enabled) {
-    const osBtn = document.getElementById('btn-one-strike');
-    if (osBtn) osBtn.disabled = true;
-  }
+  if (!enabled) { const b = document.getElementById('btn-one-strike'); if(b) b.disabled = true; }
 }
 
 function setStatus(type, text) {
@@ -1689,15 +1461,9 @@ function setStatus(type, text) {
 function setTurnIndicator(who) {
   const el = document.getElementById('turn-indicator');
   el.className = 'turn-indicator';
-  if (who === 'player') {
-    el.className += ' player-turn';
-    el.textContent = '⚔ YOUR TURN';
-  } else if (who === 'enemy') {
-    el.className += ' enemy-turn';
-    el.textContent = `💜 ${currentEnemy ? currentEnemy.name : 'ENEMY'}'S TURN`;
-  } else {
-    el.textContent = '— Prepare for Battle —';
-  }
+  if (who === 'player') { el.className += ' player-turn'; el.textContent = '⚔ YOUR TURN'; }
+  else if (who === 'enemy') { el.className += ' enemy-turn'; el.textContent = `💜 ${currentEnemy ? currentEnemy.name : 'ENEMY'}'S TURN`; }
+  else { el.textContent = '— Prepare for Battle —'; }
 }
 
 function addLog(html, type) {
@@ -1726,27 +1492,24 @@ function animateCard(cardId, animClass) {
 }
 
 function updateXPDisplay() {
-  document.querySelector('#xp-total-display span').textContent = state.totalXP;
-  // keep shop panel in sync if it exists
-  const shopXPEl = document.getElementById('shop-xp-display');
-  if (shopXPEl) shopXPEl.textContent = state.totalXP;
+  const el = document.getElementById('xp-total-display');
+  if (el) el.textContent = state.totalXP;
+  const shop = document.getElementById('shop-xp-display');
+  if (shop) shop.textContent = state.totalXP;
 }
 
 function showVictoryPopup(xpDist, total) {
   document.getElementById('overlay').classList.remove('hidden');
   document.getElementById('xp-popup').classList.remove('hidden');
-  document.getElementById('popup-enemy-name').textContent = `${currentEnemy.name} — Wave ${state.wave}`;
-
-  const breakdown = document.getElementById('xp-breakdown');
-  breakdown.innerHTML = `
+  document.getElementById('popup-enemy-name').textContent = `${currentEnemy.name} — Wave ${state.wave - 1}`;
+  document.getElementById('xp-breakdown').innerHTML = `
     <div class="xp-item"><span>💚 Stamina XP</span><span>+${xpDist.stamina}</span></div>
     <div class="xp-item"><span>⚔️ Attack XP</span><span>+${xpDist.attack}</span></div>
     <div class="xp-item"><span>🛡️ Defense XP</span><span>+${xpDist.defense}</span></div>
     <div class="xp-item"><span>💥 Critical XP</span><span>+${xpDist.crit}</span></div>
-    <div class="xp-item" style="border-top: 1px solid var(--gold3); margin-top: 0.3rem; color: var(--gold);">
-      <span>Total XP Earned</span><span style="color: var(--gold2)">+${total}</span>
-    </div>
-  `;
+    <div class="xp-item" style="border-top:1px solid var(--gold3);margin-top:0.3rem;color:var(--gold);">
+      <span>Total XP</span><span style="color:var(--gold2)">+${total}</span>
+    </div>`;
 }
 
 function closePopup() {
@@ -1757,16 +1520,11 @@ function closePopup() {
 function spawnParticles(targetId, color) {
   const el = document.getElementById(targetId);
   if (!el) return;
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 6; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
-    p.style.width = p.style.height = (4 + Math.random() * 6) + 'px';
-    p.style.background = color;
-    p.style.left = (Math.random() * 100) + '%';
-    p.style.top = '50%';
-    const dx = (Math.random() - 0.5) * 80;
-    const dy = -(20 + Math.random() * 60);
-    p.style.setProperty('--particle-end', `translate(${dx}px, ${dy}px)`);
+    p.style.cssText = `width:${4+Math.random()*5}px;height:${4+Math.random()*5}px;background:${color};left:${Math.random()*100}%;top:50%;`;
+    p.style.setProperty('--particle-end', `translate(${(Math.random()-.5)*80}px,${-(20+Math.random()*60)}px)`);
     el.parentElement.style.position = 'relative';
     el.parentElement.appendChild(p);
     setTimeout(() => p.remove(), 1000);
@@ -1780,29 +1538,27 @@ const shopState = {
   heroName: '',
   nameChangeCount: 0,
   equippedSkin: 0,
-  ownedSkins: [0],        // index into SKINS array; skin 0 always owned
+  ownedSkins: [0],
   oneStrikeUnlocked: false,
   oneStrikeUsedThisMatch: false,
 };
 
 const SKINS = [
-  { emoji:'🧙', name:'Wanderer',    price:0   },
-  { emoji:'⚔️',  name:'Swordsman',  price:20  },
-  { emoji:'🥷',  name:'Shadow Blade',price:40 },
-  { emoji:'🦸',  name:'Champion',   price:70  },
-  { emoji:'🧝',  name:'Elven Archer',price:90 },
+  { emoji:'🧙', name:'Wanderer',     price:0   },
+  { emoji:'⚔️',  name:'Swordsman',   price:20  },
+  { emoji:'🥷',  name:'Shadow Blade',price:40  },
+  { emoji:'🦸',  name:'Champion',    price:70  },
+  { emoji:'🧝',  name:'Elven Archer',price:90  },
   { emoji:'🧟',  name:'Undead King', price:120 },
   { emoji:'🐲',  name:'Dragon Knight',price:180},
-  { emoji:'👑',  name:'Immortal',   price:250 },
+  { emoji:'👑',  name:'Immortal',    price:250 },
 ];
 
 const XP_SKILL_COST = { stamina:15, attack:15, defense:15, crit:20 };
 
-// ── Shop UI ──
 function switchShopTab(tab) {
   document.querySelectorAll('.shop-tab').forEach((t,i) => {
-    const tabs = ['name','skins','skills','special'];
-    t.classList.toggle('active', tabs[i] === tab);
+    t.classList.toggle('active', ['name','skins','skills','special'][i] === tab);
   });
   document.querySelectorAll('.shop-section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
@@ -1811,29 +1567,22 @@ function switchShopTab(tab) {
   if (tab === 'special') renderOneStrikeShop();
 }
 
-// updateXPDisplay keeps both the arena footer and shop panel in sync
-
-// ── Hero Name ──
 function setHeroName() {
   const input = document.getElementById('hero-name-input');
   const name = input.value.trim();
   if (!name) return;
   const cost = shopState.nameChangeCount === 0 ? 0 : 10;
-  if (state.totalXP < cost) {
-    addLog(`💸 Not enough XP to rename. Need ${cost} XP.`, 'system'); return;
-  }
+  if (state.totalXP < cost) { addLog(`💸 Need ${cost} XP to rename.`, 'system'); return; }
   state.totalXP -= cost;
   shopState.heroName = name;
   shopState.nameChangeCount++;
   document.querySelector('.combatant-name').textContent = name.toUpperCase();
-  document.getElementById('name-cost-label').textContent =
-    shopState.nameChangeCount === 1 ? 'Next change costs 10 XP' : 'Rename costs 10 XP';
+  document.getElementById('name-cost-label').textContent = shopState.nameChangeCount >= 1 ? 'Rename costs 10 XP' : 'First change is free';
   addLog(`🏷️ <span class="log-win">Warrior renamed to "${name}"!</span>`, 'system');
   input.value = '';
   updateXPDisplay();
 }
 
-// ── Skins ──
 function renderSkinGrid() {
   const grid = document.getElementById('skin-grid');
   grid.innerHTML = '';
@@ -1841,12 +1590,8 @@ function renderSkinGrid() {
     const owned = shopState.ownedSkins.includes(i);
     const equipped = shopState.equippedSkin === i;
     const card = document.createElement('div');
-    card.className = 'skin-card' + (equipped ? ' equipped' : '') + (owned && !equipped ? ' owned-skin' : '');
-    card.innerHTML = `
-      <span class="skin-emoji">${skin.emoji}</span>
-      <span class="skin-name">${skin.name}</span>
-      <span class="skin-price-tag">${owned ? (equipped ? '✦ EQUIPPED' : '✓ OWNED') : skin.price + ' XP'}</span>
-    `;
+    card.className = 'skin-card' + (equipped?' equipped':'') + (owned&&!equipped?' owned-skin':'');
+    card.innerHTML = `<span class="skin-emoji">${skin.emoji}</span><span class="skin-name">${skin.name}</span><span class="skin-price-tag">${owned?(equipped?'✦ EQUIPPED':'✓ OWNED'):skin.price+' XP'}</span>`;
     card.onclick = () => owned ? equipSkin(i) : buySkin(i);
     grid.appendChild(card);
   });
@@ -1854,9 +1599,7 @@ function renderSkinGrid() {
 
 function buySkin(i) {
   const skin = SKINS[i];
-  if (state.totalXP < skin.price) {
-    addLog(`💸 Need ${skin.price} XP for ${skin.name} skin.`, 'system'); return;
-  }
+  if (state.totalXP < skin.price) { addLog(`💸 Need ${skin.price} XP for ${skin.name}.`, 'system'); return; }
   state.totalXP -= skin.price;
   shopState.ownedSkins.push(i);
   equipSkin(i);
@@ -1870,20 +1613,16 @@ function equipSkin(i) {
   renderSkinGrid();
 }
 
-// ── XP Skill Upgrades ──
 function renderXPSkillList() {
-  const list = document.getElementById('xp-skill-list');
   const icons = { stamina:'💚', attack:'⚔️', defense:'🛡️', crit:'💥' };
-  list.innerHTML = SKILLS.map(skill => {
+  document.getElementById('xp-skill-list').innerHTML = SKILLS.map(skill => {
     const cost = XP_SKILL_COST[skill];
-    const canAfford = state.totalXP >= cost;
-    return `
-      <div class="xp-level-row">
-        <span class="xp-level-name">${icons[skill]} ${skill.charAt(0).toUpperCase()+skill.slice(1)} LV ${state.skills[skill]}</span>
-        <span class="xp-level-cost">${cost} XP</span>
-        <button class="btn-buy btn-buy-gold" style="width:auto;padding:0.2rem 0.6rem;margin-left:0.4rem;"
-          onclick="buySkillLevel('${skill}')" ${canAfford?'':'disabled'}>+1 LV</button>
-      </div>`;
+    return `<div class="xp-level-row">
+      <span class="xp-level-name">${icons[skill]} ${skill.charAt(0).toUpperCase()+skill.slice(1)} LV ${state.skills[skill]}</span>
+      <span class="xp-level-cost">${cost} XP</span>
+      <button class="btn-buy btn-buy-gold" style="width:auto;padding:0.25rem 0.7rem;margin-left:0.4rem;"
+        onclick="buySkillLevel('${skill}')" ${state.totalXP>=cost?'':'disabled'}>+1 LV</button>
+    </div>`;
   }).join('');
 }
 
@@ -1893,19 +1632,15 @@ function buySkillLevel(skill) {
   state.totalXP -= cost;
   state.skills[skill]++;
   addLog(`💰 <span class="log-win">Spent ${cost} XP — ${skill.toUpperCase()} is now LV ${state.skills[skill]}!</span>`, 'system');
-  renderSkills();
-  renderXPSkillList();
-  updateXPDisplay();
+  renderSkills(); renderXPSkillList(); updateXPDisplay();
 }
 
-// ── One Strike ──
 function renderOneStrikeShop() {
   const statusEl = document.getElementById('one-strike-shop-status');
   const buyBtn = document.getElementById('btn-buy-one-strike');
   if (shopState.oneStrikeUnlocked) {
     statusEl.innerHTML = `<span class="owned-badge" style="display:inline-block;margin-bottom:0.4rem;">✓ UNLOCKED</span>`;
-    buyBtn.disabled = true;
-    buyBtn.textContent = 'ALREADY UNLOCKED';
+    buyBtn.disabled = true; buyBtn.textContent = 'ALREADY UNLOCKED';
   } else {
     statusEl.innerHTML = '';
     const canAfford = state.totalXP >= 150;
@@ -1918,26 +1653,16 @@ function buyOneStrike() {
   if (shopState.oneStrikeUnlocked || state.totalXP < 150) return;
   state.totalXP -= 150;
   shopState.oneStrikeUnlocked = true;
-  addLog(`☠ <span class="log-death">ONE STRIKE has been unlocked! Use it wisely...</span>`, 'system');
-  renderOneStrikeShop();
-  updateXPDisplay();
+  addLog(`☠ <span class="log-death">ONE STRIKE unlocked!</span>`, 'system');
+  renderOneStrikeShop(); updateXPDisplay();
 }
 
-// ── One Strike in combat ──
 function updateOneStrikeButton() {
   const btn = document.getElementById('btn-one-strike');
-  if (!shopState.oneStrikeUnlocked || !state.fight.active) {
-    btn.classList.add('hidden');
-    return;
-  }
+  if (!shopState.oneStrikeUnlocked || !state.fight.active) { btn.classList.add('hidden'); return; }
   btn.classList.remove('hidden');
-  if (shopState.oneStrikeUsedThisMatch) {
-    btn.disabled = true;
-    btn.classList.add('used');
-  } else {
-    btn.disabled = false;
-    btn.classList.remove('used');
-  }
+  btn.disabled = shopState.oneStrikeUsedThisMatch;
+  btn.classList.toggle('used', shopState.oneStrikeUsedThisMatch);
 }
 
 // ============================================================
@@ -1947,11 +1672,7 @@ renderSkills();
 updateBars();
 updateXPDisplay();
 renderSkinGrid();
-
-// Set initial enemy display (preview)
-document.getElementById('enemy-hp-txt').textContent = '? / ?';
-document.getElementById('enemy-atk-txt').textContent = '?';
-document.getElementById('enemy-def-txt').textContent = '?';
 </script>
+
 </body>
 </html>
