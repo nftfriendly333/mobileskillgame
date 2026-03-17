@@ -1,4 +1,4 @@
-[mobile fun.html](https://github.com/user-attachments/files/26061213/mobile.fun.html)
+[mobile fun.html](https://github.com/user-attachments/files/26061402/mobile.fun.html)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -847,6 +847,111 @@
   .xp-level-row:last-child { border-bottom:none; }
   .xp-level-name { display:flex; align-items:center; gap:0.4rem; color:var(--text); }
   .xp-level-cost { color:var(--gold3); font-family:'Cinzel',serif; font-size: 0.85rem; }
+
+  /* ── HOW TO PLAY ── */
+  .how-to-play {
+    max-width: 860px;
+    margin: 0 auto 0;
+    padding: 0 1rem 1rem;
+  }
+
+  .htp-toggle {
+    width: 100%;
+    background: linear-gradient(135deg, #1a1208, #2a200e);
+    border: 1px solid var(--gold3);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+  }
+  .htp-toggle:hover { background: linear-gradient(135deg, #2a200e, #3a2e14); border-color: var(--gold); }
+  .htp-toggle .arrow { transition: transform 0.3s; font-size: 0.8rem; }
+  .htp-toggle.open .arrow { transform: rotate(180deg); }
+
+  .htp-body {
+    display: none;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 1.4rem;
+  }
+  .htp-body.open { display: block; }
+
+  .htp-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .htp-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+  }
+
+  .htp-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .htp-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .htp-card ul li {
+    font-size: 0.9rem;
+    color: var(--text2);
+    line-height: 1.7;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .htp-card ul li:last-child { border-bottom: none; }
+
+  .htp-card ul li .li-icon {
+    flex-shrink: 0;
+    width: 1.4rem;
+    text-align: center;
+    margin-top: 0.05rem;
+  }
+
+  .htp-tip {
+    margin-top: 1.2rem;
+    background: linear-gradient(135deg, rgba(201,168,76,0.06), rgba(201,168,76,0.02));
+    border: 1px solid var(--gold3);
+    border-radius: 3px;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text2);
+    font-style: italic;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .htp-tip strong { color: var(--gold); font-style: normal; }
 </style>
 </head>
 <body>
@@ -854,6 +959,70 @@
 <div class="game-header">
   <h1>⚔ IRON ARENA ⚔</h1>
   <p><span class="ornament">✦</span> Turn-Based Combat — Train, Fight, Survive <span class="ornament">✦</span></p>
+</div>
+
+
+<div class="how-to-play">
+  <button class="htp-toggle" onclick="toggleHTP(this)">
+    <span>📖 HOW TO PLAY — Click to expand</span>
+    <span class="arrow">▼</span>
+  </button>
+  <div class="htp-body" id="htp-body">
+    <div class="htp-sections">
+
+      <div class="htp-card">
+        <div class="htp-card-title" style="color:var(--red2)">⚔️ Fighting</div>
+        <ul>
+          <li><span class="li-icon">1️⃣</span><span>Hit <strong style="color:var(--white)">ENTER THE ARENA</strong> to start a fight against the current wave's enemy.</span></li>
+          <li><span class="li-icon">🛡️</span><span><strong style="color:#60a5fa">BLOCK</strong> costs 5 stamina and heavily reduces the next enemy hit.</span></li>
+          <li><span class="li-icon">⚡</span><span><strong style="color:#f39c12">LIGHT ATTACK</strong> costs 10 stamina — reliable, safe damage every turn.</span></li>
+          <li><span class="li-icon">💀</span><span><strong style="color:var(--red2)">HEAVY ATTACK</strong> costs 25 stamina — nearly 2× the damage of a Light Attack.</span></li>
+          <li><span class="li-icon">💚</span><span>Stamina <strong style="color:var(--white)">regenerates</strong> a little each turn. Running out limits your moves.</span></li>
+          <li><span class="li-icon">💥</span><span>Your <strong style="color:#c084fc">Critical</strong> skill gives a chance to deal bonus multiplied damage on any attack.</span></li>
+          <li><span class="li-icon">♻️</span><span>If you die, you can <strong style="color:var(--white)">Respawn</strong> — but you'll lose 10% of your total XP.</span></li>
+        </ul>
+      </div>
+
+      <div class="htp-card">
+        <div class="htp-card-title" style="color:var(--green2)">⚡ Leveling Up Skills</div>
+        <ul>
+          <li><span class="li-icon">👆</span><span>Find the <strong style="color:var(--white)">Skill Training</strong> section at the bottom. Each skill has a <strong style="color:var(--white)">LEVEL UP</strong> button.</span></li>
+          <li><span class="li-icon">🔢</span><span>Click <strong style="color:var(--gold)">25 times</strong> on a skill's button to earn a level-up.</span></li>
+          <li><span class="li-icon">⏳</span><span>After leveling up, that skill enters a <strong style="color:var(--white)">1-minute cooldown</strong>. Plan ahead!</span></li>
+          <li><span class="li-icon">💚</span><span><strong style="color:var(--green2)">Stamina</strong> — increases your max HP and max stamina pool.</span></li>
+          <li><span class="li-icon">⚔️</span><span><strong style="color:var(--red2)">Attack</strong> — increases damage dealt on both Light and Heavy attacks.</span></li>
+          <li><span class="li-icon">🛡️</span><span><strong style="color:#60a5fa">Defense</strong> — reduces incoming damage and improves your block.</span></li>
+          <li><span class="li-icon">💥</span><span><strong style="color:#c084fc">Critical</strong> — raises your crit chance and crit damage multiplier.</span></li>
+        </ul>
+      </div>
+
+      <div class="htp-card">
+        <div class="htp-card-title" style="color:var(--gold)">🏪 Spending XP</div>
+        <ul>
+          <li><span class="li-icon">🏆</span><span>Winning fights earns <strong style="color:var(--gold)">XP</strong>. Tougher enemies on higher waves drop much more.</span></li>
+          <li><span class="li-icon">🏷️</span><span><strong style="color:var(--white)">Name</strong> your hero for free the first time. Renaming after that costs 10 XP.</span></li>
+          <li><span class="li-icon">🎭</span><span>Unlock <strong style="color:var(--white)">Cosmetic Skins</strong> (20–250 XP) to change your warrior's appearance on the battlefield.</span></li>
+          <li><span class="li-icon">📈</span><span>Spend XP to instantly <strong style="color:var(--gold)">Boost a Skill</strong> by 1 level (15–20 XP each) — no clicking required!</span></li>
+          <li><span class="li-icon">☠️</span><span>Unlock <strong style="color:var(--red2)">ONE STRIKE</strong> for 150 XP — a powerful gamble attack (see below).</span></li>
+        </ul>
+      </div>
+
+      <div class="htp-card">
+        <div class="htp-card-title" style="color:var(--red2)">☠ ONE STRIKE</div>
+        <ul>
+          <li><span class="li-icon">🔓</span><span>Purchase ONE STRIKE in the <strong style="color:var(--white)">Special</strong> shop tab for <strong style="color:var(--gold)">150 XP</strong>.</span></li>
+          <li><span class="li-icon">🎯</span><span>Only a <strong style="color:var(--red2)">25% chance to hit</strong> — it's a high-risk gamble every time.</span></li>
+          <li><span class="li-icon">💀</span><span>If it <strong style="color:var(--red2)">hits</strong>, the enemy is instantly killed — regardless of HP or level.</span></li>
+          <li><span class="li-icon">💸</span><span>Whether it hits or misses, you lose <strong style="color:var(--white)">75% of your stamina</strong> and <strong style="color:var(--white)">50% of your max HP</strong>.</span></li>
+          <li><span class="li-icon">⚠️</span><span>You can only use ONE STRIKE <strong style="color:var(--gold)">once per match</strong>. Use it wisely!</span></li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="htp-tip">
+      💡 <strong>Pro tip:</strong> Train skills between every wave. Enemies scale hard — a well-timed Heavy Attack with high Attack skill will carry you far. Save ONE STRIKE for Legendary or Mythic tier bosses!
+    </div>
+  </div>
 </div>
 
 <div class="game-container">
@@ -1672,6 +1841,12 @@ renderSkills();
 updateBars();
 updateXPDisplay();
 renderSkinGrid();
+
+function toggleHTP(btn) {
+  btn.classList.toggle('open');
+  document.getElementById('htp-body').classList.toggle('open');
+}
+
 </script>
 
 </body>
