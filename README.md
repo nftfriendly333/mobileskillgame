@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1573,6 +1574,17 @@ function playerDies() {
   document.getElementById('btn-respawn').classList.remove('hidden');
 }
 
+function resetPlayerStats() {
+  const f = state.fight;
+  const maxHP  = getPlayerMaxHP();
+  const maxSta = getPlayerMaxStamina();
+  f.playerHP           = maxHP;
+  f.playerMaxHP        = maxHP;
+  f.playerStamina      = maxSta;
+  f.playerMaxStamina   = maxSta;
+  updateBars();
+}
+
 function nextEnemy() {
   document.getElementById('btn-next').classList.add('hidden');
   document.getElementById('btn-fight').classList.remove('hidden');
@@ -1580,6 +1592,7 @@ function nextEnemy() {
   document.getElementById('wave-num').textContent = state.wave;
   setStatus('idle', '⚙ IDLE');
   setTurnIndicator('none');
+  resetPlayerStats();
 }
 
 function respawn() {
@@ -1590,6 +1603,7 @@ function respawn() {
   document.getElementById('btn-fight').classList.remove('hidden');
   document.getElementById('btn-fight').textContent = `⚔ CHALLENGE WAVE ${state.wave} (REVENGE)`;
   setStatus('idle', '⚙ IDLE');
+  resetPlayerStats();
   updateXPDisplay();
 }
 
@@ -1836,7 +1850,7 @@ function updateOneStrikeButton() {
 // INIT
 // ============================================================
 renderSkills();
-updateBars();
+resetPlayerStats();
 updateXPDisplay();
 renderSkinGrid();
 
