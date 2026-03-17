@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -950,6 +951,84 @@
   }
 
   .htp-tip strong { color: var(--gold); font-style: normal; }
+
+  /* Save bar */
+  .save-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border);
+  }
+  .btn-save {
+    background: linear-gradient(135deg, #0e1a0e, #1a3a1a);
+    border: 1px solid var(--green);
+    color: var(--green2);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    padding: 0.35rem 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-save:hover { background: linear-gradient(135deg, #1a3a1a, #27ae60); box-shadow: 0 0 10px rgba(39,174,96,0.3); }
+  .btn-delete-save {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 0.35rem 0.8rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-delete-save:hover { border-color: var(--red3); color: var(--red2); }
+  .save-info { font-size: 0.75rem; color: var(--text3); font-family: 'Cinzel', serif; letter-spacing: 0.05em; font-style: italic; }
+
+  /* ── SAVE BAR ── */
+  .save-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0,0,0,0.35);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .btn-save {
+    background: linear-gradient(135deg, #0e1a0e, #1a3a1a);
+    border: 1px solid var(--green);
+    color: var(--green2);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 1.1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-save:hover { background: linear-gradient(135deg, #1a3a1a, #27ae60); box-shadow: 0 0 12px rgba(39,174,96,0.3); }
+  .btn-delete-save {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    padding: 0.4rem 0.9rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-delete-save:hover { border-color: var(--red3); color: var(--red2); }
+  .save-info { font-size: 0.8rem; color: var(--text3); font-family: 'Cinzel', serif; letter-spacing: 0.05em; font-style: italic; }
+
 </style>
 </head>
 <body>
@@ -959,6 +1038,11 @@
   <p><span class="ornament">✦</span> Turn-Based Combat — Train, Fight, Survive <span class="ornament">✦</span></p>
 </div>
 
+<div class="save-bar">
+  <button class="btn-save" onclick="saveGame()">💾 Save Progress</button>
+  <span class="save-info">Auto-saves on wins &amp; purchases</span>
+  <button class="btn-delete-save" onclick="deleteSave()">🗑 Reset Save</button>
+</div>
 
 <div class="how-to-play">
   <button class="htp-toggle" onclick="toggleHTP(this)">
@@ -1359,6 +1443,7 @@ function clickSkill(skill) {
     state.skillClicks[skill] = 0;
     addLog(`🌟 <span class="log-win">${skill.toUpperCase()} leveled up to ${state.skills[skill]}!</span>`, 'system');
     startCooldownTimer(skill);
+    saveGame(); // auto-save on level-up
   }
   renderSkills();
 }
@@ -1398,8 +1483,14 @@ function renderSkills() {
   const totalLv = SKILLS.reduce((s,k) => s + state.skills[k], 0);
   const titles = ['Novice Wanderer','Apprentice Fighter','Battle-Hardened Soldier','Veteran Warrior','Elite Champion','Master of Combat','Legendary Slayer','Godlike Destroyer'];
   document.getElementById('player-title').textContent = titles[Math.min(Math.floor(totalLv / 8), titles.length - 1)];
+  // Only auto-change sprite if no skin is equipped (skin 0 is default Wanderer)
   if (!shopState || shopState.equippedSkin === 0) {
-    document.getElementById('player-sprite').textContent = totalLv < 10 ? '🧙' : totalLv < 20 ? '⚔️' : totalLv < 35 ? '🥷' : '🦸';
+    const autoSprite = totalLv < 10 ? '🧙' : totalLv < 20 ? '⚔️' : totalLv < 35 ? '🥷' : '🦸';
+    SKINS[0].emoji = autoSprite; // keep skin 0 in sync with level
+    document.getElementById('player-sprite').textContent = autoSprite;
+  } else {
+    // Re-apply the equipped skin so renderSkills never clobbers it
+    document.getElementById('player-sprite').textContent = SKINS[shopState.equippedSkin].emoji;
   }
 }
 
@@ -1560,6 +1651,7 @@ function playerWins() {
   document.getElementById('wave-num').textContent = state.wave;
   document.getElementById('enemy-count').textContent = state.enemiesDefeated;
   updateXPDisplay();
+  saveGame(); // auto-save on win
 }
 
 function playerDies() {
@@ -1676,6 +1768,12 @@ function updateXPDisplay() {
   if (el) el.textContent = state.totalXP;
   const shop = document.getElementById('shop-xp-display');
   if (shop) shop.textContent = state.totalXP;
+  // Refresh skills tab buttons immediately so afford-ability updates live
+  const skillsTab = document.getElementById('tab-skills');
+  if (skillsTab && skillsTab.classList.contains('active')) renderXPSkillList();
+  // Refresh special tab if active
+  const specialTab = document.getElementById('tab-special');
+  if (specialTab && specialTab.classList.contains('active')) renderOneStrikeShop();
 }
 
 function showVictoryPopup(xpDist, total) {
@@ -1761,6 +1859,7 @@ function setHeroName() {
   addLog(`🏷️ <span class="log-win">Warrior renamed to "${name}"!</span>`, 'system');
   input.value = '';
   updateXPDisplay();
+  saveGame();
 }
 
 function renderSkinGrid() {
@@ -1785,6 +1884,7 @@ function buySkin(i) {
   equipSkin(i);
   addLog(`🎭 <span class="log-win">Unlocked ${skin.name} skin!</span>`, 'system');
   updateXPDisplay();
+  saveGame();
 }
 
 function equipSkin(i) {
@@ -1812,7 +1912,10 @@ function buySkillLevel(skill) {
   state.totalXP -= cost;
   state.skills[skill]++;
   addLog(`💰 <span class="log-win">Spent ${cost} XP — ${skill.toUpperCase()} is now LV ${state.skills[skill]}!</span>`, 'system');
-  renderSkills(); renderXPSkillList(); updateXPDisplay();
+  renderSkills();
+  renderXPSkillList();
+  updateXPDisplay();
+  saveGame();
 }
 
 function renderOneStrikeShop() {
@@ -1835,6 +1938,7 @@ function buyOneStrike() {
   shopState.oneStrikeUnlocked = true;
   addLog(`☠ <span class="log-death">ONE STRIKE unlocked!</span>`, 'system');
   renderOneStrikeShop(); updateXPDisplay();
+  saveGame();
 }
 
 function updateOneStrikeButton() {
@@ -1845,13 +1949,124 @@ function updateOneStrikeButton() {
   btn.classList.toggle('used', shopState.oneStrikeUsedThisMatch);
 }
 
+
+// ============================================================
+// SAVE / LOAD  (localStorage)
+// ============================================================
+const SAVE_KEY = 'ironArena_v1';
+
+function saveGame() {
+  const data = {
+    skills:       state.skills,
+    skillClicks:  state.skillClicks,
+    totalXP:      state.totalXP,
+    enemiesDefeated: state.enemiesDefeated,
+    wave:         state.wave,
+    shop: {
+      heroName:          shopState.heroName,
+      nameChangeCount:   shopState.nameChangeCount,
+      equippedSkin:      shopState.equippedSkin,
+      ownedSkins:        shopState.ownedSkins,
+      oneStrikeUnlocked: shopState.oneStrikeUnlocked,
+    }
+  };
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    showSaveToast('✔ Progress saved!', '#27ae60');
+  } catch(e) {
+    showSaveToast('⚠ Save failed', '#e74c3c');
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+
+    // Restore state
+    Object.assign(state.skills,      data.skills      || {});
+    Object.assign(state.skillClicks, data.skillClicks || {});
+    state.totalXP          = data.totalXP          || 0;
+    state.enemiesDefeated  = data.enemiesDefeated  || 0;
+    state.wave             = data.wave             || 1;
+
+    // Restore shop
+    if (data.shop) {
+      shopState.heroName          = data.shop.heroName          || '';
+      shopState.nameChangeCount   = data.shop.nameChangeCount   || 0;
+      shopState.equippedSkin      = data.shop.equippedSkin      || 0;
+      shopState.ownedSkins        = data.shop.ownedSkins        || [0];
+      shopState.oneStrikeUnlocked = data.shop.oneStrikeUnlocked || false;
+    }
+
+    // Apply hero name
+    if (shopState.heroName) {
+      const nameEl = document.querySelector('.combatant-name');
+      if (nameEl) nameEl.textContent = shopState.heroName.toUpperCase();
+      document.getElementById('name-cost-label').textContent = 'Rename costs 10 XP';
+    }
+
+    // Apply equipped skin
+    if (shopState.equippedSkin > 0) {
+      document.getElementById('player-sprite').textContent = SKINS[shopState.equippedSkin].emoji;
+    }
+
+    // Update wave / enemy count display
+    document.getElementById('wave-num').textContent = state.wave;
+    document.getElementById('enemy-count').textContent = state.enemiesDefeated;
+    document.getElementById('btn-fight').textContent = state.wave > 1
+      ? `⚔ CHALLENGE WAVE ${state.wave}` : '⚔ ENTER THE ARENA';
+
+    return true;
+  } catch(e) {
+    console.warn('Load failed:', e);
+    return false;
+  }
+}
+
+function deleteSave() {
+  if (!confirm('Delete all saved progress? This cannot be undone.')) return;
+  localStorage.removeItem(SAVE_KEY);
+  showSaveToast('🗑 Save deleted — refresh to restart', '#e74c3c');
+}
+
+function showSaveToast(msg, color) {
+  let toast = document.getElementById('save-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'save-toast';
+    toast.style.cssText = `position:fixed;bottom:1.2rem;right:1.2rem;padding:0.6rem 1.1rem;
+      border-radius:4px;font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:0.08em;
+      z-index:9999;transition:opacity 0.4s;pointer-events:none;border:1px solid rgba(255,255,255,0.15);
+      box-shadow:0 4px 20px rgba(0,0,0,0.6);`;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.background = color + 'dd';
+  toast.style.color = '#fff';
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 2200);
+}
+
+// Auto-save on key events
+const _origPlayerWins = playerWins;
+// Patch: save after win, after skill levelup, after shop purchases
+const _patchSave = () => saveGame();
+
 // ============================================================
 // INIT
 // ============================================================
-renderSkills();
-resetPlayerStats();
-updateXPDisplay();
-renderSkinGrid();
+(function() {
+  // Load save first, then render everything fresh
+  const loaded = loadGame();
+  renderSkills();
+  resetPlayerStats();
+  updateXPDisplay();
+  renderSkinGrid();
+  if (loaded) showSaveToast('⚔ Progress restored!', '#7a5c1e');
+})();
 
 function toggleHTP(btn) {
   btn.classList.toggle('open');
