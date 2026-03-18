@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -741,12 +742,28 @@
   @media (max-width: 480px) {
     .game-header h1 { font-size: 1.4rem; }
     .panel { padding: 0.8rem; }
-    .combatants { grid-template-columns: 1fr; }
-    .vs-divider { display: none; }
-    .combatant-sprite { font-size: 2.5rem; }
+
+    /* Smaller combatant cards on mobile */
+    .arena-panel { padding: 0.6rem !important; }
+    .combatants { gap: 0.4rem; }
+    .combatant-card { padding: 0.5rem 0.4rem; }
+    .combatant-sprite { font-size: 1.8rem; margin-bottom: 0.2rem; }
+    .combatant-name { font-size: 0.7rem; }
+    .combatant-title { font-size: 0.6rem; margin-bottom: 0.4rem; }
+    .stat-bar-row { margin-bottom: 0.3rem; }
+    .stat-bar-label { font-size: 0.6rem; margin-bottom: 0.15rem; }
+    .stat-bar-outer { height: 6px; }
+    .enemy-tier { font-size: 0.55rem; padding: 0.1rem 0.3rem; margin-bottom: 0.3rem; }
+    .vs-divider { font-size: 1rem; padding-top: 1rem; }
+    .turn-indicator { font-size: 0.7rem; padding: 0.2rem; }
+
+    /* Actions stay readable */
     .action-buttons { grid-template-columns: 1fr 1fr; }
     .action-buttons .btn-heavy { grid-column: 1 / -1; }
-    .battle-log { height: 130px; }
+
+    /* Battle log compact */
+    .battle-log { height: 110px; font-size: 0.78rem; }
+
     .skills-grid { grid-template-columns: 1fr; }
     .skin-grid { grid-template-columns: repeat(2, 1fr); }
     .xp-popup { width: 92vw; padding: 1rem; }
@@ -1028,16 +1045,201 @@
   .btn-delete-save:hover { border-color: var(--red3); color: var(--red2); }
   .save-info { font-size: 0.8rem; color: var(--text3); font-family: 'Cinzel', serif; letter-spacing: 0.05em; font-style: italic; }
 
+
+
+
+  /* ══ LEADERBOARD ══ */
+  .lb-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.92);
+    background: var(--bg2);
+    border: 2px solid var(--gold3);
+    border-radius: 8px;
+    padding: 1.6rem 1.8rem;
+    z-index: 1001;
+    width: 92vw;
+    max-width: 620px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 0 60px rgba(201,168,76,0.2), 0 20px 60px black;
+    animation: popupIn 0.3s ease forwards;
+  }
+
+  .lb-popup h2 {
+    font-size: 1.2rem;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.3rem;
+    text-shadow: 0 0 20px rgba(201,168,76,0.4);
+  }
+
+  .lb-subtitle {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text3);
+    font-style: italic;
+    margin-bottom: 1.2rem;
+  }
+
+  .lb-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .lb-tab {
+    flex: 1;
+    padding: 0.4rem 0.3rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .lb-tab.active { background: rgba(201,168,76,0.1); border-color: var(--gold3); color: var(--gold); }
+  .lb-tab:hover:not(.active) { border-color: var(--border2); color: var(--text2); }
+
+  .lb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .lb-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--gold3);
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--border2);
+    text-transform: uppercase;
+  }
+
+  .lb-table td {
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text2);
+    vertical-align: middle;
+  }
+
+  .lb-table tr:last-child td { border-bottom: none; }
+
+  .lb-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .lb-rank {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--text3);
+    width: 2rem;
+    text-align: center;
+  }
+
+  .lb-rank-1 { color: #f59e0b; font-size: 1rem; }
+  .lb-rank-2 { color: #94a3b8; font-size: 0.95rem; }
+  .lb-rank-3 { color: #b45309; font-size: 0.9rem; }
+
+  .lb-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    color: var(--white);
+  }
+  .lb-name.is-you { color: var(--gold); }
+  .lb-name.is-you::after { content: ' (You)'; font-size: 0.65rem; color: var(--gold3); }
+
+  .lb-score {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--green2);
+    text-align: right;
+  }
+
+  .lb-skin { font-size: 1.1rem; }
+
+  .lb-empty {
+    text-align: center;
+    color: var(--text3);
+    font-style: italic;
+    padding: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  .lb-you-row td { background: rgba(201,168,76,0.04); }
+
+  .lb-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .lb-refresh-info {
+    font-size: 0.72rem;
+    color: var(--text3);
+    font-style: italic;
+  }
+
+  .btn-lb-close {
+    background: linear-gradient(135deg, #1e1812, #2a2016);
+    border: 1px solid var(--gold3);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-lb-close:hover { border-color: var(--gold); box-shadow: 0 0 10px rgba(201,168,76,0.2); }
+
+  .btn-leaderboard {
+    background: linear-gradient(135deg, #1a1408, #2e2010);
+    border: 1px solid var(--gold3);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-leaderboard:hover { background: linear-gradient(135deg,#2e2010,#4a3418); border-color:var(--gold); box-shadow:0 0 12px rgba(201,168,76,0.2); }
+
+  .lb-loading {
+    text-align: center;
+    color: var(--text3);
+    font-style: italic;
+    padding: 1.5rem;
+    font-size: 0.85rem;
+  }
+
 </style>
 </head>
 <body>
 
+
+  
 <div class="game-header">
   <h1>⚔ IRON ARENA ⚔</h1>
   <p><span class="ornament">✦</span> Turn-Based Combat — Train, Fight, Survive <span class="ornament">✦</span></p>
 </div>
 
 <div class="save-bar">
+  <button class="btn-leaderboard" onclick="openLeaderboard()">🏆 Leaderboard</button>
   <button class="btn-save" onclick="saveGame()">💾 Save Progress</button>
   <span class="save-info">Auto-saves on wins &amp; purchases</span>
   <button class="btn-delete-save" onclick="deleteSave()">🗑 Reset Save</button>
@@ -1150,15 +1352,6 @@
       <div class="turn-indicator" id="turn-indicator">— Prepare for Battle —</div>
     </div>
 
-    <!-- Battle Log -->
-    <div class="panel log-panel">
-      <div class="panel-title">📜 Battle Chronicle</div>
-      <div class="battle-log" id="battle-log">
-        <div class="log-entry log-system">⚔ Welcome to the Iron Arena. Train your skills and face your enemies.</div>
-        <div class="log-entry log-system">💡 Click LEVEL UP 25 times per skill to advance. Each level-up triggers a 1-minute cooldown.</div>
-      </div>
-    </div>
-
     <!-- Actions -->
     <div class="action-area panel" id="action-area">
       <div class="action-title">— Choose Your Action —</div>
@@ -1195,6 +1388,18 @@
       <button class="main-btn btn-next hidden" id="btn-next" onclick="nextEnemy()">▶ NEXT CHALLENGER</button>
       <button class="main-btn btn-respawn hidden" id="btn-respawn" onclick="respawn()">♻ RESPAWN (Lose 10% XP)</button>
     </div>
+
+
+
+    <!-- Battle Log -->
+    <div class="panel log-panel">
+      <div class="panel-title">📜 Battle Chronicle</div>
+      <div class="battle-log" id="battle-log">
+        <div class="log-entry log-system">⚔ Welcome to the Iron Arena. Train your skills and face your enemies.</div>
+        <div class="log-entry log-system">💡 Click LEVEL UP 25 times per skill to advance. Each level-up triggers a 1-minute cooldown.</div>
+      </div>
+    </div>
+
 
   </div><!-- /arena-col -->
 
@@ -1506,6 +1711,7 @@ function startFight() {
   const maxSta = getPlayerMaxStamina();
   const f = state.fight;
   f.playerHP = maxHP; f.playerMaxHP = maxHP;
+  // Stormbringer always starts at full stamina
   f.playerStamina = maxSta; f.playerMaxStamina = maxSta;
   f.blocking = false;
   f.enemyMaxHP = currentEnemy.hp;
@@ -1949,6 +2155,151 @@ function updateOneStrikeButton() {
 }
 
 
+
+
+
+
+// ============================================================
+// LEADERBOARD  (shared storage — visible to all players)
+// ============================================================
+const LB_PREFIX  = 'lb:';          // shared key prefix
+const LB_MAX     = 50;             // max entries to store globally
+let   lbCurrentTab = 'enemies';
+let   lbMyKey = null;              // this player's storage key
+
+// Derive a stable player key from hero name + browser fingerprint
+function getLbPlayerKey() {
+  if (lbMyKey) return lbMyKey;
+  // Use hero name + a stored local UID
+  let uid = localStorage.getItem('ironArena_uid');
+  if (!uid) {
+    uid = 'p_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('ironArena_uid', uid);
+  }
+  lbMyKey = LB_PREFIX + uid;
+  return lbMyKey;
+}
+
+async function submitLeaderboardScore() {
+  const key = getLbPlayerKey();
+  const name = shopState.heroName || 'Anonymous Warrior';
+  const skin = SKINS[shopState.equippedSkin]?.emoji || '🧙';
+  const totalSkillLv = SKILLS.reduce((s,k) => s + state.skills[k], 0);
+
+  const entry = {
+    name,
+    skin,
+    enemiesDefeated: state.enemiesDefeated,
+    wave:            Math.max(1, state.wave - 1),   // highest wave beaten
+    totalXP:         state.totalXP,
+    totalSkillLv,
+    ts: Date.now(),
+  };
+
+  try {
+    await window.storage.set(key, JSON.stringify(entry), true); // shared=true
+  } catch(e) {
+    console.warn('Leaderboard submit failed:', e);
+  }
+}
+
+async function fetchLeaderboardEntries() {
+  try {
+    const result = await window.storage.list(LB_PREFIX, true); // shared=true
+    const keys = result?.keys || [];
+    const myKey = getLbPlayerKey();
+
+    const entries = await Promise.all(keys.slice(0, LB_MAX).map(async k => {
+      try {
+        const r = await window.storage.get(k, true);
+        const d = JSON.parse(r.value);
+        d._key   = k;
+        d._isMe  = (k === myKey);
+        return d;
+      } catch { return null; }
+    }));
+
+    return entries.filter(Boolean);
+  } catch(e) {
+    console.warn('Leaderboard fetch failed:', e);
+    return [];
+  }
+}
+
+function sortLeaderboard(entries, tab) {
+  const field = { wave:'wave', xp:'totalXP' }[tab];
+  return [...entries].sort((a, b) => (b[field] || 0) - (a[field] || 0));
+}
+
+function renderLeaderboardTable(entries, tab) {
+  const field  = { wave:'wave', xp:'totalXP' }[tab];
+  const label  = { wave:'Highest Wave Reached', xp:'Total XP Earned' }[tab];
+  const fmt    = { wave: v => `Wave ${v}`, xp: v => `${v.toLocaleString()} XP` }[tab];
+
+  if (!entries.length) {
+    return `<div class="lb-empty">No scores yet — be the first on the board!</div>`;
+  }
+
+  const sorted = sortLeaderboard(entries, tab);
+
+  const rankIcon = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}`;
+  const rankCls  = i => i === 0 ? 'lb-rank lb-rank-1' : i === 1 ? 'lb-rank lb-rank-2' : i === 2 ? 'lb-rank lb-rank-3' : 'lb-rank';
+
+  const rows = sorted.slice(0, 20).map((e, i) => `
+    <tr class="${e._isMe ? 'lb-you-row' : ''}">
+      <td class="${rankCls(i)}">${rankIcon(i)}</td>
+      <td class="lb-skin">${e.skin || '🧙'}</td>
+      <td><span class="lb-name${e._isMe ? ' is-you' : ''}">${e.name || 'Unknown'}</span></td>
+      <td class="lb-score">${fmt(e[field] || 0)}</td>
+    </tr>`).join('');
+
+  return `
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th></th>
+          <th>Warrior</th>
+          <th style="text-align:right">${label}</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+async function openLeaderboard() {
+  document.getElementById('lb-overlay').classList.remove('hidden');
+  document.getElementById('lb-popup').classList.remove('hidden');
+  lbCurrentTab = 'wave';
+  document.querySelectorAll('.lb-tab').forEach((t,i) => {
+    t.classList.toggle('active', i === 0);
+  });
+  await refreshLeaderboard();
+}
+
+async function refreshLeaderboard() {
+  document.getElementById('lb-content').innerHTML = '<div class="lb-loading">⏳ Loading scores...</div>';
+  const entries = await fetchLeaderboardEntries();
+  document.getElementById('lb-content').innerHTML = renderLeaderboardTable(entries, lbCurrentTab);
+  document.getElementById('lb-refresh-info').textContent =
+    `${entries.length} warrior${entries.length !== 1 ? 's' : ''} on the board · Updates on every save`;
+}
+
+async function switchLbTab(tab) {
+  lbCurrentTab = tab;
+  const tabs = ['wave','xp'];
+  document.querySelectorAll('.lb-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
+  document.getElementById('lb-content').innerHTML = '<div class="lb-loading">⏳ Loading...</div>';
+  const entries = await fetchLeaderboardEntries();
+  document.getElementById('lb-content').innerHTML = renderLeaderboardTable(entries, tab);
+}
+
+function closeLeaderboard() {
+  document.getElementById('lb-overlay').classList.add('hidden');
+  document.getElementById('lb-popup').classList.add('hidden');
+}
+
+
 // ============================================================
 // SAVE / LOAD  (localStorage)
 // ============================================================
@@ -1972,6 +2323,7 @@ function saveGame() {
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     showSaveToast('✔ Progress saved!', '#27ae60');
+    submitLeaderboardScore(); // push to shared leaderboard
   } catch(e) {
     showSaveToast('⚠ Save failed', '#e74c3c');
   }
@@ -2054,6 +2406,7 @@ const _origPlayerWins = playerWins;
 // Patch: save after win, after skill levelup, after shop purchases
 const _patchSave = () => saveGame();
 
+
 // ============================================================
 // INIT
 // ============================================================
@@ -2073,6 +2426,28 @@ function toggleHTP(btn) {
 }
 
 </script>
+
+
+<!-- ══ LEADERBOARD POPUP ══ -->
+<div class="overlay hidden" id="lb-overlay" onclick="closeLeaderboard()"></div>
+<div class="lb-popup hidden" id="lb-popup">
+  <h2>🏆 IRON ARENA — HALL OF GLORY 🏆</h2>
+  <div class="lb-subtitle">Top warriors across all sessions</div>
+
+  <div class="lb-tabs">
+    <button class="lb-tab active" onclick="switchLbTab('wave')">🌊 Highest Wave</button>
+    <button class="lb-tab" onclick="switchLbTab('xp')">⚡ Total XP</button>
+  </div>
+
+  <div id="lb-content">
+    <div class="lb-loading">Loading scores...</div>
+  </div>
+
+  <div class="lb-footer">
+    <span class="lb-refresh-info" id="lb-refresh-info">Scores update on every save</span>
+    <button class="btn-lb-close" onclick="closeLeaderboard()">✕ Close</button>
+  </div>
+</div>
 
 </body>
 </html>
