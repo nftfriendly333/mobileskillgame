@@ -4,6 +4,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IRON ARENA — Turn-Based Combat</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, set, get, child, query, orderByKey, limitToFirst }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  window._fbReady = false;
+  window._fbDb    = null;
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAI3Pd07qv_w_YRfhhnsbSu-CXh4X-ZT9Q",
+  authDomain: "live-leaderboard-aee95.firebaseapp.com",
+  projectId: "live-leaderboard-aee95",
+  storageBucket: "live-leaderboard-aee95.firebasestorage.app",
+  messagingSenderId: "316888776436",
+  appId: "1:316888776436:web:6be767dfa0a80909cd68a1",
+  measurementId: "G-KRF6XBDTGH"
+};
+
+  try {
+    if (firebaseConfig.databaseURL.includes('YOUR_PROJECT')) {
+      console.warn('Firebase not configured — leaderboard/guilds disabled.');
+    } else {
+      const app = initializeApp(firebaseConfig);
+      window._fbDb    = getDatabase(app);
+      window._fbSet   = set;
+      window._fbRef   = ref;
+      window._fbGet   = get;
+      window._fbChild = child;
+      window._fbReady = true;
+      console.log('Firebase connected ✓');
+    }
+  } catch(e) {
+    console.warn('Firebase init failed:', e);
+  }
+</script>
 <style>
   :root {
     --bg: #0a0806;
@@ -1537,6 +1573,33 @@
   .lb-guild-members { font-size: 0.75rem; color: var(--text3); }
   .lb-guild-avg { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--green2); text-align: right; }
 
+
+  /* ── FIREBASE SETUP BANNER ── */
+  .firebase-banner {
+    background: linear-gradient(135deg, rgba(255,160,0,0.1), rgba(255,100,0,0.08));
+    border: 1px solid #f59e0b;
+    border-radius: 4px;
+    padding: 0.8rem 1.2rem;
+    margin: 0 auto;
+    max-width: 860px;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: var(--text2);
+  }
+  .firebase-banner.connected {
+    background: linear-gradient(135deg, rgba(39,174,96,0.08), rgba(39,174,96,0.04));
+    border-color: #27ae60;
+    color: var(--green2);
+  }
+  .firebase-banner .fb-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .firebase-banner strong { color: #f59e0b; }
+  .firebase-banner.connected strong { color: var(--green2); }
+  .firebase-banner a { color: #f59e0b; }
+  .firebase-banner.connected a { display: none; }
+
 </style>
 </head>
 <body>
@@ -1553,6 +1616,14 @@
   <button class="btn-save" onclick="saveGame()">💾 Save Progress</button>
   <span class="save-info">Auto-saves on wins &amp; purchases</span>
   <button class="btn-delete-save" onclick="deleteSave()">🗑 Reset Save</button>
+</div>
+
+<div class="firebase-banner" id="firebase-banner">
+  <span class="fb-icon">🔥</span>
+  <span><strong>Leaderboard &amp; Guilds need Firebase.</strong>
+  Open the file in a text editor, find <code style="background:rgba(0,0,0,0.3);padding:0.1rem 0.3rem;border-radius:2px;">YOUR_PROJECT</code> and paste your
+  <a href="https://console.firebase.google.com" target="_blank">Firebase config</a>.
+  Takes 5 minutes — see instructions below.</span>
 </div>
 
 <div class="how-to-play">
@@ -2587,29 +2658,26 @@ function saveGuildLocally() {
 
 // ── Fetch a single guild record from shared storage ──
 async function fetchGuild(code) {
+  if (!window._fbReady) return null;
   try {
-    const r = await window.storage.get(GUILD_PREFIX + code, true);
-    return r ? JSON.parse(r.value) : null;
+    const snap = await window._fbGet(window._fbRef(window._fbDb, 'guilds/' + code));
+    return snap.exists() ? snap.val() : null;
   } catch { return null; }
 }
 
-// ── Save a guild record to shared storage ──
 async function saveGuild(code, data) {
-  await window.storage.set(GUILD_PREFIX + code, JSON.stringify(data), true);
+  if (!window._fbReady) return;
+  try {
+    await window._fbSet(window._fbRef(window._fbDb, 'guilds/' + code), data);
+  } catch(e) { console.warn('saveGuild failed:', e); }
 }
 
-// ── Fetch all guilds ──
 async function fetchAllGuilds() {
+  if (!window._fbReady) return [];
   try {
-    const result = await window.storage.list(GUILD_PREFIX, true);
-    const keys = result?.keys || [];
-    const guilds = await Promise.all(keys.map(async k => {
-      try {
-        const r = await window.storage.get(k, true);
-        return r ? JSON.parse(r.value) : null;
-      } catch { return null; }
-    }));
-    return guilds.filter(Boolean);
+    const snap = await window._fbGet(window._fbRef(window._fbDb, 'guilds'));
+    if (!snap.exists()) return [];
+    return Object.values(snap.val());
   } catch { return []; }
 }
 
@@ -2694,7 +2762,9 @@ async function leaveGuild() {
     }
     if (guild.members.length === 0) {
       // Disband
-      try { await window.storage.delete(GUILD_PREFIX + guildState.myGuildCode, true); } catch{}
+      try {
+        if (window._fbReady) await window._fbSet(window._fbRef(window._fbDb, 'guilds/' + guildState.myGuildCode), null);
+      } catch{}
     } else {
       await saveGuild(guildState.myGuildCode, guild);
     }
@@ -2887,30 +2957,26 @@ async function submitLeaderboardScore() {
     ts:              Date.now(),
   };
 
+  if (!window._fbReady) return;
   try {
-    await window.storage.set(key, JSON.stringify(entry), true); // shared=true
+    const uid = key.replace('lb:', '');
+    await window._fbSet(window._fbRef(window._fbDb, 'scores/' + uid), entry);
   } catch(e) {
     console.warn('Leaderboard submit failed:', e);
   }
 }
 
 async function fetchLeaderboardEntries() {
+  if (!window._fbReady) return [];
   try {
-    const result = await window.storage.list(LB_PREFIX, true); // shared=true
-    const keys = result?.keys || [];
     const myKey = getLbPlayerKey();
-
-    const entries = await Promise.all(keys.slice(0, LB_MAX).map(async k => {
-      try {
-        const r = await window.storage.get(k, true);
-        const d = JSON.parse(r.value);
-        d._key   = k;
-        d._isMe  = (k === myKey);
-        return d;
-      } catch { return null; }
-    }));
-
-    return entries.filter(Boolean);
+    const snap = await window._fbGet(window._fbRef(window._fbDb, 'scores'));
+    if (!snap.exists()) return [];
+    return Object.entries(snap.val()).slice(0, LB_MAX).map(([uid, d]) => {
+      d._key  = 'lb:' + uid;
+      d._isMe = ('lb:' + uid === myKey);
+      return d;
+    });
   } catch(e) {
     console.warn('Leaderboard fetch failed:', e);
     return [];
@@ -2971,6 +3037,16 @@ async function openLeaderboard() {
 }
 
 async function refreshLeaderboard() {
+  if (!window._fbReady) {
+    document.getElementById('lb-content').innerHTML =
+      `<div class="lb-empty" style="line-height:1.8">
+        🔥 <strong style="color:#f59e0b">Firebase not configured</strong><br>
+        <span style="font-size:0.8rem">Add your Firebase config to the HTML file to enable the shared leaderboard and guilds.<br>
+        See the orange banner at the top of the page for instructions.</span>
+      </div>`;
+    document.getElementById('lb-refresh-info').textContent = 'Firebase required for leaderboard';
+    return;
+  }
   document.getElementById('lb-content').innerHTML = '<div class="lb-loading">⏳ Loading scores...</div>';
   const entries = await fetchLeaderboardEntries();
   document.getElementById('lb-content').innerHTML = renderLeaderboardTable(entries, lbCurrentTab);
@@ -3129,6 +3205,14 @@ const _patchSave = () => saveGame();
   updateXPDisplay();
   renderSkinGrid();
   if (loaded) showSaveToast('⚔ Progress restored!', '#7a5c1e');
+  // Update Firebase banner status after SDK loads
+  setTimeout(() => {
+    const banner = document.getElementById('firebase-banner');
+    if (banner && window._fbReady) {
+      banner.classList.add('connected');
+      banner.innerHTML = '<span class="fb-icon">✅</span><strong>Firebase connected</strong> — Leaderboard &amp; Guilds are live!';
+    }
+  }, 1500);
 })();
 
 function toggleHTP(btn) {
