@@ -336,41 +336,171 @@
     box-shadow: 0 0 15px rgba(201,168,76,0.15);
   }
 
-  .combatant-card.taking-hit {
-    animation: shake 0.3s ease;
-  }
-
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    75% { transform: translateX(6px); }
-  }
-
+  /* ── COMBATANT BASE ── */
   .combatant-sprite {
     font-size: 4rem;
     line-height: 1;
     margin-bottom: 0.5rem;
     display: block;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-    transition: transform 0.3s;
+    transform-origin: center bottom;
+    will-change: transform;
   }
 
-  .combatant-card.attacking .combatant-sprite {
-    animation: attackAnim 0.4s ease;
+  /* ── HIT REACTION ── */
+  .combatant-card.taking-hit { animation: hitRecoil 0.45s ease forwards; }
+  @keyframes hitRecoil {
+    0%   { transform: translateX(0)    rotate(0deg)  scale(1);    filter: brightness(1); }
+    15%  { transform: translateX(12px) rotate(3deg)  scale(0.93); filter: brightness(2.5) saturate(0); }
+    35%  { transform: translateX(-8px) rotate(-2deg) scale(0.96); filter: brightness(1.8); }
+    60%  { transform: translateX(5px)  rotate(1deg)  scale(0.98); filter: brightness(1.3); }
+    100% { transform: translateX(0)    rotate(0deg)  scale(1);    filter: brightness(1); }
   }
 
-  @keyframes attackAnim {
-    0%, 100% { transform: translateX(0) scale(1); }
-    50% { transform: translateX(20px) scale(1.1); }
+  /* ── LIGHT ATTACK: quick dart + snap ── */
+  .combatant-card.attack-light .combatant-sprite {
+    animation: lightStrike 0.55s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  @keyframes lightStrike {
+    0%   { transform: translateX(0)    scale(1)    rotate(0deg); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+    10%  { transform: translateX(-18px) scale(0.9) rotate(-8deg); }
+    35%  { transform: translateX(70px)  scale(1.25) rotate(12deg); filter: drop-shadow(0 0 18px rgba(255,200,50,0.9)); }
+    55%  { transform: translateX(50px)  scale(1.1) rotate(6deg); }
+    75%  { transform: translateX(8px)   scale(1.02) rotate(1deg); }
+    100% { transform: translateX(0)    scale(1)    rotate(0deg); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
   }
 
-  .enemy-card.attacking .combatant-sprite {
-    animation: enemyAttackAnim 0.4s ease;
+  /* ── HEAVY ATTACK: wind-up + ground-slam ── */
+  .combatant-card.attack-heavy .combatant-sprite {
+    animation: heavySlam 0.9s cubic-bezier(0.22,0.61,0.36,1);
+  }
+  @keyframes heavySlam {
+    0%   { transform: translateX(0)      translateY(0)    scale(1)    rotate(0deg);
+           filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)) brightness(1); opacity:1; }
+    /* Wind-up: pull way back, grow huge */
+    10%  { transform: translateX(-50px)  translateY(-15px) scale(1.5) rotate(-25deg);
+           filter: drop-shadow(0 0 15px rgba(255,80,0,0.6)) brightness(1.3); }
+    18%  { transform: translateX(-65px)  translateY(-30px) scale(1.8) rotate(-35deg);
+           filter: drop-shadow(0 0 35px rgba(255,60,0,0.9)) brightness(1.8); }
+    20%  { transform: translateX(-65px)  translateY(-35px) scale(2.0) rotate(-38deg);
+           filter: drop-shadow(0 0 50px rgba(255,40,0,1))   brightness(2.2); }
+    /* Blur streak — nearly invisible flash across */
+    30%  { transform: translateX(60px)   translateY(-5px)  scale(0.7) rotate(15deg);
+           filter: blur(4px) drop-shadow(0 0 60px rgba(255,20,0,1)) brightness(3);
+           opacity: 0.5; }
+    /* Crash into target */
+    42%  { transform: translateX(110px)  translateY(12px)  scale(2.2) rotate(28deg);
+           filter: drop-shadow(0 0 70px rgba(255,50,0,1))  brightness(2.5); opacity:1; }
+    /* Bounce-back recoil */
+    55%  { transform: translateX(80px)   translateY(0)     scale(1.5) rotate(12deg);
+           filter: drop-shadow(0 0 30px rgba(255,80,30,0.7)) brightness(1.6); }
+    70%  { transform: translateX(25px)   translateY(0)     scale(1.15) rotate(4deg);
+           filter: drop-shadow(0 0 12px rgba(255,100,30,0.4)) brightness(1.2); }
+    85%  { transform: translateX(5px)    translateY(0)     scale(1.03) rotate(1deg);
+           filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)) brightness(1); }
+    100% { transform: translateX(0)      translateY(0)     scale(1)    rotate(0deg);
+           filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)) brightness(1); opacity:1; }
   }
 
-  @keyframes enemyAttackAnim {
-    0%, 100% { transform: translateX(0) scale(1); }
-    50% { transform: translateX(-20px) scale(1.1); }
+  /* Screen shake on heavy hit landing */
+  @keyframes screenShake {
+    0%,100% { transform: translate(0,0); }
+    10%  { transform: translate(-6px, 3px); }
+    20%  { transform: translate(6px, -4px); }
+    30%  { transform: translate(-5px, 5px); }
+    40%  { transform: translate(7px, -3px); }
+    50%  { transform: translate(-4px, 4px); }
+    60%  { transform: translate(5px, -2px); }
+    80%  { transform: translate(-2px, 2px); }
+  }
+  body.screen-shake { animation: screenShake 0.45s ease; }
+
+  /* ── ONE STRIKE: spin + teleport ── */
+  .combatant-card.attack-onestrike .combatant-sprite {
+    animation: oneStrikeAnim 0.75s ease-in-out;
+  }
+  @keyframes oneStrikeAnim {
+    0%   { transform: scale(1)    rotate(0deg)   translateX(0);    opacity: 1;   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+    20%  { transform: scale(1.5)  rotate(180deg) translateX(0);    opacity: 0.7; filter: drop-shadow(0 0 20px rgba(180,0,255,0.8)); }
+    40%  { transform: scale(0.3)  rotate(540deg) translateX(120px);opacity: 0;   }
+    41%  { transform: scale(0.3)  rotate(540deg) translateX(120px);opacity: 0;   }
+    60%  { transform: scale(1.8)  rotate(720deg) translateX(80px); opacity: 1;   filter: drop-shadow(0 0 40px rgba(255,0,0,1)); }
+    80%  { transform: scale(1.1)  rotate(730deg) translateX(5px);  }
+    100% { transform: scale(1)    rotate(720deg) translateX(0);    opacity: 1;   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+  }
+
+  /* ── MONSTER ATTACK: looming pounce ── */
+  .enemy-card.attack-monster .combatant-sprite {
+    animation: monsterPounce 0.7s cubic-bezier(0.22,1,0.36,1);
+  }
+  @keyframes monsterPounce {
+    0%   { transform: translateX(0)     translateY(0)    scale(1)    rotate(0deg);  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+    10%  { transform: translateX(15px)  translateY(-30px) scale(1.4) rotate(5deg);  filter: drop-shadow(0 0 15px rgba(180,0,255,0.5)); }
+    20%  { transform: translateX(15px)  translateY(-38px) scale(1.5) rotate(8deg);  filter: drop-shadow(0 0 25px rgba(180,0,255,0.8)); }
+    50%  { transform: translateX(-90px) translateY(-10px) scale(1.7) rotate(-5deg); filter: drop-shadow(0 0 40px rgba(180,0,255,1)); }
+    70%  { transform: translateX(-60px) translateY(0)    scale(1.2) rotate(-2deg); }
+    85%  { transform: translateX(-8px)  translateY(0)    scale(1.02) rotate(0deg); }
+    100% { transform: translateX(0)     translateY(0)    scale(1)    rotate(0deg);  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+  }
+
+  /* ── MONSTER CRIT: grow + slam ── */
+  .enemy-card.attack-monster-crit .combatant-sprite {
+    animation: monsterCrit 0.75s cubic-bezier(0.22,1,0.36,1);
+  }
+  @keyframes monsterCrit {
+    0%   { transform: scale(1)    rotate(0deg)  translateX(0);    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+    15%  { transform: scale(2.2)  rotate(-10deg) translateX(10px); filter: drop-shadow(0 0 30px rgba(255,0,0,0.8)) brightness(1.5); }
+    25%  { transform: scale(2.4)  rotate(-12deg) translateX(10px); filter: drop-shadow(0 0 50px rgba(255,0,0,1)) brightness(2); }
+    50%  { transform: scale(1.8)  rotate(5deg)  translateX(-110px);filter: drop-shadow(0 0 40px rgba(255,50,0,1)); }
+    70%  { transform: scale(1.2)  rotate(1deg)  translateX(-20px); }
+    85%  { transform: scale(1.02) rotate(0deg)  translateX(-3px); }
+    100% { transform: scale(1)    rotate(0deg)  translateX(0);    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+  }
+
+  /* ── BLOCK STANCE ── */
+  .combatant-card.attack-block .combatant-sprite {
+    animation: blockStance 0.5s ease;
+  }
+  @keyframes blockStance {
+    0%   { transform: scale(1)    translateX(0)   rotate(0deg); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+    20%  { transform: scale(0.85) translateX(-15px) rotate(-5deg); filter: drop-shadow(0 0 20px rgba(52,152,219,0.9)); }
+    50%  { transform: scale(1.1)  translateX(-10px) rotate(-3deg); filter: drop-shadow(0 0 30px rgba(52,152,219,1)); }
+    75%  { transform: scale(1.05) translateX(-5px)  rotate(-1deg); }
+    100% { transform: scale(1)    translateX(0)   rotate(0deg); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+  }
+
+  /* ── IMPACT SHOCKWAVE on enemy card ── */
+  .combatant-card.impact::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    animation: shockwave 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes shockwave {
+    0%   { box-shadow: inset 0 0 0px 0px rgba(255,200,50,0); }
+    20%  { box-shadow: inset 0 0 30px 8px rgba(255,200,50,0.7); }
+    60%  { box-shadow: inset 0 0 15px 4px rgba(255,100,30,0.4); }
+    100% { box-shadow: inset 0 0 0px 0px rgba(255,200,50,0); }
+  }
+  .combatant-card.impact-heavy::after {
+    animation: shockwaveHeavy 0.6s ease-out forwards;
+  }
+  @keyframes shockwaveHeavy {
+    0%   { box-shadow: inset 0 0 0px 0px rgba(255,50,0,0); background: transparent; }
+    15%  { box-shadow: inset 0 0 50px 15px rgba(255,50,0,0.6); background: rgba(255,50,0,0.08); }
+    40%  { box-shadow: inset 0 0 30px 8px rgba(255,100,30,0.4); }
+    100% { box-shadow: inset 0 0 0px 0px rgba(255,50,0,0); background: transparent; }
+  }
+  .combatant-card.impact-os::after {
+    animation: shockwaveOS 0.7s ease-out forwards;
+  }
+  @keyframes shockwaveOS {
+    0%   { box-shadow: inset 0 0 0px 0px rgba(180,0,255,0); background: transparent; }
+    10%  { box-shadow: inset 0 0 80px 20px rgba(180,0,255,0.7); background: rgba(180,0,255,0.12); }
+    50%  { box-shadow: inset 0 0 40px 10px rgba(180,0,255,0.3); }
+    100% { box-shadow: inset 0 0 0px 0px rgba(180,0,255,0); background: transparent; }
   }
 
   .combatant-name {
@@ -1624,8 +1754,8 @@ function scaleEnemy(base, wave) {
 // ============================================================
 // PLAYER STATS
 // ============================================================
-function getPlayerMaxHP()      { return 60 + state.skills.defense * 8 + state.skills.stamina * 5; }
-function getPlayerMaxStamina() { return 60 + state.skills.stamina * 10; }
+function getPlayerMaxHP()      { return 60 + state.skills.defense * 8 + state.skills.stamina * 2; }  // nerfed: was *5
+function getPlayerMaxStamina() { return 60 + state.skills.stamina * 5; }   // nerfed: was *10
 function getPlayerAttack(type) {
   const base = 3 + state.skills.attack * 2;
   if (type === 'light') return base;
@@ -1758,7 +1888,11 @@ function playerAction(type) {
       if (hit) {
         addLog(`💀 <span class="log-crit">ONE STRIKE CONNECTS! ${currentEnemy.name} is OBLITERATED!</span>`, 'crit');
         showDamage('enemy-card', '☠ INSTANT KILL', 'damage-crit');
-        animateCard('enemy-card', 'taking-hit');
+        animateCard('player-card', 'attack-onestrike', 800);
+        setTimeout(() => {
+          animateCard('enemy-card', 'taking-hit', 500);
+          animateCard('enemy-card', 'impact-os', 700);
+        }, 500);
         currentEnemy.hp = 0; updateBars(); setTimeout(playerWins, 900);
       } else {
         addLog(`💨 ONE STRIKE MISSED... energy fades.`, 'miss');
@@ -1783,6 +1917,7 @@ function playerAction(type) {
     f.blocking = true;
     addLog(`🛡️ You raise your shield!`, 'block');
     showDamage('player-card', 'BLOCK!', 'damage-block');
+    animateCard('player-card', 'attack-block', 550);
     updateBars();
     setTimeout(enemyTurn, 700);
   } else {
@@ -1796,8 +1931,19 @@ function playerAction(type) {
       ? `${label} — <span class="log-crit">CRITICAL HIT! ${dmg} damage!</span>`
       : `${label} — ${dmg} damage to ${currentEnemy.name}.`, 'player');
     showDamage('enemy-card', isCrit ? `💥 ${dmg}!` : `-${dmg}`, isCrit ? 'damage-crit' : 'damage-normal');
-    animateCard('player-card', 'attacking');
-    setTimeout(() => animateCard('enemy-card', 'taking-hit'), 200);
+    const atkAnim = type === 'light' ? 'attack-light' : 'attack-heavy';
+    const impactAnim = type === 'light' ? 'impact' : 'impact-heavy';
+    const atkDur = type === 'heavy' ? 950 : 650;
+    animateCard('player-card', atkAnim, atkDur);
+    const hitDelay = type === 'heavy' ? 420 : 280;
+    setTimeout(() => {
+      animateCard('enemy-card', 'taking-hit', 500);
+      animateCard('enemy-card', impactAnim, 650);
+      if (type === 'heavy') {
+        document.body.classList.add('screen-shake');
+        setTimeout(() => document.body.classList.remove('screen-shake'), 500);
+      }
+    }, hitDelay);
     updateBars();
     if (currentEnemy.hp <= 0) { setTimeout(playerWins, 800); return; }
     setTimeout(enemyTurn, 1000);
@@ -1810,13 +1956,14 @@ function enemyTurn() {
   setTurnIndicator('enemy');
   addLog(`--- Enemy Turn ---`, 'turn');
   let dmg = Math.max(1, currentEnemy.atk - getPlayerDefense() * 0.5);
+  let enemyCrit = false;
   if (f.blocking) {
     const blockFactor = 0.15 + (state.skills.defense * 0.03);
     dmg = Math.max(1, Math.round(dmg * (1 - Math.min(blockFactor * 3, 0.75))));
     addLog(`🛡️ <span class="log-block">Blocked! ${currentEnemy.name} deals only ${dmg}.</span>`, 'block');
     showDamage('player-card', `-${dmg}`, 'damage-block');
   } else {
-    const enemyCrit = Math.random() < 0.12;
+    enemyCrit = Math.random() < 0.12;
     if (enemyCrit) dmg = Math.round(dmg * 1.5);
     addLog(enemyCrit
       ? `💜 <span class="log-enemy">${currentEnemy.name} lands a CRUSHING BLOW! ${dmg} damage!</span>`
@@ -1824,8 +1971,13 @@ function enemyTurn() {
     showDamage('player-card', `-${dmg}`, 'damage-enemy');
   }
   f.playerHP = Math.max(0, f.playerHP - dmg);
-  animateCard('enemy-card', 'attacking');
-  setTimeout(() => animateCard('player-card', 'taking-hit'), 200);
+  const monsterAnim = enemyCrit ? 'attack-monster-crit' : 'attack-monster';
+  animateCard('enemy-card', monsterAnim, 750);
+  setTimeout(() => {
+    animateCard('player-card', 'taking-hit', 500);
+    if (enemyCrit) animateCard('player-card', 'impact-heavy', 600);
+    else animateCard('player-card', 'impact', 550);
+  }, 420);
   f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 8 + Math.floor(state.skills.stamina * 1.5));
   updateBars();
   if (f.playerHP <= 0) { setTimeout(playerDies, 700); return; }
@@ -1962,10 +2114,17 @@ function showDamage(cardId, text, cls) {
   setTimeout(() => el.remove(), 1200);
 }
 
-function animateCard(cardId, animClass) {
+function animateCard(cardId, animClass, duration) {
   const el = document.getElementById(cardId);
+  // Remove any existing animation classes first
+  const allAnim = ['attacking','attack-light','attack-heavy','attack-onestrike',
+                   'attack-block','attack-monster','attack-monster-crit',
+                   'taking-hit','impact','impact-heavy','impact-os'];
+  allAnim.forEach(c => el.classList.remove(c));
+  // Force reflow so re-adding the class re-triggers the animation
+  void el.offsetWidth;
   el.classList.add(animClass);
-  setTimeout(() => el.classList.remove(animClass), 500);
+  setTimeout(() => el.classList.remove(animClass), duration || 750);
 }
 
 function updateXPDisplay() {
@@ -2037,7 +2196,14 @@ const SKINS = [
   { emoji:'👑',  name:'Immortal',    price:250 },
 ];
 
-const XP_SKILL_COST = { stamina:15, attack:15, defense:15, crit:20 };
+// Base XP costs — scale up every 5 waves
+const XP_SKILL_COST_BASE = { stamina:15, attack:15, defense:15, crit:20 };
+
+function getSkillXPCost(skill) {
+  const tier = Math.floor((state.wave - 1) / 5); // increases every 5 waves
+  const multiplier = 1 + tier * 0.25;             // +25% per tier (wave 1-5: 1x, 6-10: 1.25x, 11-15: 1.5x ...)
+  return Math.round(XP_SKILL_COST_BASE[skill] * multiplier);
+}
 
 function switchShopTab(tab) {
   document.querySelectorAll('.shop-tab').forEach((t,i) => {
@@ -2100,19 +2266,26 @@ function equipSkin(i) {
 
 function renderXPSkillList() {
   const icons = { stamina:'💚', attack:'⚔️', defense:'🛡️', crit:'💥' };
-  document.getElementById('xp-skill-list').innerHTML = SKILLS.map(skill => {
-    const cost = XP_SKILL_COST[skill];
-    return `<div class="xp-level-row">
-      <span class="xp-level-name">${icons[skill]} ${skill.charAt(0).toUpperCase()+skill.slice(1)} LV ${state.skills[skill]}</span>
-      <span class="xp-level-cost">${cost} XP</span>
-      <button class="btn-buy btn-buy-gold" style="width:auto;padding:0.25rem 0.7rem;margin-left:0.4rem;"
-        onclick="buySkillLevel('${skill}')" ${state.totalXP>=cost?'':'disabled'}>+1 LV</button>
-    </div>`;
-  }).join('');
+  const tier = Math.floor((state.wave - 1) / 5);
+  const tierLabel = tier > 0 ? ` <span style="color:var(--red2);font-size:0.7rem;">(Wave ${Math.min(state.wave,99)} pricing)</span>` : '';
+  document.getElementById('xp-skill-list').innerHTML =
+    `<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-bottom:0.5rem;">
+       Costs rise +25% every 5 waves${tierLabel}
+     </div>` +
+    SKILLS.map(skill => {
+      const cost = getSkillXPCost(skill);
+      const canAfford = state.totalXP >= cost;
+      return `<div class="xp-level-row">
+        <span class="xp-level-name">${icons[skill]} ${skill.charAt(0).toUpperCase()+skill.slice(1)} LV ${state.skills[skill]}</span>
+        <span class="xp-level-cost">${cost} XP</span>
+        <button class="btn-buy btn-buy-gold" style="width:auto;padding:0.25rem 0.7rem;margin-left:0.4rem;"
+          onclick="buySkillLevel('${skill}')" ${canAfford?'':'disabled'}>+1 LV</button>
+      </div>`;
+    }).join('');
 }
 
 function buySkillLevel(skill) {
-  const cost = XP_SKILL_COST[skill];
+  const cost = getSkillXPCost(skill);
   if (state.totalXP < cost) return;
   state.totalXP -= cost;
   state.skills[skill]++;
