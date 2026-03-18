@@ -12,16 +12,17 @@
   window._fbReady = false;
   window._fbDb    = null;
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAI3Pd07qv_w_YRfhhnsbSu-CXh4X-ZT9Q",
-  authDomain: "live-leaderboard-aee95.firebaseapp.com",
-  projectId: "live-leaderboard-aee95",
-  storageBucket: "live-leaderboard-aee95.firebasestorage.app",
-  messagingSenderId: "316888776436",
-  appId: "1:316888776436:web:6be767dfa0a80909cd68a1",
-  measurementId: "G-KRF6XBDTGH"
-};
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAI3Pd07qv_w_YRfhhnsbSu-CXh4X-ZT9Q",
+    authDomain:        "live-leaderboard-aee95.firebaseapp.com",
+    projectId:         "live-leaderboard-aee95",
+    storageBucket:     "live-leaderboard-aee95.firebasestorage.app",
+    messagingSenderId: "316888776436",
+    appId:             "1:316888776436:web:6be767dfa0a80909cd68a1",
+    measurementId:     "G-KRF6XBDTGH",
+    databaseURL:       "https://live-leaderboard-aee95-default-rtdb.firebaseio.com"
+  };
 
   try {
     if (firebaseConfig.databaseURL.includes('YOUR_PROJECT')) {
@@ -902,6 +903,19 @@ const firebaseConfig = {
   .tier-epic     { background: rgba(142,68,173,0.15); border: 1px solid #8e44ad; color: #9b59b6; }
   .tier-legendary{ background: rgba(201,168,76,0.15); border: 1px solid var(--gold); color: var(--gold2); }
   .tier-mythic   { background: rgba(192,57,43,0.2);   border: 1px solid #e74c3c; color: #ff6b6b; }
+  .tier-titan    {
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,100,255,0.1));
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255,215,0,0.6);
+    animation: titanBadgePulse 2s ease-in-out infinite;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+  }
+  @keyframes titanBadgePulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(255,215,0,0.3); }
+    50%       { box-shadow: 0 0 12px rgba(255,215,0,0.7), 0 0 24px rgba(255,100,255,0.3); }
+  }
 
   /* ── MOBILE POLISH ── */
   @media (max-width: 480px) {
@@ -1998,13 +2012,20 @@ const ENEMY_TIERS = [
   { name:'ECLIPSE WRAITH',   sprite:'🌘', title:'A being between worlds — neither alive nor dead', tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:580,  baseAtk:58,  baseDef:32,  xpBase:340, wave:28 },
   { name:'BLOOD LEVIATHAN',  sprite:'🩸', title:'Ancient and vast — it bled the first age dry',   tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:680,  baseAtk:65,  baseDef:36,  xpBase:400, wave:32 },
   { name:'ETERNAL DEVOURER', sprite:'🕳️', title:'The end of all things, given form and appetite',  tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:800,  baseAtk:75,  baseDef:42,  xpBase:500, wave:36 },
+
+  // ── TITAN TIER — Beyond Mythic ──
+  { name:'WORLD BREAKER',    sprite:'🌍', title:'It shattered a world once — yours is next',         tier:'TITAN', tierClass:'tier-titan', baseHP:1100, baseAtk:95,  baseDef:55,  xpBase:700, wave:40 },
+  { name:'ASTRAL EXECUTIONER',sprite:'⚡',title:'Summoned from the space between stars to destroy',   tier:'TITAN', tierClass:'tier-titan', baseHP:1300, baseAtk:110, baseDef:60,  xpBase:850, wave:44 },
+  { name:'UNDYING BEHEMOTH',  sprite:'🦣', title:'Killed ten thousand times — it keeps returning',    tier:'TITAN', tierClass:'tier-titan', baseHP:1600, baseAtk:100, baseDef:80,  xpBase:1000,wave:48 },
+  { name:'VOID ARCHITECT',    sprite:'🌀', title:'The intelligence that designed the abyss itself',   tier:'TITAN', tierClass:'tier-titan', baseHP:1400, baseAtk:130, baseDef:65,  xpBase:1100,wave:52 },
+  { name:'THE FIRST EVIL',    sprite:'👁️', title:'Older than gods — it was there before the light',  tier:'TITAN', tierClass:'tier-titan', baseHP:2000, baseAtk:150, baseDef:90,  xpBase:1500,wave:56 },
 ];
 
 function getEnemyForWave(wave) {
   let eligible = ENEMY_TIERS.filter(e => e.wave <= wave);
   // After wave 35, only Legendary and Mythic enemies appear
   if (wave > 35) {
-    const elites = eligible.filter(e => e.tier === 'LEGENDARY' || e.tier === 'MYTHIC');
+    const elites = eligible.filter(e => e.tier === 'LEGENDARY' || e.tier === 'MYTHIC' || e.tier === 'TITAN');
     if (elites.length) eligible = elites;
   }
   const weights = eligible.map((e, i) => Math.pow(i + 1, 1.5));
@@ -2262,7 +2283,7 @@ function enemyTurn() {
     if (enemyCrit) animateCard('player-card', 'impact-heavy', 600);
     else animateCard('player-card', 'impact', 550);
   }, 420);
-  f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 8 + Math.floor(state.skills.stamina * 1.5));
+  f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 4 + Math.floor(state.skills.stamina * 0.75));
   updateBars();
   if (f.playerHP <= 0) { setTimeout(playerDies, 700); return; }
   f.turn++; f.playerTurn = true; actionLocked = false; f.blocking = false;
@@ -2485,9 +2506,11 @@ const SKINS = [
 const XP_SKILL_COST_BASE = { stamina:15, attack:15, defense:15, crit:20 };
 
 function getSkillXPCost(skill) {
-  const tier = Math.floor((state.wave - 1) / 5); // increases every 5 waves
-  const multiplier = 1 + tier * 0.5;              // +50% per tier (wave 1-5: 1x, 6-10: 1.5x, 11-15: 2x ...)
-  return Math.round(XP_SKILL_COST_BASE[skill] * multiplier);
+  const tier       = Math.floor((state.wave - 1) / 5);  // +50% every 5 waves
+  const waveMult   = 1 + tier * 0.5;
+  const skillLv    = state.skills[skill];                // current level of this skill
+  const lvMult     = 1 + (skillLv - 1) * 0.4;           // +40% per level already purchased
+  return Math.round(XP_SKILL_COST_BASE[skill] * waveMult * lvMult);
 }
 
 function switchShopTab(tab) {
