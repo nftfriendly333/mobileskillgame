@@ -1356,6 +1356,187 @@
     font-size: 0.85rem;
   }
 
+
+  /* ══ GUILD SYSTEM ══ */
+  .guild-section { display: flex; flex-direction: column; gap: 0.8rem; }
+
+  .guild-locked-msg {
+    text-align: center;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.2rem;
+  }
+  .guild-locked-msg .lock-icon { font-size: 2rem; display: block; margin-bottom: 0.4rem; }
+  .guild-locked-msg p { font-size: 0.85rem; color: var(--text3); font-style: italic; line-height: 1.6; }
+  .guild-locked-msg strong { color: var(--gold); }
+
+  .guild-progress-bar-bg {
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.6rem 0 0.3rem;
+  }
+  .guild-progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold3), var(--gold));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .guild-progress-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    color: var(--text3);
+    text-align: center;
+    letter-spacing: 0.08em;
+  }
+
+  .guild-panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.9rem;
+  }
+
+  .guild-panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    color: var(--gold3);
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .guild-name-display {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 0.2rem;
+    text-shadow: 0 0 15px rgba(201,168,76,0.35);
+  }
+
+  .guild-code-display {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    color: var(--text3);
+    margin-bottom: 0.7rem;
+  }
+
+  .guild-code-badge {
+    display: inline-block;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid var(--gold3);
+    border-radius: 3px;
+    padding: 0.15rem 0.6rem;
+    color: var(--gold);
+    font-family: monospace;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .guild-code-badge:hover { background: rgba(201,168,76,0.2); }
+
+  .guild-role-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    margin-bottom: 0.6rem;
+  }
+  .role-leader  { background: rgba(201,168,76,0.15); border: 1px solid var(--gold3); color: var(--gold); }
+  .role-member  { background: rgba(41,128,185,0.12);  border: 1px solid #2980b9; color: #60a5fa; }
+
+  .guild-members-list { margin-top: 0.5rem; }
+
+  .guild-member-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+  }
+  .guild-member-row:last-child { border-bottom: none; }
+  .guild-member-skin { font-size: 1rem; }
+  .guild-member-name { flex: 1; color: var(--text); font-family: 'Cinzel', serif; font-size: 0.78rem; }
+  .guild-member-name.is-you { color: var(--gold); }
+  .guild-member-wave { color: var(--green2); font-family: 'Cinzel', serif; font-size: 0.75rem; }
+  .guild-member-leader-crown { font-size: 0.8rem; }
+
+  .guild-avg-wave {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--text3);
+    padding: 0.6rem;
+    border-top: 1px solid var(--border);
+    margin-top: 0.5rem;
+  }
+  .guild-avg-wave span { color: var(--gold); font-size: 1rem; }
+
+  .guild-input-row { display: flex; gap: 0.5rem; margin-top: 0.4rem; }
+  .guild-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--white);
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 2px;
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .guild-input:focus { border-color: var(--gold3); }
+  .guild-input::placeholder { text-transform: none; letter-spacing: normal; color: var(--text3); }
+
+  .btn-guild {
+    padding: 0.4rem 0.9rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .btn-guild-gold { background: linear-gradient(135deg,#1e1608,#3a2e10); border-color: var(--gold3); color: var(--gold); }
+  .btn-guild-gold:hover { background: linear-gradient(135deg,#3a2e10,#6a4e10); border-color: var(--gold); }
+  .btn-guild-red  { background: linear-gradient(135deg,#200808,#5a1010); border-color: var(--red3); color: var(--red2); }
+  .btn-guild-red:hover  { background: linear-gradient(135deg,#5a1010,#a01818); border-color: var(--red); }
+  .btn-guild-blue { background: linear-gradient(135deg,#0a1020,#102040); border-color: #2980b9; color: #60a5fa; }
+  .btn-guild-blue:hover { background: linear-gradient(135deg,#102040,#1a4080); border-color: #3498db; }
+  .btn-guild:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .guild-error { font-size: 0.78rem; color: var(--red2); font-style: italic; margin-top: 0.3rem; min-height: 1rem; }
+  .guild-success { font-size: 0.78rem; color: var(--green2); font-style: italic; margin-top: 0.3rem; }
+
+  /* Leaderboard guild tab */
+  .lb-guild-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .lb-guild-row:last-child { border-bottom: none; }
+  .lb-guild-name { flex: 1; font-family: 'Cinzel', serif; font-size: 0.82rem; color: var(--white); }
+  .lb-guild-name.is-my-guild { color: var(--gold); }
+  .lb-guild-name.is-my-guild::after { content: ' (Yours)'; font-size: 0.65rem; color: var(--gold3); }
+  .lb-guild-members { font-size: 0.75rem; color: var(--text3); }
+  .lb-guild-avg { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--green2); text-align: right; }
+
 </style>
 </head>
 <body>
@@ -1543,6 +1724,7 @@
       <button class="shop-tab active" onclick="switchShopTab('name')">🏷 Name</button>
       <button class="shop-tab" onclick="switchShopTab('skins')">🎭 Skins</button>
       <button class="shop-tab" onclick="switchShopTab('skills')">📈 Skills</button>
+      <button class="shop-tab" onclick="switchShopTab('guild')">⚔ Guild</button>
       <button class="shop-tab" onclick="switchShopTab('special')">☠ Special</button>
     </div>
 
@@ -1569,6 +1751,13 @@
     <div class="shop-section" id="tab-skills">
       <div style="font-size:0.85rem; color:var(--text3); font-style:italic; margin-bottom:0.7rem;">Spend XP to instantly boost a skill by 1 level.</div>
       <div id="xp-skill-list"></div>
+    </div>
+
+    <!-- GUILD TAB -->
+    <div class="shop-section" id="tab-guild">
+      <div id="guild-ui-container">
+        <div class="lb-loading">Loading guild data...</div>
+      </div>
     </div>
 
     <!-- SPECIAL TAB -->
@@ -1921,6 +2110,17 @@ function playerAction(type) {
     setTimeout(enemyTurn, 700);
   } else {
     const rawAtk = getPlayerAttack(type);
+    // Heavy attack only connects 75% of the time
+    const heavyMiss = type === 'heavy' && Math.random() > 0.75;
+    if (heavyMiss) {
+      addLog(`💀 Heavy — <span class="log-miss">MISSED! The blow swings wide!</span>`, 'player');
+      showDamage('enemy-card', 'MISS!', 'damage-miss');
+      animateCard('player-card', 'attack-heavy', 950);
+      updateBars();
+      if (currentEnemy.hp <= 0) { setTimeout(playerWins, 800); return; }
+      setTimeout(enemyTurn, 1000);
+      return;
+    }
     const isCrit = Math.random() < getCritChance();
     let dmg = Math.max(1, Math.round(rawAtk - currentEnemy.def * 0.4));
     if (isCrit) dmg = Math.round(dmg * getCritMultiplier());
@@ -1992,10 +2192,11 @@ function playerWins() {
   const f = state.fight;
   f.active = false; f.won = true; actionLocked = false;
   state.enemiesDefeated++;
-  const xpGain = currentEnemy.xpReward;
+  const xpPenalty = state.wave > 25;
+  const xpGain = xpPenalty ? Math.round(currentEnemy.xpReward * 0.9) : currentEnemy.xpReward;
   state.totalXP += xpGain;
   addLog(`☠ <span class="log-death">${currentEnemy.name} slain!</span>`, 'death');
-  addLog(`<span class="log-win">🏆 VICTORY! +${xpGain} XP!</span>`, 'win');
+  addLog(`<span class="log-win">🏆 VICTORY! +${xpGain} XP!${xpPenalty ? ' <span style="color:var(--text3);font-size:0.85em;">(-10% late game)</span>' : ''}</span>`, 'win');
   setStatus('won', '✓ VICTORY');
   setActionButtons(false);
   setTurnIndicator('none');
@@ -2200,19 +2401,20 @@ const XP_SKILL_COST_BASE = { stamina:15, attack:15, defense:15, crit:20 };
 
 function getSkillXPCost(skill) {
   const tier = Math.floor((state.wave - 1) / 5); // increases every 5 waves
-  const multiplier = 1 + tier * 0.25;             // +25% per tier (wave 1-5: 1x, 6-10: 1.25x, 11-15: 1.5x ...)
+  const multiplier = 1 + tier * 0.5;              // +50% per tier (wave 1-5: 1x, 6-10: 1.5x, 11-15: 2x ...)
   return Math.round(XP_SKILL_COST_BASE[skill] * multiplier);
 }
 
 function switchShopTab(tab) {
   document.querySelectorAll('.shop-tab').forEach((t,i) => {
-    t.classList.toggle('active', ['name','skins','skills','special'][i] === tab);
+    t.classList.toggle('active', ['name','skins','skills','guild','special'][i] === tab);
   });
   document.querySelectorAll('.shop-section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'skins') renderSkinGrid();
-  if (tab === 'skills') renderXPSkillList();
+  if (tab === 'skins')   renderSkinGrid();
+  if (tab === 'skills')  renderXPSkillList();
   if (tab === 'special') renderOneStrikeShop();
+  if (tab === 'guild')   renderGuildUI();
 }
 
 function setHeroName() {
@@ -2269,7 +2471,7 @@ function renderXPSkillList() {
   const tierLabel = tier > 0 ? ` <span style="color:var(--red2);font-size:0.7rem;">(Wave ${Math.min(state.wave,99)} pricing)</span>` : '';
   document.getElementById('xp-skill-list').innerHTML =
     `<div style="font-size:0.78rem;color:var(--text3);font-style:italic;margin-bottom:0.5rem;">
-       Costs rise +25% every 5 waves${tierLabel}
+       Costs rise +50% every 5 waves${tierLabel}
      </div>` +
     SKILLS.map(skill => {
       const cost = getSkillXPCost(skill);
@@ -2331,6 +2533,308 @@ function updateOneStrikeButton() {
 
 
 
+
+// ============================================================
+// GUILD SYSTEM
+// ============================================================
+const GUILD_PREFIX      = 'guild:';
+const GUILD_UNLOCK_WAVE = 30;   // must have beaten wave 30 to create
+const GUILD_CREATE_COST = 1000; // XP cost to create a guild
+const GUILD_JOIN_WAVE   = 10;   // must have beaten wave 10 to join
+const GUILD_MAX_MEMBERS = 20;
+
+const guildState = {
+  myGuildCode:  localStorage.getItem('ironArena_guildCode')  || null,
+  myGuildName:  localStorage.getItem('ironArena_guildName')  || null,
+  isLeader:     localStorage.getItem('ironArena_guildLeader') === '1',
+};
+
+function generateGuildCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+function getHighestWaveBeaten() {
+  return Math.max(0, state.wave - 1);
+}
+
+// ── Persist guild membership locally ──
+function saveGuildLocally() {
+  if (guildState.myGuildCode) {
+    localStorage.setItem('ironArena_guildCode',   guildState.myGuildCode);
+    localStorage.setItem('ironArena_guildName',   guildState.myGuildName || '');
+    localStorage.setItem('ironArena_guildLeader', guildState.isLeader ? '1' : '0');
+  } else {
+    localStorage.removeItem('ironArena_guildCode');
+    localStorage.removeItem('ironArena_guildName');
+    localStorage.removeItem('ironArena_guildLeader');
+  }
+}
+
+// ── Fetch a single guild record from shared storage ──
+async function fetchGuild(code) {
+  try {
+    const r = await window.storage.get(GUILD_PREFIX + code, true);
+    return r ? JSON.parse(r.value) : null;
+  } catch { return null; }
+}
+
+// ── Save a guild record to shared storage ──
+async function saveGuild(code, data) {
+  await window.storage.set(GUILD_PREFIX + code, JSON.stringify(data), true);
+}
+
+// ── Fetch all guilds ──
+async function fetchAllGuilds() {
+  try {
+    const result = await window.storage.list(GUILD_PREFIX, true);
+    const keys = result?.keys || [];
+    const guilds = await Promise.all(keys.map(async k => {
+      try {
+        const r = await window.storage.get(k, true);
+        return r ? JSON.parse(r.value) : null;
+      } catch { return null; }
+    }));
+    return guilds.filter(Boolean);
+  } catch { return []; }
+}
+
+// ── Create a guild (leader only, wave 30+) ──
+async function createGuild() {
+  const nameEl = document.getElementById('guild-create-name');
+  const errEl  = document.getElementById('guild-create-error');
+  const name = nameEl?.value.trim();
+  if (!name) { if(errEl) errEl.textContent = 'Enter a guild name.'; return; }
+  if (name.length < 3 || name.length > 24) { if(errEl) errEl.textContent = 'Name must be 3–24 characters.'; return; }
+  if (getHighestWaveBeaten() < GUILD_UNLOCK_WAVE) {
+    if(errEl) errEl.textContent = `You must reach wave ${GUILD_UNLOCK_WAVE} first.`; return;
+  }
+  if (state.totalXP < GUILD_CREATE_COST) {
+    if(errEl) errEl.textContent = `Need ${GUILD_CREATE_COST} XP to found a guild (have ${state.totalXP}).`; return;
+  }
+
+  state.totalXP -= GUILD_CREATE_COST;
+  updateXPDisplay();
+  const code = generateGuildCode();
+  const myKey = getLbPlayerKey().replace('lb:','');
+  const guild = {
+    name,
+    code,
+    leaderKey:   myKey,
+    leaderName:  shopState.heroName || 'Anonymous',
+    members:     [myKey],
+    created:     Date.now(),
+  };
+
+  await saveGuild(code, guild);
+  guildState.myGuildCode = code;
+  guildState.myGuildName = name;
+  guildState.isLeader    = true;
+  saveGuildLocally();
+  await submitLeaderboardScore();
+  showSaveToast(`⚔ Guild "${name}" created! Code: ${code}`, '#c9a84c');
+  renderGuildUI();
+}
+
+// ── Join a guild (wave 10+) ──
+async function joinGuild() {
+  const codeEl = document.getElementById('guild-join-code');
+  const errEl  = document.getElementById('guild-join-error');
+  const code   = codeEl?.value.trim().toUpperCase();
+  if (!code || code.length !== 6) { if(errEl) errEl.textContent = 'Enter a valid 6-character code.'; return; }
+  if (getHighestWaveBeaten() < GUILD_JOIN_WAVE) {
+    if(errEl) errEl.textContent = `You must reach wave ${GUILD_JOIN_WAVE} first.`; return;
+  }
+  if (guildState.myGuildCode) { if(errEl) errEl.textContent = 'Leave your current guild first.'; return; }
+
+  const guild = await fetchGuild(code);
+  if (!guild) { if(errEl) errEl.textContent = 'Guild not found. Check the code.'; return; }
+  if (guild.members.length >= GUILD_MAX_MEMBERS) { if(errEl) errEl.textContent = 'Guild is full (20 members max).'; return; }
+
+  const myKey = getLbPlayerKey().replace('lb:','');
+  if (!guild.members.includes(myKey)) guild.members.push(myKey);
+  await saveGuild(code, guild);
+
+  guildState.myGuildCode = code;
+  guildState.myGuildName = guild.name;
+  guildState.isLeader    = false;
+  saveGuildLocally();
+  await submitLeaderboardScore();
+  showSaveToast(`⚔ Joined "${guild.name}"!`, '#2ecc71');
+  renderGuildUI();
+}
+
+// ── Leave a guild ──
+async function leaveGuild() {
+  if (!guildState.myGuildCode) return;
+  if (!confirm('Leave your guild? You will lose your leader status if applicable.')) return;
+
+  const guild = await fetchGuild(guildState.myGuildCode);
+  if (guild) {
+    const myKey = getLbPlayerKey().replace('lb:','');
+    guild.members = guild.members.filter(k => k !== myKey);
+    // If leader leaves and members remain, transfer to first member
+    if (guildState.isLeader && guild.members.length > 0) {
+      guild.leaderKey = guild.members[0];
+      guild.leaderName = 'New Leader';
+    }
+    if (guild.members.length === 0) {
+      // Disband
+      try { await window.storage.delete(GUILD_PREFIX + guildState.myGuildCode, true); } catch{}
+    } else {
+      await saveGuild(guildState.myGuildCode, guild);
+    }
+  }
+
+  guildState.myGuildCode = null;
+  guildState.myGuildName = null;
+  guildState.isLeader    = false;
+  saveGuildLocally();
+  await submitLeaderboardScore();
+  renderGuildUI();
+}
+
+// ── Render guild UI in shop tab ──
+async function renderGuildUI() {
+  const container = document.getElementById('guild-ui-container');
+  if (!container) return;
+  container.innerHTML = '<div class="lb-loading">⏳ Loading guild data...</div>';
+
+  const waveBeaten = getHighestWaveBeaten();
+  const myKey = getLbPlayerKey().replace('lb:','');
+
+  // ── Not in a guild ──
+  if (!guildState.myGuildCode) {
+    const canCreate = waveBeaten >= GUILD_UNLOCK_WAVE;
+    const canJoin   = waveBeaten >= GUILD_JOIN_WAVE;
+    const waveProgress = Math.min(waveBeaten / GUILD_UNLOCK_WAVE * 100, 100);
+
+    container.innerHTML = `
+      <div class="guild-section">
+        ${!canCreate ? `
+        <div class="guild-locked-msg">
+          <span class="lock-icon">🏰</span>
+          <p>Reach <strong>Wave ${GUILD_UNLOCK_WAVE}</strong> to found a Guild and become a Guild Leader.</p>
+          <div class="guild-progress-bar-bg">
+            <div class="guild-progress-bar-fill" style="width:${waveProgress}%"></div>
+          </div>
+          <div class="guild-progress-label">Wave ${waveBeaten} / ${GUILD_UNLOCK_WAVE} to unlock</div>
+        </div>` : ''}
+
+        ${canCreate ? `
+        <div class="guild-panel">
+          <div class="guild-panel-title">👑 Found a Guild — 1,000 XP</div>
+          <div class="guild-input-row">
+            <input class="guild-input" id="guild-create-name" maxlength="24" placeholder="Enter guild name..." />
+            <button class="btn-guild btn-guild-gold" onclick="createGuild()">CREATE</button>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text3);font-style:italic;margin-top:0.3rem;">
+            Costs 1,000 XP · Wave ${GUILD_UNLOCK_WAVE}+ required · You have <span style="color:var(--gold)">${state.totalXP}</span> XP
+          </div>
+          <div class="guild-error" id="guild-create-error"></div>
+        </div>` : ''}
+
+        <div class="guild-panel">
+          <div class="guild-panel-title">⚔ Join a Guild ${!canJoin ? `(Wave ${GUILD_JOIN_WAVE}+ Required)` : ''}</div>
+          <div class="guild-input-row">
+            <input class="guild-input" id="guild-join-code" maxlength="6" placeholder="6-char code..."
+              style="letter-spacing:0.2em;" ${!canJoin ? 'disabled' : ''} />
+            <button class="btn-guild btn-guild-blue" onclick="joinGuild()" ${!canJoin ? 'disabled' : ''}>JOIN</button>
+          </div>
+          <div class="guild-error" id="guild-join-error"></div>
+          ${!canJoin ? `<div style="font-size:0.75rem;color:var(--text3);font-style:italic;margin-top:0.3rem;">Reach Wave ${GUILD_JOIN_WAVE} to join a guild (Wave ${waveBeaten} now)</div>` : ''}
+        </div>
+      </div>`;
+    return;
+  }
+
+  // ── In a guild — fetch full data ──
+  const guild = await fetchGuild(guildState.myGuildCode);
+  if (!guild) {
+    // Guild was disbanded
+    guildState.myGuildCode = null; guildState.myGuildName = null; guildState.isLeader = false;
+    saveGuildLocally();
+    renderGuildUI(); return;
+  }
+
+  // Fetch all member scores from leaderboard
+  const allEntries = await fetchLeaderboardEntries();
+  const memberEntries = allEntries.filter(e => e.guildCode === guildState.myGuildCode);
+  const avgWave = memberEntries.length
+    ? (memberEntries.reduce((s,e) => s + (e.wave||0), 0) / memberEntries.length).toFixed(1)
+    : '—';
+
+  const memberRows = guild.members.slice(0, 20).map(mKey => {
+    const entry = allEntries.find(e => e._key === 'lb:' + mKey);
+    const isMe  = mKey === myKey;
+    const isLeader = mKey === guild.leaderKey;
+    return `<div class="guild-member-row">
+      <span class="guild-member-skin">${entry?.skin || '🧙'}</span>
+      ${isLeader ? '<span class="guild-member-leader-crown">👑</span>' : ''}
+      <span class="guild-member-name ${isMe?'is-you':''}">${entry?.name || 'Unknown Warrior'}</span>
+      <span class="guild-member-wave">Wave ${entry?.wave || '?'}</span>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="guild-section">
+      <div class="guild-panel">
+        <div class="guild-name-display">${guild.name}</div>
+        <div class="guild-code-display">
+          Code: <span class="guild-code-badge" onclick="navigator.clipboard?.writeText('${guild.code}');showSaveToast('Code copied!','#c9a84c')" title="Click to copy">${guild.code}</span>
+        </div>
+        <div style="text-align:center;margin-bottom:0.6rem;">
+          <span class="guild-role-badge ${guildState.isLeader?'role-leader':'role-member'}">
+            ${guildState.isLeader ? '👑 Guild Leader' : '⚔ Member'}
+          </span>
+        </div>
+        <div class="guild-panel-title">Members (${guild.members.length}/${GUILD_MAX_MEMBERS})</div>
+        <div class="guild-members-list">${memberRows || '<div style="color:var(--text3);font-style:italic;font-size:0.8rem;">No score data yet — save your game!</div>'}</div>
+        <div class="guild-avg-wave">Avg Wave Completion: <span>${avgWave}</span></div>
+        <div style="margin-top:0.7rem;text-align:right;">
+          <button class="btn-guild btn-guild-red" onclick="leaveGuild()">Leave Guild</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Guild leaderboard tab ──
+async function renderGuildLeaderboard() {
+  const guilds = await fetchAllGuilds();
+  const allEntries = await fetchLeaderboardEntries();
+
+  if (!guilds.length) return '<div class="lb-empty">No guilds have been founded yet.<br><span style="font-size:0.78rem;color:var(--text3);">Reach Wave 30 to found the first guild!</span></div>';
+
+  // Compute avg wave per guild
+  const guildStats = guilds.map(g => {
+    const members = allEntries.filter(e => e.guildCode === g.code);
+    const avgWave = members.length
+      ? members.reduce((s,e) => s + (e.wave||0), 0) / members.length
+      : 0;
+    return { ...g, memberCount: members.length, avgWave };
+  }).sort((a,b) => b.avgWave - a.avgWave);
+
+  const rankIcon = i => i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+
+  const rows = guildStats.slice(0,20).map((g,i) => {
+    const isMyGuild = g.code === guildState.myGuildCode;
+    return `<tr class="${isMyGuild?'lb-you-row':''}">
+      <td class="lb-rank ${i<3?'lb-rank-'+(i+1):''}">${rankIcon(i)}</td>
+      <td class="lb-guild-name ${isMyGuild?'is-my-guild':''}">${g.name}</td>
+      <td class="lb-guild-members">${g.memberCount} member${g.memberCount!==1?'s':''}</td>
+      <td class="lb-guild-avg">Avg Wave ${g.avgWave.toFixed(1)}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table class="lb-table">
+    <thead><tr>
+      <th>#</th><th>Guild</th><th>Members</th><th style="text-align:right">Avg Wave</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+
 // ============================================================
 // LEADERBOARD  (shared storage — visible to all players)
 // ============================================================
@@ -2362,10 +2866,11 @@ async function submitLeaderboardScore() {
     name,
     skin,
     enemiesDefeated: state.enemiesDefeated,
-    wave:            Math.max(1, state.wave - 1),   // highest wave beaten
+    wave:            Math.max(1, state.wave - 1),
     totalXP:         state.totalXP,
     totalSkillLv,
-    ts: Date.now(),
+    guildCode:       guildState.myGuildCode || null,
+    ts:              Date.now(),
   };
 
   try {
@@ -2447,6 +2952,8 @@ async function openLeaderboard() {
     t.classList.toggle('active', i === 0);
   });
   await refreshLeaderboard();
+  // Pre-load guild data in background
+  fetchAllGuilds().catch(()=>{});
 }
 
 async function refreshLeaderboard() {
@@ -2459,11 +2966,16 @@ async function refreshLeaderboard() {
 
 async function switchLbTab(tab) {
   lbCurrentTab = tab;
-  const tabs = ['wave','xp'];
+  const tabs = ['wave','xp','guilds'];
   document.querySelectorAll('.lb-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
   document.getElementById('lb-content').innerHTML = '<div class="lb-loading">⏳ Loading...</div>';
-  const entries = await fetchLeaderboardEntries();
-  document.getElementById('lb-content').innerHTML = renderLeaderboardTable(entries, tab);
+  if (tab === 'guilds') {
+    const html = await renderGuildLeaderboard();
+    document.getElementById('lb-content').innerHTML = html;
+  } else {
+    const entries = await fetchLeaderboardEntries();
+    document.getElementById('lb-content').innerHTML = renderLeaderboardTable(entries, tab);
+  }
 }
 
 function closeLeaderboard() {
@@ -2490,6 +3002,11 @@ function saveGame() {
       equippedSkin:      shopState.equippedSkin,
       ownedSkins:        shopState.ownedSkins,
       oneStrikeUnlocked: shopState.oneStrikeUnlocked,
+    },
+    guild: {
+      code:     guildState.myGuildCode,
+      name:     guildState.myGuildName,
+      isLeader: guildState.isLeader,
     }
   };
   try {
@@ -2533,6 +3050,14 @@ function loadGame() {
     // Apply equipped skin
     if (shopState.equippedSkin > 0) {
       document.getElementById('player-sprite').textContent = SKINS[shopState.equippedSkin].emoji;
+    }
+
+    // Restore guild membership
+    if (data.guild?.code) {
+      guildState.myGuildCode = data.guild.code;
+      guildState.myGuildName = data.guild.name;
+      guildState.isLeader    = data.guild.isLeader || false;
+      saveGuildLocally();
     }
 
     // Update wave / enemy count display
@@ -2609,6 +3134,7 @@ function toggleHTP(btn) {
   <div class="lb-tabs">
     <button class="lb-tab active" onclick="switchLbTab('wave')">🌊 Highest Wave</button>
     <button class="lb-tab" onclick="switchLbTab('xp')">⚡ Total XP</button>
+    <button class="lb-tab" onclick="switchLbTab('guilds')">⚔ Guilds</button>
   </div>
 
   <div id="lb-content">
