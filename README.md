@@ -1917,11 +1917,25 @@ const ENEMY_TIERS = [
   { name:'ARCANE LICH',  sprite:'💀', title:'An immortal sorcerer of death magic',     tier:'EPIC',      tierClass:'tier-epic',      baseHP:200, baseAtk:22, baseDef:14, xpBase:90,  wave:12 },
   { name:'DEMON LORD',   sprite:'😈', title:'A prince of the infernal planes',         tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:280, baseAtk:28, baseDef:18, xpBase:130, wave:15 },
   { name:'CHAOS TITAN',  sprite:'🔥', title:'An entity of pure destructive force',     tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:360, baseAtk:36, baseDef:22, xpBase:180, wave:18 },
-  { name:'VOID EMPEROR', sprite:'🌑', title:'The sovereign of nothingness',            tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:500, baseAtk:50, baseDef:30, xpBase:300, wave:22 },
+  { name:'VOID EMPEROR',    sprite:'🌑', title:'The sovereign of nothingness',                   tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:500,  baseAtk:50,  baseDef:30,  xpBase:300, wave:22 },
+
+  // ── 7 NEW LEGENDARY & MYTHIC ENEMIES ──
+  { name:'SOUL REAPER',      sprite:'💀', title:'Death given hunger — it feeds on the fallen',     tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:420,  baseAtk:42,  baseDef:24,  xpBase:220, wave:20 },
+  { name:'ABYSSAL KRAKEN',   sprite:'🐙', title:'An ocean of darkness wrapped in tentacles',       tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:480,  baseAtk:38,  baseDef:28,  xpBase:240, wave:22 },
+  { name:'INFERNO PHOENIX',  sprite:'🔥', title:'Reborn from ash — it cannot truly die',           tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:390,  baseAtk:48,  baseDef:20,  xpBase:230, wave:24 },
+  { name:'STORM COLOSSUS',   sprite:'⛈️', title:'A titan born of lightning and ruin',              tier:'LEGENDARY', tierClass:'tier-legendary', baseHP:520,  baseAtk:44,  baseDef:26,  xpBase:250, wave:26 },
+  { name:'ECLIPSE WRAITH',   sprite:'🌘', title:'A being between worlds — neither alive nor dead', tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:580,  baseAtk:58,  baseDef:32,  xpBase:340, wave:28 },
+  { name:'BLOOD LEVIATHAN',  sprite:'🩸', title:'Ancient and vast — it bled the first age dry',   tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:680,  baseAtk:65,  baseDef:36,  xpBase:400, wave:32 },
+  { name:'ETERNAL DEVOURER', sprite:'🕳️', title:'The end of all things, given form and appetite',  tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:800,  baseAtk:75,  baseDef:42,  xpBase:500, wave:36 },
 ];
 
 function getEnemyForWave(wave) {
-  const eligible = ENEMY_TIERS.filter(e => e.wave <= wave);
+  let eligible = ENEMY_TIERS.filter(e => e.wave <= wave);
+  // After wave 35, only Legendary and Mythic enemies appear
+  if (wave > 35) {
+    const elites = eligible.filter(e => e.tier === 'LEGENDARY' || e.tier === 'MYTHIC');
+    if (elites.length) eligible = elites;
+  }
   const weights = eligible.map((e, i) => Math.pow(i + 1, 1.5));
   const total = weights.reduce((a,b)=>a+b, 0);
   let r = Math.random() * total;
