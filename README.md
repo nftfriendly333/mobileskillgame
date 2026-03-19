@@ -2014,11 +2014,11 @@ const ENEMY_TIERS = [
   { name:'ETERNAL DEVOURER', sprite:'🕳️', title:'The end of all things, given form and appetite',  tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:800,  baseAtk:75,  baseDef:42,  xpBase:500, wave:36 },
 
   // ── TITAN TIER — Beyond Mythic ──
-  { name:'WORLD BREAKER',    sprite:'🌍', title:'It shattered a world once — yours is next',         tier:'TITAN', tierClass:'tier-titan', baseHP:1100, baseAtk:95,  baseDef:55,  xpBase:700, wave:40 },
-  { name:'ASTRAL EXECUTIONER',sprite:'⚡',title:'Summoned from the space between stars to destroy',   tier:'TITAN', tierClass:'tier-titan', baseHP:1300, baseAtk:110, baseDef:60,  xpBase:850, wave:44 },
-  { name:'UNDYING BEHEMOTH',  sprite:'🦣', title:'Killed ten thousand times — it keeps returning',    tier:'TITAN', tierClass:'tier-titan', baseHP:1600, baseAtk:100, baseDef:80,  xpBase:1000,wave:48 },
-  { name:'VOID ARCHITECT',    sprite:'🌀', title:'The intelligence that designed the abyss itself',   tier:'TITAN', tierClass:'tier-titan', baseHP:1400, baseAtk:130, baseDef:65,  xpBase:1100,wave:52 },
-  { name:'THE FIRST EVIL',    sprite:'👁️', title:'Older than gods — it was there before the light',  tier:'TITAN', tierClass:'tier-titan', baseHP:2000, baseAtk:150, baseDef:90,  xpBase:1500,wave:56 },
+  { name:'WORLD BREAKER',    sprite:'🌍', title:'It shattered a world once — yours is next',         tier:'TITAN', tierClass:'tier-titan', baseHP:900,  baseAtk:70,  baseDef:55,  xpBase:700, wave:40 },
+  { name:'ASTRAL EXECUTIONER',sprite:'⚡',title:'Summoned from the space between stars to destroy',   tier:'TITAN', tierClass:'tier-titan', baseHP:1000, baseAtk:78,  baseDef:60,  xpBase:850, wave:44 },
+  { name:'UNDYING BEHEMOTH',  sprite:'🦣', title:'Killed ten thousand times — it keeps returning',    tier:'TITAN', tierClass:'tier-titan', baseHP:1200, baseAtk:75,  baseDef:80,  xpBase:1000,wave:48 },
+  { name:'VOID ARCHITECT',    sprite:'🌀', title:'The intelligence that designed the abyss itself',   tier:'TITAN', tierClass:'tier-titan', baseHP:1100, baseAtk:90,  baseDef:65,  xpBase:1100,wave:52 },
+  { name:'THE FIRST EVIL',    sprite:'👁️', title:'Older than gods — it was there before the light',  tier:'TITAN', tierClass:'tier-titan', baseHP:1500, baseAtk:100, baseDef:90,  xpBase:1500,wave:56 },
 ];
 
 function getEnemyForWave(wave) {
@@ -2509,7 +2509,7 @@ function getSkillXPCost(skill) {
   const tier       = Math.floor((state.wave - 1) / 5);  // +50% every 5 waves
   const waveMult   = 1 + tier * 0.5;
   const skillLv    = state.skills[skill];                // current level of this skill
-  const lvMult     = 1 + (skillLv - 1) * 0.4;           // +40% per level already purchased
+  const lvMult     = 1 + (skillLv - 1) * 0.25;          // +25% per level already purchased
   return Math.round(XP_SKILL_COST_BASE[skill] * waveMult * lvMult);
 }
 
