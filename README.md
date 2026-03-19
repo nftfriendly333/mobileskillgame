@@ -2014,11 +2014,11 @@ const ENEMY_TIERS = [
   { name:'ETERNAL DEVOURER', sprite:'🕳️', title:'The end of all things, given form and appetite',  tier:'MYTHIC',    tierClass:'tier-mythic',    baseHP:800,  baseAtk:75,  baseDef:42,  xpBase:500, wave:36 },
 
   // ── TITAN TIER — Beyond Mythic ──
-  { name:'WORLD BREAKER',    sprite:'🌍', title:'It shattered a world once — yours is next',         tier:'TITAN', tierClass:'tier-titan', baseHP:900,  baseAtk:70,  baseDef:55,  xpBase:700, wave:40 },
-  { name:'ASTRAL EXECUTIONER',sprite:'⚡',title:'Summoned from the space between stars to destroy',   tier:'TITAN', tierClass:'tier-titan', baseHP:1000, baseAtk:78,  baseDef:60,  xpBase:850, wave:44 },
-  { name:'UNDYING BEHEMOTH',  sprite:'🦣', title:'Killed ten thousand times — it keeps returning',    tier:'TITAN', tierClass:'tier-titan', baseHP:1200, baseAtk:75,  baseDef:80,  xpBase:1000,wave:48 },
-  { name:'VOID ARCHITECT',    sprite:'🌀', title:'The intelligence that designed the abyss itself',   tier:'TITAN', tierClass:'tier-titan', baseHP:1100, baseAtk:90,  baseDef:65,  xpBase:1100,wave:52 },
-  { name:'THE FIRST EVIL',    sprite:'👁️', title:'Older than gods — it was there before the light',  tier:'TITAN', tierClass:'tier-titan', baseHP:1500, baseAtk:100, baseDef:90,  xpBase:1500,wave:56 },
+  { name:'WORLD BREAKER',    sprite:'🌍', title:'It shattered a world once — yours is next',         tier:'TITAN', tierClass:'tier-titan', baseHP:900,  baseAtk:70,  baseDef:55,  xpBase:700, wave:60 },
+  { name:'ASTRAL EXECUTIONER',sprite:'⚡',title:'Summoned from the space between stars to destroy',   tier:'TITAN', tierClass:'tier-titan', baseHP:1000, baseAtk:78,  baseDef:60,  xpBase:850, wave:65 },
+  { name:'UNDYING BEHEMOTH',  sprite:'🦣', title:'Killed ten thousand times — it keeps returning',    tier:'TITAN', tierClass:'tier-titan', baseHP:1200, baseAtk:75,  baseDef:80,  xpBase:1000,wave:70 },
+  { name:'VOID ARCHITECT',    sprite:'🌀', title:'The intelligence that designed the abyss itself',   tier:'TITAN', tierClass:'tier-titan', baseHP:1100, baseAtk:90,  baseDef:65,  xpBase:1100,wave:75 },
+  { name:'THE FIRST EVIL',    sprite:'👁️', title:'Older than gods — it was there before the light',  tier:'TITAN', tierClass:'tier-titan', baseHP:1500, baseAtk:100, baseDef:90,  xpBase:1500,wave:80 },
 ];
 
 function getEnemyForWave(wave) {
@@ -2027,6 +2027,10 @@ function getEnemyForWave(wave) {
   if (wave > 35) {
     const elites = eligible.filter(e => e.tier === 'LEGENDARY' || e.tier === 'MYTHIC' || e.tier === 'TITAN');
     if (elites.length) eligible = elites;
+  }
+  if (wave > 100) {
+    const apex = eligible.filter(e => e.tier === 'MYTHIC' || e.tier === 'TITAN');
+    if (apex.length) eligible = apex;
   }
   const weights = eligible.map((e, i) => Math.pow(i + 1, 1.5));
   const total = weights.reduce((a,b)=>a+b, 0);
