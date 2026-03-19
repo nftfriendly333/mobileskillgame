@@ -2509,7 +2509,7 @@ function getSkillXPCost(skill) {
   const tier       = Math.floor((state.wave - 1) / 5);  // +50% every 5 waves
   const waveMult   = 1 + tier * 0.5;
   const skillLv    = state.skills[skill];                // current level of this skill
-  const lvMult     = 1 + (skillLv - 1) * 0.25;          // +25% per level already purchased
+  const lvMult     = 1 + (skillLv - 1) * 0.175;         // +17.5% per level already purchased
   return Math.round(XP_SKILL_COST_BASE[skill] * waveMult * lvMult);
 }
 
