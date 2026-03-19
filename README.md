@@ -2042,10 +2042,10 @@ function getEnemyForWave(wave) {
 function scaleEnemy(base, wave) {
   const scale = 1 + (wave - 1) * 0.18;
   return { ...base,
-    hp: Math.round(base.baseHP * scale),
-    atk: Math.round(base.baseAtk * scale),
-    def: Math.round(base.baseDef * scale),
-    xpReward: Math.round(base.xpBase * scale),
+    hp:       Math.round(base.baseHP  * scale),
+    atk:      Math.round(base.baseAtk * scale * 0.875),  // -12.5% attack
+    def:      Math.round(base.baseDef * scale * 0.90),   // -10% defense
+    xpReward: Math.round(base.xpBase  * scale),
   };
 }
 
@@ -2287,7 +2287,7 @@ function enemyTurn() {
     if (enemyCrit) animateCard('player-card', 'impact-heavy', 600);
     else animateCard('player-card', 'impact', 550);
   }, 420);
-  f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 4 + Math.floor(state.skills.stamina * 0.75));
+  f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 9 + Math.floor(state.skills.stamina * 1.25));
   updateBars();
   if (f.playerHP <= 0) { setTimeout(playerDies, 700); return; }
   f.turn++; f.playerTurn = true; actionLocked = false; f.blocking = false;
@@ -2302,11 +2302,18 @@ function playerWins() {
   const f = state.fight;
   f.active = false; f.won = true; actionLocked = false;
   state.enemiesDefeated++;
+  // -10% penalty after wave 25; bonus multiplier kicks in after wave 40
   const xpPenalty = state.wave > 25;
-  const xpGain = xpPenalty ? Math.round(currentEnemy.xpReward * 0.9) : currentEnemy.xpReward;
+  let xpMultiplier = xpPenalty ? 0.9 : 1.0;
+  if      (state.wave > 80) xpMultiplier *= 2.0;
+  else if (state.wave > 60) xpMultiplier *= 1.6;
+  else if (state.wave > 40) xpMultiplier *= 1.3;
+  const xpGain = Math.round(currentEnemy.xpReward * xpMultiplier);
   state.totalXP += xpGain;
+  const penaltyTag = xpPenalty && state.wave <= 40 ? ' <span style="color:var(--text3);font-size:0.85em;">(-10%)</span>' : '';
+  const bonusTag   = state.wave > 40 ? ` <span style="color:var(--green2);font-size:0.85em;">(x${xpMultiplier.toFixed(2)} bonus)</span>` : '';
   addLog(`☠ <span class="log-death">${currentEnemy.name} slain!</span>`, 'death');
-  addLog(`<span class="log-win">🏆 VICTORY! +${xpGain} XP!${xpPenalty ? ' <span style="color:var(--text3);font-size:0.85em;">(-10% late game)</span>' : ''}</span>`, 'win');
+  addLog(`<span class="log-win">🏆 VICTORY! +${xpGain} XP!${penaltyTag}${bonusTag}</span>`, 'win');
   setStatus('won', '✓ VICTORY');
   setActionButtons(false);
   setTurnIndicator('none');
@@ -2512,8 +2519,11 @@ const XP_SKILL_COST_BASE = { stamina:15, attack:15, defense:15, crit:20 };
 function getSkillXPCost(skill) {
   const tier       = Math.floor((state.wave - 1) / 5);  // +50% every 5 waves
   const waveMult   = 1 + tier * 0.5;
-  const skillLv    = state.skills[skill];                // current level of this skill
-  const lvMult     = 1 + (skillLv - 1) * 0.175;         // +17.5% per level already purchased
+  const skillLv    = state.skills[skill];
+  // Gentler scaling for early levels (1-15), steeper after
+  const lvMult     = skillLv <= 15
+    ? 1 + (skillLv - 1) * 0.06    // +6% per level up to LV 15
+    : 1 + 14 * 0.06 + (skillLv - 15) * 0.175; // steeper after LV 15
   return Math.round(XP_SKILL_COST_BASE[skill] * waveMult * lvMult);
 }
 
@@ -3191,11 +3201,80 @@ function loadGame() {
 }
 
 function deleteSave() {
-  if (!confirm('Delete all saved progress? This cannot be undone.')) return;
-  localStorage.removeItem(SAVE_KEY);
-  showSaveToast('🗑 Save deleted — refresh to restart', '#e74c3c');
-}
+  const first = confirm(
+    'RESET ALL PROGRESS?\n\n' +
+    'This will permanently delete all skill levels, XP, hero name, skins, wave progress and guild membership.\n\n' +
+    'This CANNOT be undone. Continue?'
+  );
+  if (!first) return;
 
+  const second = confirm(
+    'FINAL WARNING\n\n' +
+    'ALL progress will be lost forever.\n\n' +
+    'Press OK to reset everything and start from the beginning.\n' +
+    'Press Cancel to keep your progress.'
+  );
+  if (!second) return;
+
+  localStorage.removeItem(SAVE_KEY);
+  localStorage.removeItem('ironArena_uid');
+  localStorage.removeItem('ironArena_guildCode');
+  localStorage.removeItem('ironArena_guildName');
+  localStorage.removeItem('ironArena_guildLeader');
+
+  SKILLS.forEach(s => {
+    state.skills[s]      = 1;
+    state.skillClicks[s] = 0;
+    if (state.cdTimers[s]) { clearInterval(state.cdTimers[s]); state.cdTimers[s] = null; }
+    const btn = document.getElementById('btn-' + s);
+    if (btn) btn.disabled = false;
+    const cdBar  = document.getElementById('cd-bar-'  + s);
+    const cdText = document.getElementById('cd-text-' + s);
+    if (cdBar)  cdBar.style.width  = '0%';
+    if (cdText) cdText.textContent = '';
+  });
+
+  state.totalXP         = 0;
+  state.enemiesDefeated = 0;
+  state.wave            = 1;
+  state.fight.active    = false;
+  actionLocked          = false;
+
+  shopState.heroName               = '';
+  shopState.nameChangeCount        = 0;
+  shopState.equippedSkin           = 0;
+  shopState.ownedSkins             = [0];
+  shopState.oneStrikeUnlocked      = false;
+  shopState.oneStrikeUsedThisMatch = false;
+
+  guildState.myGuildCode = null;
+  guildState.myGuildName = null;
+  guildState.isLeader    = false;
+
+  const nameEl = document.querySelector('.combatant-name');
+  if (nameEl) nameEl.textContent = 'THE WARRIOR';
+  document.getElementById('player-sprite').textContent  = '🧙';
+  document.getElementById('player-title').textContent   = 'Novice Wanderer';
+  const nameCostEl = document.getElementById('name-cost-label');
+  if (nameCostEl) nameCostEl.textContent = 'First change is free';
+  document.getElementById('btn-fight').classList.remove('hidden');
+  document.getElementById('btn-fight').textContent = '⚔ ENTER THE ARENA';
+  document.getElementById('btn-next').classList.add('hidden');
+  document.getElementById('btn-respawn').classList.add('hidden');
+  document.getElementById('btn-one-strike').classList.add('hidden');
+  document.getElementById('wave-num').textContent    = '1';
+  document.getElementById('enemy-count').textContent = '0';
+
+  setStatus('idle', '⚙ IDLE');
+  setTurnIndicator('none');
+  setActionButtons(false);
+  renderSkills();
+  resetPlayerStats();
+  updateXPDisplay();
+  renderSkinGrid();
+
+  showSaveToast('Progress reset. Starting fresh!', '#e74c3c');
+}
 function showSaveToast(msg, color) {
   let toast = document.getElementById('save-toast');
   if (!toast) {
