@@ -1,42 +1,46 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRON ARENA — Turn-Based Combat</title>
+<title>Iron Arena — PvE Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
-<!-- Firebase SDK -->
+<!-- Firebase SDK — initialized via Cloudflare Worker -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, set, get, child, query, orderByKey, limitToFirst }
+  import { getDatabase, ref, set, get, child, query, orderByKey, limitToFirst, onValue, push, serverTimestamp }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
   window._fbReady = false;
   window._fbDb    = null;
 
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
-    apiKey:            "AIzaSyAI3Pd07qv_w_YRfhhnsbSu-CXh4X-ZT9Q",
-    authDomain:        "live-leaderboard-aee95.firebaseapp.com",
-    projectId:         "live-leaderboard-aee95",
-    storageBucket:     "live-leaderboard-aee95.firebasestorage.app",
-    messagingSenderId: "316888776436",
-    appId:             "1:316888776436:web:6be767dfa0a80909cd68a1",
-    measurementId:     "G-KRF6XBDTGH",
-    databaseURL:       "https://live-leaderboard-aee95-default-rtdb.firebaseio.com"
+    apiKey:            "AIzaSyA76CnkQAK5vmYqv30nO8BL77e1kPj76IM",
+    authDomain:        "the-best-iron-arena.firebaseapp.com",
+    projectId:         "the-best-iron-arena",
+    storageBucket:     "the-best-iron-arena.firebasestorage.app",
+    messagingSenderId: "584814007725",
+    appId:             "1:584814007725:web:acc65cddc620f130fdfd24",
+    databaseURL:       "https://the-best-iron-arena-default-rtdb.firebaseio.com"
   };
 
   try {
-    if (firebaseConfig.databaseURL.includes('YOUR_PROJECT')) {
-      console.warn('Firebase not configured — leaderboard/guilds disabled.');
-    } else {
-      const app = initializeApp(firebaseConfig);
-      window._fbDb    = getDatabase(app);
-      window._fbSet   = set;
-      window._fbRef   = ref;
-      window._fbGet   = get;
-      window._fbChild = child;
-      window._fbReady = true;
-      console.log('Firebase connected ✓');
-    }
+    const { getApps } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    window._fbDb          = getDatabase(app);
+    window._fbSet         = set;
+    window._fbRef         = ref;
+    window._fbGet         = get;
+    window._fbChild       = child;
+    window._fbQuery       = query;
+    window._fbOrderByKey  = orderByKey;
+    window._fbLimitToFirst = limitToFirst;
+    window._fbOnValue      = onValue;
+    window._fbPush         = push;
+    window._fbServerTs     = serverTimestamp;
+    window._fbReady       = true;
+    window.WORKER_URL     = null; // Worker not in use — direct config active
+    console.log('Firebase connected ✓');
   } catch(e) {
     console.warn('Firebase init failed:', e);
   }
@@ -1010,6 +1014,8 @@
   .btn-buy-gold:hover:not(:disabled) { background:linear-gradient(135deg,#3a2e10,#6a4e10); border-color:var(--gold); box-shadow:0 0 10px rgba(201,168,76,0.2); }
   .btn-buy-red { background:linear-gradient(135deg,#200808,#5a1010); border-color:var(--red3); color:var(--red2); }
   .btn-buy-red:hover:not(:disabled) { background:linear-gradient(135deg,#5a1010,#a01818); border-color:var(--red); box-shadow:0 0 10px rgba(192,57,43,0.3); }
+  .btn-buy-blue { background:linear-gradient(135deg,#080e20,#102040); border-color:#2980b9; color:#60a5fa; }
+  .btn-buy-blue:hover:not(:disabled) { background:linear-gradient(135deg,#102040,#1a3a6b); border-color:#3498db; box-shadow:0 0 10px rgba(52,152,219,0.3); }
   .btn-buy:disabled { opacity:0.35; cursor:not-allowed; }
   .owned-badge { font-family:'Cinzel',serif; font-size: 0.8rem; color:var(--green2); background:rgba(39,174,96,0.1); border:1px solid #1a5c30; padding:0.15rem 0.4rem; border-radius:2px; }
   .skin-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.5rem; margin-bottom:0.5rem; }
@@ -1017,6 +1023,8 @@
   .skin-card:hover { border-color:var(--border2); }
   .skin-card.equipped { border-color:var(--gold); background:rgba(201,168,76,0.06); }
   .skin-card.owned-skin { border-color:#1a5c30; }
+  .skin-card.skin-locked { opacity:0.6; cursor: not-allowed; border-color: var(--border); }
+  .skin-card.skin-locked:hover { border-color: var(--border); transform: none; }
   .skin-emoji { font-size:2rem; display:block; margin-bottom:0.3rem; }
   .skin-name { font-family:'Cinzel',serif; font-size: 0.8rem; color:var(--text2); display:block; margin-bottom:0.2rem; }
   .skin-price-tag { font-size: 0.8rem; color:var(--gold3); font-family:'Cinzel',serif; }
@@ -1024,9 +1032,9 @@
   .name-input { flex:1; background:var(--bg); border:1px solid var(--border2); color:var(--white); font-family:'Cinzel',serif; font-size: 0.95rem; padding:0.4rem 0.6rem; border-radius:2px; outline:none; }
   .name-input:focus { border-color:var(--gold3); }
   .one-strike-banner { background:linear-gradient(135deg,rgba(192,57,43,0.15),rgba(120,20,10,0.2)); border:1px solid var(--red3); border-radius:3px; padding:0.8rem; text-align:center; margin-bottom:0.6rem; }
-  .one-strike-banner .big-icon { font-size:2.5rem; display:block; margin-bottom:0.3rem; }
-  .one-strike-banner h3 { font-size: 1.15rem; color:var(--red2); letter-spacing:0.15em; margin-bottom:0.3rem; text-shadow:0 0 15px rgba(192,57,43,0.5); }
-  .one-strike-stats { font-size: 0.85rem; color:var(--text3); font-style:italic; line-height:1.6; margin-bottom:0.5rem; }
+  .one-strike-banner .big-icon { font-size:3.2rem; display:block; margin-bottom:0.4rem; }
+  .one-strike-banner h3 { font-size: 1.45rem; color:var(--red2); letter-spacing:0.15em; margin-bottom:0.4rem; text-shadow:0 0 15px rgba(192,57,43,0.5); }
+  .one-strike-stats { font-size: 1.05rem; color:var(--text3); font-style:italic; line-height:1.8; margin-bottom:0.6rem; }
   .btn-one-strike {
     background:linear-gradient(135deg,#3a0505,#7a1010); border:2px solid #c0392b; border-radius:4px;
     color:#ff6b6b; font-family:'Cinzel Decorative',serif; font-size: 0.9rem; letter-spacing:0.1em;
@@ -1233,160 +1241,183 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.92);
-    background: var(--bg2);
-    border: 2px solid var(--gold3);
-    border-radius: 8px;
-    padding: 1.6rem 1.8rem;
+    background: #0d0b08;
+    border: 1px solid rgba(201,168,76,0.35);
+    border-radius: 12px;
+    padding: 1.6rem 1.4rem;
     z-index: 1001;
     width: 92vw;
-    max-width: 620px;
+    max-width: 640px;
     max-height: 88vh;
     overflow-y: auto;
-    box-shadow: 0 0 60px rgba(201,168,76,0.2), 0 20px 60px black;
+    box-shadow: 0 0 80px rgba(201,168,76,0.12), 0 24px 80px rgba(0,0,0,0.9);
     animation: popupIn 0.3s ease forwards;
   }
 
   .lb-popup h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--gold);
     text-align: center;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.3rem;
-    text-shadow: 0 0 20px rgba(201,168,76,0.4);
+    letter-spacing: 0.2em;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 0 24px rgba(201,168,76,0.5);
   }
 
   .lb-subtitle {
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     color: var(--text3);
     font-style: italic;
     margin-bottom: 1.2rem;
+    letter-spacing: 0.06em;
   }
 
   .lb-tabs {
     display: flex;
     gap: 0.4rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
+    background: #070604;
+    border-radius: 6px;
+    padding: 4px;
   }
 
   .lb-tab {
     flex: 1;
-    padding: 0.4rem 0.3rem;
+    padding: 0.45rem 0.3rem;
     font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     letter-spacing: 0.08em;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text3);
+    background: transparent;
+    border: none;
+    color: #6a5040;
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: 4px;
     transition: all 0.2s;
     text-align: center;
   }
-  .lb-tab.active { background: rgba(201,168,76,0.1); border-color: var(--gold3); color: var(--gold); }
-  .lb-tab:hover:not(.active) { border-color: var(--border2); color: var(--text2); }
+  .lb-tab.active { background: rgba(201,168,76,0.15); color: var(--gold); box-shadow: inset 0 0 0 1px rgba(201,168,76,0.3); }
+  .lb-tab:hover:not(.active) { color: var(--text2); background: rgba(255,255,255,0.04); }
 
   .lb-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 3px;
     font-size: 0.85rem;
+  }
+
+  .lb-table thead tr {
+    background: transparent;
   }
 
   .lb-table th {
     font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: var(--gold3);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: rgba(201,168,76,0.5);
     text-align: left;
-    padding: 0.4rem 0.6rem;
-    border-bottom: 1px solid var(--border2);
+    padding: 0.3rem 0.8rem;
+    border-bottom: 1px solid rgba(201,168,76,0.12);
     text-transform: uppercase;
   }
 
-  .lb-table td {
-    padding: 0.55rem 0.6rem;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    color: var(--text2);
-    vertical-align: middle;
+  .lb-table tbody tr {
+    background: #141008;
+    transition: background 0.15s;
   }
+  .lb-table tbody tr:nth-child(even) { background: #100e06; }
+  .lb-table tbody tr:hover { background: #1e180a; }
 
-  .lb-table tr:last-child td { border-bottom: none; }
-
-  .lb-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .lb-table td {
+    padding: 0.65rem 0.8rem;
+    color: #c0a880;
+    vertical-align: middle;
+    border-top: 1px solid rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(0,0,0,0.3);
+  }
+  .lb-table tbody tr td:first-child { border-radius: 6px 0 0 6px; }
+  .lb-table tbody tr td:last-child  { border-radius: 0 6px 6px 0; }
 
   .lb-rank {
     font-family: 'Cinzel', serif;
-    font-size: 0.8rem;
-    color: var(--text3);
-    width: 2rem;
+    font-size: 0.82rem;
+    color: #6a5040;
+    width: 2.4rem;
     text-align: center;
   }
-
-  .lb-rank-1 { color: #f59e0b; font-size: 1rem; }
-  .lb-rank-2 { color: #94a3b8; font-size: 0.95rem; }
-  .lb-rank-3 { color: #b45309; font-size: 0.9rem; }
+  .lb-rank-1 { color: #f59e0b; font-size: 1.05rem; text-shadow: 0 0 10px rgba(245,158,11,0.5); }
+  .lb-rank-2 { color: #cbd5e1; font-size: 1rem; }
+  .lb-rank-3 { color: #cd7f32; font-size: 0.95rem; }
 
   .lb-name {
     font-family: 'Cinzel', serif;
-    font-size: 0.82rem;
-    color: var(--white);
+    font-size: 0.84rem;
+    color: #e8d5b0;
+    letter-spacing: 0.04em;
   }
-  .lb-name.is-you { color: var(--gold); }
-  .lb-name.is-you::after { content: ' (You)'; font-size: 0.65rem; color: var(--gold3); }
+  .lb-name.is-you { color: var(--gold); text-shadow: 0 0 8px rgba(201,168,76,0.4); }
+  .lb-name.is-you::after { content: ' ✦ You'; font-size: 0.6rem; color: rgba(201,168,76,0.6); letter-spacing: 0.1em; }
 
   .lb-score {
     font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    color: var(--green2);
+    font-size: 0.88rem;
+    color: #4ade80;
     text-align: right;
+    font-weight: 600;
+    letter-spacing: 0.04em;
   }
 
-  .lb-skin { font-size: 1.1rem; }
+  .lb-skin { font-size: 1.15rem; line-height: 1; }
 
   .lb-empty {
     text-align: center;
     color: var(--text3);
     font-style: italic;
-    padding: 1.5rem;
-    font-size: 0.85rem;
+    padding: 2rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
   }
 
-  .lb-you-row td { background: rgba(201,168,76,0.04); }
+  .lb-you-row td {
+    background: rgba(201,168,76,0.06) !important;
+    border-top: 1px solid rgba(201,168,76,0.12) !important;
+    border-bottom: 1px solid rgba(201,168,76,0.12) !important;
+  }
 
   .lb-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1rem;
+    margin-top: 1.2rem;
     padding-top: 0.8rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(201,168,76,0.1);
     flex-wrap: wrap;
     gap: 0.5rem;
   }
 
   .lb-refresh-info {
-    font-size: 0.72rem;
-    color: var(--text3);
+    font-size: 0.68rem;
+    color: #6a5040;
     font-style: italic;
+    letter-spacing: 0.04em;
   }
 
   .btn-lb-close {
-    background: linear-gradient(135deg, #1e1812, #2a2016);
-    border: 1px solid var(--gold3);
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
     color: var(--gold);
     font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    padding: 0.4rem 1rem;
-    border-radius: 3px;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    padding: 0.45rem 1.2rem;
+    border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-lb-close:hover { border-color: var(--gold); box-shadow: 0 0 10px rgba(201,168,76,0.2); }
+  .btn-lb-close:hover { background: rgba(201,168,76,0.16); border-color: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.2); }
 
   .btn-leaderboard {
-    background: linear-gradient(135deg, #1a1408, #2e2010);
-    border: 1px solid var(--gold3);
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
     color: var(--gold);
     font-family: 'Cinzel', serif;
     font-size: 0.82rem;
@@ -1396,14 +1427,16 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-leaderboard:hover { background: linear-gradient(135deg,#2e2010,#4a3418); border-color:var(--gold); box-shadow:0 0 12px rgba(201,168,76,0.2); }
+  .btn-leaderboard:hover { background: rgba(201,168,76,0.16); border-color: var(--gold); box-shadow: 0 0 14px rgba(201,168,76,0.25); }
 
   .lb-loading {
     text-align: center;
-    color: var(--text3);
+    color: #6a5040;
     font-style: italic;
-    padding: 1.5rem;
-    font-size: 0.85rem;
+    padding: 2rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    animation: pulse 1.5s ease-in-out infinite;
   }
 
 
@@ -1614,9 +1647,376 @@
   .firebase-banner a { color: #f59e0b; }
   .firebase-banner.connected a { display: none; }
 
-</style>
+
+  /* ── POTIONS ── */
+  .potion-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.8rem;
+    margin-bottom: 0.6rem;
+    transition: border-color 0.2s;
+  }
+  .potion-card:hover { border-color: var(--border2); }
+  .potion-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem; }
+  .potion-name { font-family:'Cinzel',serif; font-size:1.05rem; font-weight:600; color:var(--white); display:flex; align-items:center; gap:0.4rem; }
+  .potion-desc { font-size:1.0rem; color:var(--text3); font-style:italic; margin-bottom:0.6rem; line-height:1.7; }
+  .potion-active-badge {
+    display:inline-block; font-family:'Cinzel',serif; font-size:0.65rem;
+    padding:0.15rem 0.5rem; border-radius:2px; margin-bottom:0.4rem;
+    background:rgba(39,174,96,0.12); border:1px solid #1a5c30; color:var(--green2);
+  }
+
+
+  /* ── ADMIN SNAPSHOT ── */
+  .btn-admin-snapshot {
+    background: linear-gradient(135deg, #0a0a1a, #1a1a3a);
+    border: 1px solid #4a4a8a;
+    color: #8a8aff;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 1rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+  }
+  .btn-admin-snapshot:hover { background: linear-gradient(135deg,#1a1a3a,#2a2a6a); border-color:#8a8aff; box-shadow:0 0 10px rgba(138,138,255,0.25); }
+  .btn-admin-snapshot.visible { display: inline-block; }
+
+
+  /* ── WALLET ── */
+  .wallet-linked-banner {
+    background: rgba(39,174,96,0.08);
+    border: 1px solid #1a5c30;
+    border-radius: 3px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.82rem;
+    color: var(--green2);
+    font-family: 'Cinzel', serif;
+    margin-bottom: 0.6rem;
+    word-break: break-all;
+  }
+  .wallet-linked-banner.hidden { display: none; }
+
+  /* ═══════════════════════════════════════
+     BOSS FIGHT SYSTEM STYLES
+  ═══════════════════════════════════════ */
+
+  /* Boss alert banner */
+  #boss-alert-banner {
+    display: none;
+    background: linear-gradient(135deg, #1a0000 0%, #2d0000 50%, #1a0000 100%);
+    border-bottom: 2px solid var(--red2);
+    padding: 9px 16px;
+    text-align: center;
+    position: sticky;
+    top: 48px;
+    z-index: 8999;
+    animation: bossAlertPulse 2s ease-in-out infinite;
+  }
+  #boss-alert-banner.active { display: block; }
+  @keyframes bossAlertPulse {
+    0%,100% { border-bottom-color:var(--red); box-shadow:0 2px 16px rgba(192,57,43,0.3); }
+    50%     { border-bottom-color:var(--gold); box-shadow:0 2px 24px rgba(192,57,43,0.6); }
+  }
+  .boss-alert-inner {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .boss-alert-skull { font-size:1.2rem; animation: bossSkullSpin 3s linear infinite; }
+  @keyframes bossSkullSpin { to { transform: rotate(360deg); } }
+  .boss-alert-text { font-family:'Cinzel Decorative',serif; font-size:0.72rem; color:var(--red2); letter-spacing:2px; }
+  .boss-alert-name { font-family:'Cinzel Decorative',serif; font-size:0.72rem; color:var(--gold); font-weight:900; }
+
+  /* Arena locked overlay */
+  #arena-locked-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 500;
+    background: rgba(10,8,6,0.92);
+    backdrop-filter: blur(3px);
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+    padding: 20px;
+  }
+  #arena-locked-overlay.active { display: flex; }
+  .arena-locked-icon { font-size: 3rem; }
+  .arena-locked-title { font-family:'Cinzel Decorative',serif; font-size:1.1rem; color:var(--red2); letter-spacing:3px; }
+  .arena-locked-sub { font-size:0.78rem; color:var(--text3); font-family:'IM Fell English',serif; font-style:italic; line-height:1.7; max-width:240px; }
+  .arena-locked-btn {
+    background: linear-gradient(135deg, #1a0000, #2d0a0a);
+    border: 1px solid var(--red2); color: var(--red2);
+    font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:2px;
+    padding:10px 22px; cursor:pointer; text-transform:uppercase; transition:all 0.2s;
+  }
+  .arena-locked-btn:hover { background:linear-gradient(135deg,#2d0000,#450a0a); box-shadow:0 0 14px rgba(192,57,43,0.4); }
+
+  /* Boss fight panel */
+  #boss-fight-panel {
+    display: none;
+    background: linear-gradient(135deg, #14080a 0%, #0d0508 100%);
+    border: 1px solid var(--red3);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  #boss-fight-panel.active { display: block; }
+  #boss-fight-panel::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(139,0,0,0.18) 0%, transparent 65%);
+    pointer-events:none;
+  }
+  .boss-panel-title {
+    font-family:'Cinzel Decorative',serif; font-size:0.72rem; color:var(--gold);
+    letter-spacing:3px; text-transform:uppercase; margin-bottom:12px;
+    border-bottom:1px solid var(--border); padding-bottom:8px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .live-dot {
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--green2); animation: liveBlink 1.5s ease-in-out infinite;
+  }
+  @keyframes liveBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .boss-name-display {
+    font-family:'Cinzel Decorative',serif; font-size:1rem; color:var(--red2);
+    letter-spacing:2px; margin-bottom:3px;
+    text-shadow:0 0 12px rgba(192,57,43,0.5);
+  }
+  .boss-tier-display { font-size:0.62rem; color:var(--gold2); letter-spacing:3px; margin-bottom:12px; }
+  .boss-phase-badge {
+    display:none; font-size:0.6rem; letter-spacing:2px; color:#ff6b00;
+    border:1px solid #ff6b00; padding:2px 8px; margin-bottom:10px;
+    animation: phasePulse 0.8s ease-in-out infinite;
+  }
+  .boss-phase-badge.visible { display:inline-block; }
+  @keyframes phasePulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+  /* Boss HP */
+  .boss-hp-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
+  .boss-hp-label { font-size:0.68rem; color:var(--text2); letter-spacing:1px; }
+  .boss-hp-value { font-family:'IM Fell English',serif; font-size:0.8rem; color:var(--white); }
+  .boss-hp-track {
+    height:13px; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+    border-radius:2px; overflow:hidden; margin-bottom:12px; position:relative;
+  }
+  .boss-hp-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--red3), var(--red));
+    transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+    position:relative;
+  }
+  .boss-hp-fill::after {
+    content:''; position:absolute; top:0; right:0; width:3px; height:100%;
+    background:rgba(255,255,255,0.5); animation:hpShimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes hpShimmer { 0%,100%{opacity:0.2} 50%{opacity:0.9} }
+  .boss-hp-fill.enraged {
+    background: linear-gradient(90deg, #5c1a00, #ff6b00);
+    animation: enragedPulse 0.5s ease-in-out infinite;
+  }
+  @keyframes enragedPulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.35)} }
+
+  /* Roster */
+  .roster-section-title { font-size:0.63rem; color:var(--text3); letter-spacing:2px; margin-bottom:7px; text-transform:uppercase; }
+  .boss-roster { display:flex; flex-direction:column; gap:5px; margin-bottom:12px; }
+  .roster-entry {
+    display:flex; align-items:center; gap:7px;
+    background:rgba(255,255,255,0.02); border:1px solid var(--border);
+    border-radius:2px; padding:5px 9px; font-size:0.68rem;
+  }
+  .roster-entry.me { border-color:var(--gold3); background:rgba(201,168,76,0.06); }
+  .roster-skin { font-size:1rem; }
+  .roster-name { flex:1; color:var(--text); letter-spacing:0.5px; }
+  .roster-dmg { font-family:'IM Fell English',serif; font-size:0.68rem; color:var(--red2); }
+  .roster-pct { font-family:'IM Fell English',serif; font-size:0.63rem; color:var(--gold); min-width:30px; text-align:right; }
+  .me-tag { font-size:0.52rem; color:var(--gold); border:1px solid var(--gold3); padding:1px 4px; letter-spacing:1px; }
+
+  /* Boss log */
+  .boss-log-wrap { max-height:100px; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:3px; }
+  .boss-log-wrap::-webkit-scrollbar { width:3px; }
+  .boss-log-wrap::-webkit-scrollbar-thumb { background:var(--border); }
+  .boss-log-entry {
+    font-family:'IM Fell English',serif; font-size:0.68rem;
+    padding:3px 7px; border-radius:2px; line-height:1.4;
+  }
+  .boss-log-entry.bdmg    { color:var(--red2);  background:rgba(192,57,43,0.06); }
+  .boss-log-entry.bheal   { color:var(--green2); background:rgba(46,204,113,0.06); }
+  .boss-log-entry.bsystem { color:var(--gold);   background:rgba(201,168,76,0.06); }
+  .boss-log-entry.batk    { color:#ff9944;        background:rgba(255,100,0,0.06); }
+  .boss-log-entry.bspecial{ color:var(--purple);  background:rgba(142,68,173,0.06); }
+
+  /* Skill tap mode (during boss) */
+  .skill-boss-info {
+    font-size:0.68rem; color:var(--text3); font-style:italic;
+    line-height:1.6; margin-bottom:10px; padding:8px 10px;
+    background:rgba(0,0,0,0.2); border:1px solid var(--border);
+    border-radius:3px; display:none;
+  }
+  .skill-boss-info.active { display:block; }
+  .skill-boss-damage-badge {
+    display:none; font-size:0.58rem; color:var(--red2); border:1px solid var(--red3);
+    padding:2px 6px; letter-spacing:1px; margin-top:4px; text-align:center;
+  }
+  .skill-boss-damage-badge.active { display:block; }
+
+  /* Boss attack button */
+  #boss-attack-btn {
+    display:none;
+    width:100%; padding:14px;
+    background:linear-gradient(135deg,#1a0000,#2d0000);
+    border:1px solid var(--red2); color:var(--red2);
+    font-family:'Cinzel Decorative',serif; font-size:0.85rem; letter-spacing:3px;
+    cursor:pointer; text-transform:uppercase; position:relative; overflow:hidden;
+    transition:all 0.2s; margin-bottom:10px;
+  }
+  #boss-attack-btn.active { display:block; }
+  #boss-attack-btn:not(:disabled):hover {
+    background:linear-gradient(135deg,#2d0000,#450000);
+    box-shadow:0 0 18px rgba(192,57,43,0.4); border-color:var(--gold); color:var(--gold);
+  }
+  #boss-attack-btn:not(:disabled):active { transform:scale(0.98); }
+  #boss-attack-btn:disabled { opacity:0.35; cursor:not-allowed; }
+  .boss-btn-cd-bar {
+    position:absolute; bottom:0; left:0; height:3px;
+    background:var(--red2); transition:width 0.1s linear; width:0%;
+  }
+
+  /* Boss spawn button in save bar */
+  .btn-boss-spawn {
+    background: linear-gradient(135deg, #1a0000, #2d0000);
+    border: 1px solid var(--red);
+    color: var(--red2);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: nowrap;
+    animation: bossButtonGlow 3s ease-in-out infinite;
+  }
+  .btn-boss-spawn:hover {
+    background: linear-gradient(135deg, #2d0000, #450000);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 14px rgba(192,57,43,0.5);
+    animation: none;
+  }
+  .btn-boss-spawn.boss-live {
+    border-color: var(--gold);
+    color: var(--gold);
+    animation: bossLivePulse 1s ease-in-out infinite;
+  }
+  @keyframes bossButtonGlow {
+    0%,100% { box-shadow: 0 0 4px rgba(192,57,43,0.2); }
+    50%     { box-shadow: 0 0 10px rgba(192,57,43,0.5); }
+  }
+  @keyframes bossLivePulse {
+    0%,100% { box-shadow: 0 0 8px rgba(201,168,76,0.4); border-color: var(--gold); }
+    50%     { box-shadow: 0 0 18px rgba(201,168,76,0.7); border-color: var(--gold2); }
+  }
+
+  /* Modal inputs focus */
+  #boss-spawn-modal input:focus,
+  #boss-spawn-modal select:focus {
+    border-color: var(--red3) !important;
+    outline: none;
+  }
+  #boss-spawn-confirm-btn:hover { background: linear-gradient(135deg,#2d0000,#450000) !important; box-shadow: 0 0 14px rgba(192,57,43,0.4); }
+  #boss-end-btn:hover { border-color: var(--text2) !important; color: var(--text2) !important; }
+
+
+  .boss-float-dmg {
+    position:fixed; font-family:'Cinzel Decorative',serif;
+    font-size:1.2rem; font-weight:900; pointer-events:none; z-index:9998;
+    animation: bossDmgFloat 1.2s ease-out forwards;
+  }
+  @keyframes bossDmgFloat {
+    0%   { transform:translateY(0) scale(1); opacity:1; }
+    100% { transform:translateY(-70px) scale(0.65); opacity:0; }
+  }
+
+  /* Enhancements disabled badge */
+  .enhancements-disabled-note {
+    display:none; font-size:0.65rem; color:var(--text3); text-align:center;
+    padding:6px 10px; border:1px solid var(--border); border-radius:3px;
+    font-style:italic; margin-bottom:8px;
+  }
+  .enhancements-disabled-note.active { display:block; }
+
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
+<script>
+// Pre-stub: queue storage calls until PveStorage.install() is ready
+(function() {
+  if (window.storage) return;
+  var _q = [];
+  var _stub = function(method) {
+    return function() {
+      var args = arguments;
+      return new Promise(function(resolve) {
+        _q.push(function() { resolve(window.storage[method].apply(window.storage, args)); });
+      });
+    };
+  };
+  window._storageQueue = _q;
+  window.storage = {
+    get: _stub('get'), set: _stub('set'),
+    delete: _stub('delete'), list: _stub('list'),
+    _isStub: true
+  };
+})();
+</script>
 <body>
+<!-- ── SITE NAV ── -->
+<style>
+#site-nav{position:sticky;top:0;z-index:9000;background:#0a0a0f;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:48px;font-family:'DM Mono',monospace;gap:12px;}
+#site-nav .sn-logo{font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;color:#e8e6f0;text-decoration:none;white-space:nowrap;flex-shrink:0;}
+#site-nav .sn-logo span{color:#c8a96e;font-style:italic;}
+#site-nav .sn-links{display:flex;align-items:center;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex:1;}
+#site-nav .sn-links::-webkit-scrollbar{display:none;}
+#site-nav .sn-links a{font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;padding:5px 10px;border-radius:6px;text-decoration:none;color:#6b6880;border:1px solid transparent;white-space:nowrap;transition:all 0.18s;}
+#site-nav .sn-links a:hover{color:#e8e6f0;border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);}
+#site-nav .sn-links a.sn-active{color:#e8e6f0;border-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);}
+#site-nav .sn-links a.sn-arena.sn-active{color:#e06c6c;border-color:rgba(224,108,108,0.3);background:rgba(224,108,108,0.07);}
+#site-nav .sn-links a.sn-trade.sn-active{color:#7faaff;border-color:rgba(127,170,255,0.3);background:rgba(127,170,255,0.07);}
+#site-nav .sn-links a.sn-tourney.sn-active{color:#d4a8ff;border-color:rgba(212,168,255,0.3);background:rgba(212,168,255,0.07);}
+</style>
+<nav id="site-nav">
+  <a class="sn-logo" href="index.html">PvE <span>Hub</span></a>
+  <div class="sn-links">
+    <a href="index.html" class="sn-home">Home</a>
+    <a href="iron-arena.html" class="sn-arena sn-active">⚔ Iron Arena</a>
+    <a href="trade-together.html" class="sn-trade">📊 Trade Together</a>
+  </div>
+</nav>
+
+<!-- ══ BOSS ALERT BANNER ══ -->
+<div id="boss-alert-banner">
+  <div class="boss-alert-inner">
+    <span class="boss-alert-skull">💀</span>
+    <span class="boss-alert-text">BOSS FIGHT ACTIVE —</span>
+    <span class="boss-alert-name" id="boss-alert-name-text">THE IRON COLOSSUS</span>
+    <span class="boss-alert-text">— ALL COMBATANTS REPORT</span>
+    <span class="boss-alert-skull">💀</span>
+  </div>
+</div>
+
+
+
+
 
 
   
@@ -1629,7 +2029,60 @@
   <button class="btn-leaderboard" onclick="openLeaderboard()">🏆 Leaderboard</button>
   <button class="btn-save" onclick="saveGame()">💾 Save Progress</button>
   <span class="save-info">Auto-saves on wins &amp; purchases</span>
+  <button class="btn-admin-snapshot" id="btn-admin-snapshot" onclick="downloadSnapshotCSV()">📊 XP Snapshot</button>
+  <button class="btn-admin-snapshot" id="btn-skin-snapshot" onclick="openSkinSnapshot()" style="display:none;">🎭 Skin Snapshot</button>
   <button class="btn-delete-save" onclick="deleteSave()">🗑 Reset Save</button>
+  <button class="btn-boss-spawn" id="btn-boss-spawn" onclick="toggleBossSpawnModal()">☠ BOSS FIGHT</button>
+</div>
+
+<!-- ══ BOSS SPAWN MODAL ══ -->
+<div id="boss-spawn-overlay" onclick="closeBossSpawnModal()" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);"></div>
+<div id="boss-spawn-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9501;width:min(94vw,420px);background:#110a0b;border:1px solid #8b0000;border-radius:4px;padding:22px 20px;font-family:'IM Fell English',serif;">
+  <div style="font-family:'Cinzel Decorative',serif;font-size:1rem;color:#e74c3c;letter-spacing:3px;text-align:center;margin-bottom:4px;">☠ INITIATE BOSS FIGHT</div>
+  <div style="font-size:0.7rem;color:#6a5040;letter-spacing:2px;text-align:center;margin-bottom:18px;font-family:'Cinzel',serif;">ADMIN · WORLD EVENT</div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <label style="font-size:0.7rem;color:#a08060;letter-spacing:1px;">BOSS NAME</label>
+      <input id="boss-spawn-name" type="text" value="The Iron Colossus" maxlength="40" style="background:#0a0608;border:1px solid #3a2e20;color:#f0e8d8;font-family:'IM Fell English',serif;font-size:0.85rem;padding:8px 10px;border-radius:2px;outline:none;width:100%;">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <label style="font-size:0.7rem;color:#a08060;letter-spacing:1px;">BOSS HP</label>
+        <input id="boss-spawn-hp" type="number" value="1000000" min="10000" step="50000" style="background:#0a0608;border:1px solid #3a2e20;color:#f0e8d8;font-family:'IM Fell English',serif;font-size:0.85rem;padding:8px 10px;border-radius:2px;outline:none;width:100%;">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+        <label style="font-size:0.7rem;color:#a08060;letter-spacing:1px;">LOOT POOL ($PvE)</label>
+        <input id="boss-spawn-loot" type="number" value="25000" min="0" step="1000" style="background:#0a0608;border:1px solid #3a2e20;color:#f0e8d8;font-family:'IM Fell English',serif;font-size:0.85rem;padding:8px 10px;border-radius:2px;outline:none;width:100%;">
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <label style="font-size:0.7rem;color:#a08060;letter-spacing:1px;">TIER</label>
+      <select id="boss-spawn-tier" style="background:#0a0608;border:1px solid #3a2e20;color:#f0e8d8;font-family:'IM Fell English',serif;font-size:0.85rem;padding:8px 10px;border-radius:2px;outline:none;width:100%;">
+        <option value="⬛ TITAN TIER · WORLD BOSS">⬛ Titan — World Boss</option>
+        <option value="🟣 MYTHIC TIER · GUILD BOSS">🟣 Mythic — Guild Boss</option>
+        <option value="🔴 LEGENDARY TIER · RAID BOSS">🔴 Legendary — Raid Boss</option>
+        <option value="🟠 EPIC TIER · EVENT BOSS">🟠 Epic — Event Boss</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Active boss warning -->
+  <div id="boss-spawn-active-warning" style="display:none;font-size:0.72rem;color:#e67e22;border:1px solid #7a4510;padding:8px 10px;border-radius:3px;margin-bottom:12px;text-align:center;font-style:italic;">
+    ⚠ A boss fight is already active. End it first before spawning a new one.
+  </div>
+
+  <div style="display:flex;gap:10px;">
+    <button onclick="spawnBossFromModal()" id="boss-spawn-confirm-btn" style="flex:1;background:linear-gradient(135deg,#1a0000,#2d0000);border:1px solid #e74c3c;color:#e74c3c;font-family:'Cinzel Decorative',serif;font-size:0.75rem;letter-spacing:2px;padding:12px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;">
+      ⚔ SPAWN BOSS
+    </button>
+    <button onclick="endBossFromModal()" id="boss-end-btn" style="flex:1;background:linear-gradient(135deg,#0a0a00,#1a1a00);border:1px solid #6a5040;color:#6a5040;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:2px;padding:12px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;">
+      ☠ END FIGHT
+    </button>
+    <button onclick="closeBossSpawnModal()" style="background:transparent;border:1px solid #3a2e20;color:#6a5040;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:1px;padding:12px 16px;cursor:pointer;transition:all 0.2s;">
+      ✕
+    </button>
+  </div>
 </div>
 
 <div class="firebase-banner" id="firebase-banner">
@@ -1696,6 +2149,17 @@
         </ul>
       </div>
 
+      <div class="htp-card">
+        <div class="htp-card-title" style="color:#a78bfa">🧪 Venom of Spite &amp; 🌫️ Veil of Shadows</div>
+        <ul>
+          <li><span class="li-icon">🛒</span><span>Both potions are purchased in the <strong style="color:var(--white)">Special</strong> shop tab. Cost scales up with your current wave.</span></li>
+          <li><span class="li-icon">⚠️</span><span><strong style="color:#fbbf24">Potions are active for the next round only</strong> — they are consumed the moment the fight begins and do not carry over.</span></li>
+          <li><span class="li-icon">🧪</span><span><strong style="color:#a78bfa">Venom of Spite</strong> — poisons the enemy at fight start. They take <strong style="color:#a78bfa">10% of their max HP</strong> as damage every turn for the whole fight.</span></li>
+          <li><span class="li-icon">🌫️</span><span><strong style="color:#60a5fa">Veil of Shadows</strong> — shrouds you in darkness. The enemy has a <strong style="color:#60a5fa">25% chance to miss</strong> every attack for the whole fight.</span></li>
+          <li><span class="li-icon">💡</span><span>Stack both in the same round for a serious edge — buy before you hit <strong style="color:var(--white)">ENTER THE ARENA</strong>.</span></li>
+        </ul>
+      </div>
+
     </div>
     <div class="htp-tip">
       💡 <strong>Pro tip:</strong> Train skills between every wave. Enemies scale hard — a well-timed Heavy Attack with high Attack skill will carry you far. Save ONE STRIKE for Legendary or Mythic tier bosses!
@@ -1705,11 +2169,49 @@
 
 <div class="game-container">
 
+  <!-- ══ BOSS FIGHT PANEL (shown when a boss is active) ══ -->
+  <div id="boss-fight-panel">
+    <div class="boss-panel-title">
+      <span class="live-dot"></span>
+      BOSS FIGHT IN PROGRESS
+    </div>
+    <div class="boss-name-display" id="boss-name-display">THE IRON COLOSSUS</div>
+    <div class="boss-tier-display" id="boss-tier-display">⬛ TITAN TIER · WORLD BOSS</div>
+    <div class="boss-phase-badge" id="boss-phase-badge">⚠ RAGE PHASE ACTIVE</div>
+
+    <div class="boss-hp-row">
+      <span class="boss-hp-label"><span class="live-dot"></span> BOSS HP — LIVE</span>
+      <span class="boss-hp-value" id="boss-hp-value-text">1,000,000 / 1,000,000</span>
+    </div>
+    <div class="boss-hp-track">
+      <div class="boss-hp-fill" id="boss-hp-fill" style="width:100%;"></div>
+    </div>
+
+    <div class="roster-section-title">⚔ ACTIVE COMBATANTS</div>
+    <div class="boss-roster" id="boss-roster"></div>
+
+    <button id="boss-attack-btn" onclick="bossDoAttack()">
+      ⚔ STRIKE THE BOSS ⚔
+      <div class="boss-btn-cd-bar" id="boss-btn-cd-bar"></div>
+    </button>
+
+    <div class="boss-panel-title" style="margin-top:8px;">📜 BATTLE FEED</div>
+    <div class="boss-log-wrap" id="boss-log-wrap"></div>
+  </div>
+
   <!-- ══ SECTION 1: FIGHT ARENA (top) ══ -->
-  <div class="arena-col">
+  <div class="arena-col" style="position:relative;">
 
     <!-- Combatants -->
-    <div class="panel arena-panel">
+    <div class="panel arena-panel" style="position:relative;">
+
+      <!-- Arena locked overlay during boss fight -->
+      <div id="arena-locked-overlay">
+        <div class="arena-locked-icon">🔒</div>
+        <div class="arena-locked-title">ARENA LOCKED</div>
+        <div class="arena-locked-sub">A Boss Fight is in progress. The regular arena is suspended until the boss falls.</div>
+        <button class="arena-locked-btn" onclick="document.getElementById('boss-fight-panel').scrollIntoView({behavior:'smooth'})">View Boss Fight ↑</button>
+      </div>
       <div class="combatants">
         <!-- Player -->
         <div class="combatant-card" id="player-card">
@@ -1773,10 +2275,29 @@
         <div style="font-size:0.75rem;opacity:0.7;margin-top:0.2rem;font-family:'IM Fell English',serif;font-style:italic;">25% hit · Kills instantly · −75% Stamina · −50% HP</div>
       </button>
 
+      <div id="potion-active-display" class="hidden" style="
+        margin-top:0.6rem;
+        padding:0.55rem 0.8rem;
+        border-radius:4px;
+        background:rgba(0,0,0,0.25);
+        border:1px solid rgba(255,255,255,0.07);
+        font-family:'Cinzel',serif;
+        font-size:0.78rem;
+        letter-spacing:0.06em;
+        display:flex;
+        flex-direction:column;
+        gap:0.3rem;
+      "></div>
+
       <div class="status-row">
         <span class="status-badge badge-idle" id="status-badge">⚙ IDLE</span>
         <span class="wave-info">Wave <span id="wave-num">1</span> · <span id="enemy-count">0</span> Defeated</span>
         <span class="wave-info">XP: <span id="xp-total-display"><span>0</span></span></span>
+      </div>
+
+      <!-- Boss mode: enhancements disabled notice -->
+      <div class="enhancements-disabled-note" id="enhancements-disabled-note">
+        ⛔ One Strike &amp; special enhancements are disabled during Boss Fights
       </div>
 
       <button class="main-btn btn-fight" id="btn-fight" onclick="startFight()">⚔ ENTER THE ARENA</button>
@@ -1815,6 +2336,8 @@
 
     <!-- NAME TAB -->
     <div class="shop-section active" id="tab-name">
+
+      <!-- Hero Name -->
       <div class="shop-item">
         <div class="shop-item-name">🏷️ Hero Name</div>
         <div class="shop-item-desc">Name your warrior. First change is free — after that, 10 XP each.</div>
@@ -1824,6 +2347,22 @@
         </div>
         <div style="font-size:0.8rem; color:var(--text3); margin-top:0.4rem; font-style:italic;" id="name-cost-label">First change is free</div>
       </div>
+
+      <!-- Wallet -->
+      <div class="shop-item">
+        <div class="shop-item-name">👛 Wallet</div>
+        <div class="shop-item-desc">Connect your Ethereum wallet to save progress and receive $PvE rewards. Works with MetaMask, Coinbase, Rabby, Rainbow, Trust, and any WalletConnect-compatible wallet.</div>
+        <div class="wallet-linked-banner hidden" id="wallet-linked-banner"></div>
+        <div id="wallet-connect-area">
+          <button class="btn-buy btn-buy-gold" onclick="PveAuth._openModal()" style="width:100%;padding:0.6rem;font-size:0.9rem;letter-spacing:0.1em;">
+            ⬡ CONNECT WALLET
+          </button>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:0.5rem;font-style:italic;text-align:center;">
+            Signs a message to verify ownership — no transaction, no gas fee.
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- SKINS TAB -->
@@ -1847,6 +2386,8 @@
 
     <!-- SPECIAL TAB -->
     <div class="shop-section" id="tab-special">
+
+      <!-- ONE STRIKE -->
       <div class="one-strike-banner">
         <span class="big-icon">☠</span>
         <h3>ONE STRIKE</h3>
@@ -1860,6 +2401,29 @@
         <div id="one-strike-shop-status"></div>
         <button class="btn-buy btn-buy-red" id="btn-buy-one-strike" onclick="buyOneStrike()">UNLOCK FOR 150 XP</button>
       </div>
+
+      <!-- POISON POTION -->
+      <div class="potion-card" id="potion-poison-card">
+        <div class="potion-header">
+          <span class="potion-name">🧪 Venom of Spite</span>
+          <span class="shop-price">1,500 XP</span>
+        </div>
+        <div class="potion-desc">Poison the enemy at the start of combat — they take <strong style="color:#a78bfa">10% of their max HP</strong> as poison damage every turn. <strong style="color:var(--white)">⚠ Active for the next round only</strong> — consumed on use.</div>
+        <div id="potion-poison-status"></div>
+        <button class="btn-buy btn-buy-red" id="btn-buy-poison" onclick="buyPotion('poison')" style="border-color:#7c3aed;color:#a78bfa;">BUY FOR 1,500 XP</button>
+      </div>
+
+      <!-- MISS POTION -->
+      <div class="potion-card" id="potion-miss-card">
+        <div class="potion-header">
+          <span class="potion-name">🌫️ Veil of Shadows</span>
+          <span class="shop-price">5,000 XP</span>
+        </div>
+        <div class="potion-desc">Shroud yourself in darkness — the enemy <strong style="color:#60a5fa">misses 25% of all attacks</strong> for the duration of the fight. <strong style="color:var(--white)">⚠ Active for the next round only</strong> — consumed on use.</div>
+        <div id="potion-miss-status"></div>
+        <button class="btn-buy btn-buy-blue" id="btn-buy-miss" onclick="buyPotion('miss')">BUY FOR 5,000 XP</button>
+      </div>
+
     </div>
   </div><!-- /shop-panel -->
 
@@ -1867,8 +2431,13 @@
   <div class="panel skills-panel">
     <div class="panel-title">⚡ Skill Training</div>
 
+    <!-- Boss mode skill note -->
+    <div class="skill-boss-info" id="skill-boss-info">
+      ⚡ <strong style="color:var(--gold);">Boss Mode Active</strong> — Each level-up fires a bonus damage strike against the boss.
+      Tap 25 times to level up. One Strike &amp; potions are disabled during boss fights.
+    </div>
+
     <div class="skills-grid">
-      <!-- Stamina -->
       <div class="skill-row" id="skill-stamina">
         <div class="skill-label">
           <span class="skill-name"><span class="skill-icon">💚</span> Stamina</span>
@@ -1973,6 +2542,7 @@ const state = {
   skillClicks: { stamina:0, attack:0, defense:0, crit:0 },
   cdTimers: { stamina:null, attack:null, defense:null, crit:null },
   totalXP: 0,
+  lifetimeXP: 0,    // never decremented — only goes up
   enemiesDefeated: 0,
   wave: 1,
   fight: {
@@ -2052,15 +2622,15 @@ function scaleEnemy(base, wave) {
 // ============================================================
 // PLAYER STATS
 // ============================================================
-function getPlayerMaxHP()      { return 60 + state.skills.defense * 8 + state.skills.stamina * 2; }  // nerfed: was *5
+function getPlayerMaxHP()      { return Math.round((60 + state.skills.defense * 8 + state.skills.stamina * 2) * 1.265); } // +26.5% total HP buff (15%+10%)
 function getPlayerMaxStamina() { return 60 + state.skills.stamina * 5; }   // nerfed: was *10
 function getPlayerAttack(type) {
-  const base = 3 + state.skills.attack * 2;
-  if (type === 'light') return base;
+  const base = Math.round((3 + state.skills.attack * 2) * 1.125); // +12.5%
+  if (type === 'light') return Math.round(base * 1.25);
   if (type === 'heavy') return Math.round(base * 1.9);
   return 0;
 }
-function getPlayerDefense()    { return 1 + state.skills.defense * 1.5; }
+function getPlayerDefense()    { return (1 + state.skills.defense * 1.5) * 1.125; } // +12.5%
 function getCritChance()       { return Math.min(0.05 + (state.skills.crit - 1) * 0.035, 0.55); }
 function getCritMultiplier()   { return 1.5 + (state.skills.crit - 1) * 0.05; }
 
@@ -2075,6 +2645,11 @@ function clickSkill(skill) {
     state.skillClicks[skill] = 0;
     addLog(`🌟 <span class="log-win">${skill.toUpperCase()} leveled up to ${state.skills[skill]}!</span>`, 'system');
     startCooldownTimer(skill);
+    // ── Boss System: fire bonus damage on level-up ──
+    if (typeof BossSystem !== 'undefined' && BossSystem.isActive()) {
+      const skillNames = { stamina:'Stamina', attack:'Attack', defense:'Defense', crit:'Critical' };
+      BossSystem.onSkillLevelUp(skillNames[skill] || skill, state.skills[skill]);
+    }
     saveGame(); // auto-save on level-up
   }
   renderSkills();
@@ -2138,7 +2713,7 @@ function startFight() {
   const maxHP = getPlayerMaxHP();
   const maxSta = getPlayerMaxStamina();
   const f = state.fight;
-  f.playerHP = maxHP; f.playerMaxHP = maxHP;
+  f.playerHP = Math.floor(maxHP); f.playerMaxHP = Math.floor(maxHP);
   // Stormbringer always starts at full stamina
   f.playerStamina = maxSta; f.playerMaxStamina = maxSta;
   f.blocking = false;
@@ -2146,6 +2721,7 @@ function startFight() {
   f.active = true; f.playerTurn = true; f.turn = 1; f.won = false;
   actionLocked = false;
   shopState.oneStrikeUsedThisMatch = false;
+  activatePotions();
 
   document.getElementById('enemy-name').textContent = currentEnemy.name;
   document.getElementById('enemy-subtitle').textContent = currentEnemy.title;
@@ -2264,7 +2840,17 @@ function enemyTurn() {
   if (!f.active) return;
   setTurnIndicator('enemy');
   addLog(`--- Enemy Turn ---`, 'turn');
-  let dmg = Math.max(1, currentEnemy.atk - getPlayerDefense() * 0.5);
+  // Veil of Shadows: 25% miss chance
+  if (potionState.miss.activeThisFight && Math.random() < 0.25) {
+    addLog(`🌫️ <span style="color:#60a5fa">The enemy's attack misses! (Veil of Shadows)</span>`, 'block');
+    showDamage('player-card', 'MISS!', 'damage-miss');
+    f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 9 + Math.floor(state.skills.stamina * 1.25));
+    updateBars();
+    f.turn++; f.playerTurn = true; actionLocked = false; f.blocking = false;
+    setTimeout(() => { addLog(`--- Turn ${f.turn} ---`, 'turn'); setTurnIndicator('player'); setActionButtons(true); }, 600);
+    return;
+  }
+  let dmg = Math.max(1, Math.round(currentEnemy.atk - getPlayerDefense() * 0.5));
   let enemyCrit = false;
   if (f.blocking) {
     const blockFactor = 0.15 + (state.skills.defense * 0.03);
@@ -2279,7 +2865,7 @@ function enemyTurn() {
       : `💜 <span class="log-enemy">${currentEnemy.name} attacks for ${dmg}.</span>`, 'enemy');
     showDamage('player-card', `-${dmg}`, 'damage-enemy');
   }
-  f.playerHP = Math.max(0, f.playerHP - dmg);
+  f.playerHP = Math.floor(Math.max(0, f.playerHP - dmg));
   const monsterAnim = enemyCrit ? 'attack-monster-crit' : 'attack-monster';
   animateCard('enemy-card', monsterAnim, 750);
   setTimeout(() => {
@@ -2288,6 +2874,13 @@ function enemyTurn() {
     else animateCard('player-card', 'impact', 550);
   }, 420);
   f.playerStamina = Math.min(f.playerMaxStamina, f.playerStamina + 9 + Math.floor(state.skills.stamina * 1.25));
+  // Venom of Spite: 10% of enemy max HP as poison damage per turn
+  if (potionState.poison.activeThisFight) {
+    const poisonDmg = Math.max(1, Math.round(f.enemyMaxHP * 0.10));
+    currentEnemy.hp = Math.max(0, currentEnemy.hp - poisonDmg);
+    addLog(`🧪 <span style="color:#a78bfa">Poison deals ${poisonDmg} damage to ${currentEnemy.name}! (${currentEnemy.hp} HP left)</span>`, 'system');
+    if (currentEnemy.hp <= 0) { updateBars(); setTimeout(playerWins, 500); return; }
+  }
   updateBars();
   if (f.playerHP <= 0) { setTimeout(playerDies, 700); return; }
   f.turn++; f.playerTurn = true; actionLocked = false; f.blocking = false;
@@ -2309,7 +2902,8 @@ function playerWins() {
   else if (state.wave > 60) xpMultiplier *= 1.6;
   else if (state.wave > 40) xpMultiplier *= 1.3;
   const xpGain = Math.round(currentEnemy.xpReward * xpMultiplier);
-  state.totalXP += xpGain;
+  state.totalXP    += xpGain;
+  state.lifetimeXP += xpGain;  // lifetime never decremented
   const penaltyTag = xpPenalty && state.wave <= 40 ? ' <span style="color:var(--text3);font-size:0.85em;">(-10%)</span>' : '';
   const bonusTag   = state.wave > 40 ? ` <span style="color:var(--green2);font-size:0.85em;">(x${xpMultiplier.toFixed(2)} bonus)</span>` : '';
   addLog(`☠ <span class="log-death">${currentEnemy.name} slain!</span>`, 'death');
@@ -2318,6 +2912,7 @@ function playerWins() {
   setActionButtons(false);
   setTurnIndicator('none');
   document.getElementById('btn-one-strike').classList.add('hidden');
+  updatePotionFightButtons();
   const perSkill = Math.floor(xpGain / 4);
   showVictoryPopup({stamina:perSkill,attack:perSkill,defense:perSkill,crit:xpGain-perSkill*3}, xpGain);
   state.wave++;
@@ -2336,6 +2931,7 @@ function playerDies() {
   setActionButtons(false);
   setTurnIndicator('none');
   document.getElementById('btn-one-strike').classList.add('hidden');
+  updatePotionFightButtons();
   document.getElementById('btn-respawn').classList.remove('hidden');
 }
 
@@ -2343,7 +2939,7 @@ function resetPlayerStats() {
   const f = state.fight;
   const maxHP  = getPlayerMaxHP();
   const maxSta = getPlayerMaxStamina();
-  f.playerHP           = maxHP;
+  f.playerHP           = Math.floor(maxHP);
   f.playerMaxHP        = maxHP;
   f.playerStamina      = maxSta;
   f.playerMaxStamina   = maxSta;
@@ -2379,7 +2975,7 @@ function updateBars() {
   const f = state.fight;
   const hpPct = Math.max(0, f.playerHP / f.playerMaxHP * 100);
   document.getElementById('player-hp-bar').style.width = hpPct + '%';
-  document.getElementById('player-hp-txt').textContent = `${Math.max(0,f.playerHP)} / ${f.playerMaxHP}`;
+  document.getElementById('player-hp-txt').textContent = `${Math.floor(Math.max(0,f.playerHP))} / ${Math.floor(f.playerMaxHP)}`;
   const staPct = Math.max(0, f.playerStamina / f.playerMaxStamina * 100);
   document.getElementById('player-sta-bar').style.width = staPct + '%';
   document.getElementById('player-sta-txt').textContent = `${Math.round(f.playerStamina)} / ${f.playerMaxStamina}`;
@@ -2395,6 +2991,7 @@ function setActionButtons(enabled) {
     document.getElementById('btn-action-' + t).disabled = !enabled;
   });
   if (typeof shopState !== 'undefined') updateOneStrikeButton();
+  if (typeof potionState !== 'undefined') updatePotionFightButtons();
   if (!enabled) { const b = document.getElementById('btn-one-strike'); if(b) b.disabled = true; }
 }
 
@@ -2500,17 +3097,22 @@ const shopState = {
   ownedSkins: [0],
   oneStrikeUnlocked: false,
   oneStrikeUsedThisMatch: false,
+  walletAddress: '',
 };
 
 const SKINS = [
-  { emoji:'🧙', name:'Wanderer',     price:0   },
-  { emoji:'⚔️',  name:'Swordsman',   price:20  },
-  { emoji:'🥷',  name:'Shadow Blade',price:40  },
-  { emoji:'🦸',  name:'Champion',    price:70  },
-  { emoji:'🧝',  name:'Elven Archer',price:90  },
-  { emoji:'🧟',  name:'Undead King', price:120 },
-  { emoji:'🐲',  name:'Dragon Knight',price:180},
-  { emoji:'👑',  name:'Immortal',    price:250 },
+  { emoji:'🧙', name:'Wanderer',            price:0      },
+  { emoji:'🗡️', name:'Iron Duelist',        price:500    },
+  { emoji:'🥷',  name:'Void Assassin',       price:1200   },
+  { emoji:'🧝', name:'Thornwood Sentinel',  price:2500   },
+  { emoji:'🦅', name:'Skywarden',           price:5000   },
+  { emoji:'🧟', name:'Risen Warlord',       price:8500   },
+  { emoji:'🐉', name:'Dragonbound',         price:15000  },
+  { emoji:'💀', name:'Death Incarnate',     price:25000  },
+  { emoji:'⚡', name:'Storm Herald',        price:40000  },
+  { emoji:'🌑', name:'Eclipse Sovereign',   price:60000  },
+  { emoji:'🔱', name:'Abyssal Titan',       price:90000  },
+  { emoji:'👁️', name:'The Undying One',     price:150000 },
 ];
 
 // Base XP costs — scale up every 5 waves
@@ -2537,6 +3139,7 @@ function switchShopTab(tab) {
   if (tab === 'skills')  renderXPSkillList();
   if (tab === 'special') renderOneStrikeShop();
   if (tab === 'guild')   renderGuildUI();
+  if (tab === 'name')    renderWalletDisplay();
 }
 
 function setHeroName() {
@@ -2556,23 +3159,81 @@ function setHeroName() {
   saveGame();
 }
 
+// wallet connection handled by PveAuth — see PVE STORAGE + AUTH block below
+
+function renderWalletDisplay() {
+  const linked  = document.getElementById('wallet-linked-banner');
+  const area    = document.getElementById('wallet-connect-area');
+  if (!linked) return;
+
+  const profile = (typeof PveAuth !== 'undefined') ? PveAuth.getProfile() : null;
+  const addr    = profile?.address || shopState.walletAddress || '';
+
+  if (addr) {
+    const short = addr.slice(0, 8) + '...' + addr.slice(-4);
+    linked.classList.remove('hidden');
+    linked.innerHTML = '✔ Wallet connected: <span style="font-family:monospace;font-size:0.8rem;opacity:0.85;">' + short + '</span>'
+      + ' <button onclick="PveAuth._openModal()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.75rem;margin-left:0.5rem;text-decoration:underline;">switch</button>';
+    if (area) area.style.display = 'none';
+  } else {
+    linked.classList.add('hidden');
+    if (area) area.style.display = '';
+  }
+}
+
+// Block the fight button until wallet is saved
+function updateFightButtonWalletGate() {
+  // Fight button always enabled (no wallet required)
+  const fightBtn = document.getElementById('btn-fight');
+  if (!fightBtn) return;
+  fightBtn.disabled = false;
+  fightBtn.title = '';
+  fightBtn.style.opacity = '';
+  fightBtn.style.cursor  = '';
+}
+
 function renderSkinGrid() {
   const grid = document.getElementById('skin-grid');
   grid.innerHTML = '';
   SKINS.forEach((skin, i) => {
-    const owned = shopState.ownedSkins.includes(i);
+    const owned    = shopState.ownedSkins.includes(i);
     const equipped = shopState.equippedSkin === i;
+    // Locked unless previous skin is owned (skin 0 always available)
+    const prevOwned = i === 0 || shopState.ownedSkins.includes(i - 1);
+    const locked   = !owned && !prevOwned;
+
     const card = document.createElement('div');
-    card.className = 'skin-card' + (equipped?' equipped':'') + (owned&&!equipped?' owned-skin':'');
-    card.innerHTML = `<span class="skin-emoji">${skin.emoji}</span><span class="skin-name">${skin.name}</span><span class="skin-price-tag">${owned?(equipped?'✦ EQUIPPED':'✓ OWNED'):skin.price+' XP'}</span>`;
-    card.onclick = () => owned ? equipSkin(i) : buySkin(i);
+    card.className = 'skin-card'
+      + (equipped ? ' equipped' : '')
+      + (owned && !equipped ? ' owned-skin' : '')
+      + (locked ? ' skin-locked' : '');
+
+    let priceTag;
+    if (equipped)      priceTag = '✦ EQUIPPED';
+    else if (owned)    priceTag = '✓ OWNED — tap to equip';
+    else if (locked)   priceTag = '🔒 Buy previous skin first';
+    else               priceTag = skin.price.toLocaleString() + ' XP';
+
+    card.innerHTML = `
+      <span class="skin-emoji" style="opacity:${locked?'0.3':'1'}">${skin.emoji}</span>
+      <span class="skin-name" style="opacity:${locked?'0.4':'1'}">${skin.name}</span>
+      <span class="skin-price-tag" style="${locked?'color:var(--text3)':''}">${priceTag}</span>
+    `;
+
+    if (!locked) card.onclick = () => owned ? equipSkin(i) : buySkin(i);
     grid.appendChild(card);
   });
 }
 
 function buySkin(i) {
   const skin = SKINS[i];
-  if (state.totalXP < skin.price) { addLog(`💸 Need ${skin.price} XP for ${skin.name}.`, 'system'); return; }
+  // Enforce sequential unlock
+  if (i > 0 && !shopState.ownedSkins.includes(i - 1)) {
+    addLog(`🔒 You must own ${SKINS[i-1].name} first.`, 'system'); return;
+  }
+  if (state.totalXP < skin.price) {
+    addLog(`💸 Need ${skin.price.toLocaleString()} XP for ${skin.name}.`, 'system'); return;
+  }
   state.totalXP -= skin.price;
   shopState.ownedSkins.push(i);
   equipSkin(i);
@@ -2582,8 +3243,13 @@ function buySkin(i) {
 }
 
 function equipSkin(i) {
+  // Can only equip owned skins
+  if (!shopState.ownedSkins.includes(i)) return;
   shopState.equippedSkin = i;
   document.getElementById('player-sprite').textContent = SKINS[i].emoji;
+  // Sync skin to shared profile
+  const _p = PveAuth.getProfile();
+  if (_p) PveAuth.saveProfile({ skin: SKINS[i].emoji });
   renderSkinGrid();
 }
 
@@ -2631,6 +3297,7 @@ function renderOneStrikeShop() {
     buyBtn.disabled = !canAfford;
     buyBtn.textContent = canAfford ? 'UNLOCK FOR 150 XP' : `NEED 150 XP (have ${state.totalXP})`;
   }
+  renderPotionShop();
 }
 
 function buyOneStrike() {
@@ -2650,6 +3317,32 @@ function updateOneStrikeButton() {
   btn.classList.toggle('used', shopState.oneStrikeUsedThisMatch);
 }
 
+function updatePotionFightButtons() {
+  const el = document.getElementById('potion-active-display');
+  if (!el) return;
+
+  const lines = [];
+  if (potionState.poison.activeThisFight) {
+    lines.push('<span style="color:#a78bfa;">🧪 Venom of Spite is active — enemy takes 10% max HP poison each turn</span>');
+  } else if (potionState.poison.owned && state.fight.active) {
+    lines.push('<span style="color:#7c3aed;opacity:0.7;">🧪 Venom of Spite in inventory — activates next round only</span>');
+  }
+  if (potionState.miss.activeThisFight) {
+    lines.push('<span style="color:#60a5fa;">🌫️ Veil of Shadows is active — enemy has 25% miss chance</span>');
+  } else if (potionState.miss.owned && state.fight.active) {
+    lines.push('<span style="color:#2980b9;opacity:0.7;">🌫️ Veil of Shadows in inventory — activates next round only</span>');
+  }
+
+  if (lines.length > 0) {
+    el.innerHTML = lines.join('');
+    el.classList.remove('hidden');
+    el.style.display = 'flex';
+  } else {
+    el.classList.add('hidden');
+    el.style.display = 'none';
+  }
+}
+
 
 
 
@@ -2663,12 +3356,12 @@ const GUILD_PREFIX      = 'guild:';
 const GUILD_UNLOCK_WAVE = 30;   // must have beaten wave 30 to create
 const GUILD_CREATE_COST = 1000; // XP cost to create a guild
 const GUILD_JOIN_WAVE   = 10;   // must have beaten wave 10 to join
-const GUILD_MAX_MEMBERS = 20;
+const GUILD_MAX_MEMBERS = 5;
 
 const guildState = {
-  myGuildCode:  localStorage.getItem('ironArena_guildCode')  || null,
-  myGuildName:  localStorage.getItem('ironArena_guildName')  || null,
-  isLeader:     localStorage.getItem('ironArena_guildLeader') === '1',
+  myGuildCode:  null,
+  myGuildName:  null,
+  isLeader:     false,
 };
 
 function generateGuildCode() {
@@ -2680,17 +3373,9 @@ function getHighestWaveBeaten() {
   return Math.max(0, state.wave - 1);
 }
 
-// ── Persist guild membership locally ──
+// Guild membership is persisted via saveGame() to Firebase — no localStorage needed
 function saveGuildLocally() {
-  if (guildState.myGuildCode) {
-    localStorage.setItem('ironArena_guildCode',   guildState.myGuildCode);
-    localStorage.setItem('ironArena_guildName',   guildState.myGuildName || '');
-    localStorage.setItem('ironArena_guildLeader', guildState.isLeader ? '1' : '0');
-  } else {
-    localStorage.removeItem('ironArena_guildCode');
-    localStorage.removeItem('ironArena_guildName');
-    localStorage.removeItem('ironArena_guildLeader');
-  }
+  // no-op: guild state is saved as part of the full saveGame() call
 }
 
 // ── Fetch a single guild record from shared storage ──
@@ -2768,7 +3453,7 @@ async function joinGuild() {
 
   const guild = await fetchGuild(code);
   if (!guild) { if(errEl) errEl.textContent = 'Guild not found. Check the code.'; return; }
-  if (guild.members.length >= GUILD_MAX_MEMBERS) { if(errEl) errEl.textContent = 'Guild is full (20 members max).'; return; }
+  if (guild.members.length >= GUILD_MAX_MEMBERS) { if(errEl) errEl.textContent = 'Guild is full (5 members max).'; return; }
 
   const myKey = getLbPlayerKey().replace('lb:','');
   if (!guild.members.includes(myKey)) guild.members.push(myKey);
@@ -2912,8 +3597,18 @@ async function renderGuildUI() {
         <div class="guild-panel-title">Members (${guild.members.length}/${GUILD_MAX_MEMBERS})</div>
         <div class="guild-members-list">${memberRows || '<div style="color:var(--text3);font-style:italic;font-size:0.8rem;">No score data yet — save your game!</div>'}</div>
         <div class="guild-avg-wave">Avg Wave Completion: <span>${avgWave}</span></div>
-        <div style="margin-top:0.7rem;text-align:right;">
-          <button class="btn-guild btn-guild-red" onclick="leaveGuild()">Leave Guild</button>
+        <div style="margin-top:0.7rem;display:flex;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+          <div style="flex:1;">
+            <div style="font-family:'Cinzel',serif;font-size:0.72rem;color:var(--text3);margin-bottom:0.3rem;">Send XP to all guild members — any member can distribute</div>
+            <div style="display:flex;gap:0.4rem;">
+              <input class="guild-input" id="guild-xp-amount" type="number" min="1" placeholder="Amount each..." style="max-width:120px;"/>
+              <button class="btn-guild btn-guild-gold" onclick="distributeGuildXP()">SEND</button>
+            </div>
+            <div class="guild-error" id="guild-xp-error"></div>
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn-guild btn-guild-red" onclick="leaveGuild()">Leave Guild</button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -2956,29 +3651,165 @@ async function renderGuildLeaderboard() {
 }
 
 
+
+// ============================================================
+// POTION SYSTEM
+// ============================================================
+const potionState = {
+  poison: { owned: false, activeThisFight: false },
+  miss:   { owned: false, activeThisFight: false },
+};
+
+const POTION_BASE_COST = { poison: 1500, miss: 5000 };
+function getPotionCost(type) {
+  const base = POTION_BASE_COST[type];
+  const wave = state.wave || 1;
+  // Every 10 waves adds 20% to the base cost, capped at 5× base
+  const mult = Math.min(5, 1 + Math.floor(wave / 10) * 0.2);
+  return Math.round(base * mult / 100) * 100;
+}
+
+function buyPotion(type) {
+  const cost = getPotionCost(type);
+  if (state.totalXP < cost) {
+    addLog(`💸 Need ${cost.toLocaleString()} XP for that potion.`, 'system');
+    return;
+  }
+  if (potionState[type].owned) {
+    addLog(`🧪 You already have that potion.`, 'system');
+    return;
+  }
+  state.totalXP -= cost;
+  potionState[type].owned = true;
+  const names = { poison: 'Venom of Spite', miss: 'Veil of Shadows' };
+  addLog(`🧪 <span class="log-win">${names[type]} purchased!</span>`, 'system');
+  updateXPDisplay();
+  renderOneStrikeShop(); // refresh whole special tab
+  saveGame();
+}
+
+function activatePotions() {
+  // Called at fight start — reset active flags
+  potionState.poison.activeThisFight = false;
+  potionState.miss.activeThisFight   = false;
+  // Auto-activate if owned
+  if (potionState.poison.owned) {
+    potionState.poison.activeThisFight = true;
+    potionState.poison.owned = false; // consumed on use
+    addLog(`🧪 <span style="color:#a78bfa">Venom of Spite applied! Enemy takes 10% of their max HP as poison each turn. (This round only)</span>`, 'system');
+  }
+  if (potionState.miss.owned) {
+    potionState.miss.activeThisFight = true;
+    potionState.miss.owned = false;
+    addLog(`🌫️ <span style="color:#60a5fa">Veil of Shadows active! Enemy has 25% miss chance. (This round only)</span>`, 'system');
+  }
+}
+
+function renderPotionShop() {
+  ['poison','miss'].forEach(type => {
+    const statusEl = document.getElementById('potion-' + type + '-status');
+    const buyBtn   = document.getElementById('btn-buy-' + type);
+    if (!statusEl || !buyBtn) return;
+    const cost     = getPotionCost(type);
+    const owned    = potionState[type].owned;
+    const canAfford = state.totalXP >= cost;
+    if (owned) {
+      statusEl.innerHTML = '<span class="potion-active-badge">✓ IN INVENTORY — activates next round only</span>';
+      buyBtn.disabled = true;
+      buyBtn.textContent = 'PURCHASED';
+    } else {
+      statusEl.innerHTML = '';
+      buyBtn.disabled = !canAfford;
+      buyBtn.textContent = canAfford
+        ? `BUY FOR ${cost.toLocaleString()} XP`
+        : `NEED ${cost.toLocaleString()} XP (have ${state.totalXP.toLocaleString()})`;
+    }
+  });
+}
+
+
+
+// ── Distribute XP to all guild members (leader only) ──
+async function distributeGuildXP() {
+  const errEl = document.getElementById('guild-xp-error');
+  const input = document.getElementById('guild-xp-amount');
+  const amount = parseInt(input?.value);
+  if (!amount || amount < 1) { if(errEl) errEl.textContent = 'Enter a valid XP amount.'; return; }
+  const guild = await fetchGuild(guildState.myGuildCode);
+  if (!guild)                { if(errEl) errEl.textContent = 'Could not load guild data.'; return; }
+  const myUid       = getLbPlayerKey().replace('lb:','');
+  const otherMembers = guild.members.filter(uid => uid !== myUid);
+  const memberCount  = otherMembers.length;
+  if (memberCount === 0) { if(errEl) errEl.textContent = 'No other members to send XP to.'; return; }
+  const totalCost   = amount * memberCount;
+  if (state.totalXP < totalCost) {
+    if(errEl) errEl.textContent = `Need ${totalCost.toLocaleString()} XP total (${amount} × ${memberCount} other members). You have ${state.totalXP.toLocaleString()}.`;
+    return;
+  }
+  state.totalXP -= totalCost;
+  updateXPDisplay();
+  // Write each OTHER member's bonus to Firebase
+  if (window._fbReady) {
+    await Promise.all(otherMembers.map(async uid => {
+      try {
+        const key = 'guildXP/' + guildState.myGuildCode + '/' + uid;
+        const snap = await window._fbGet(window._fbRef(window._fbDb, key));
+        const existing = snap.exists() ? (snap.val() || 0) : 0;
+        await window._fbSet(window._fbRef(window._fbDb, key), existing + amount);
+      } catch(e) { console.warn('xp dist failed for', uid, e); }
+    }));
+  }
+  addLog(`💰 <span class="log-win">Sent ${amount.toLocaleString()} XP to ${memberCount} other guild member${memberCount!==1?'s':''}!</span>`, 'system');
+  showSaveToast(`Sent ${amount.toLocaleString()} XP to ${memberCount} member${memberCount!==1?'s':''}!`, '#c9a84c');
+  if(errEl) errEl.textContent = '';
+  if(input) input.value = '';
+  saveGame();
+  renderGuildUI();
+}
+
+// ── Claim pending guild XP on load ──
+async function claimGuildXP() {
+  if (!window._fbReady || !guildState.myGuildCode) return;
+  try {
+    const uid = getLbPlayerKey().replace('lb:','');
+    const key = 'guildXP/' + guildState.myGuildCode + '/' + uid;
+    const snap = await window._fbGet(window._fbRef(window._fbDb, key));
+    if (!snap.exists() || !snap.val()) return;
+    const pending = snap.val();
+    state.totalXP    += pending;
+    state.lifetimeXP += pending;
+    await window._fbSet(window._fbRef(window._fbDb, key), 0);
+    updateXPDisplay();
+    showSaveToast(`+${pending.toLocaleString()} XP from your Guild!`, '#c9a84c');
+    addLog(`🏰 <span class="log-win">Received ${pending.toLocaleString()} XP distributed by your Guild Leader!</span>`, 'system');
+    saveGame();
+  } catch(e) { console.warn('claimGuildXP failed:', e); }
+}
+
+
 // ============================================================
 // LEADERBOARD  (shared storage — visible to all players)
 // ============================================================
 const LB_PREFIX  = 'lb:';          // shared key prefix
-const LB_MAX     = 50;             // max entries to store globally
-let   lbCurrentTab = 'enemies';
+const LB_MAX     = 100;            // max entries to store globally
+let   lbCurrentTab = 'lifetime';
 let   lbMyKey = null;              // this player's storage key
 
-// Derive a stable player key from hero name + browser fingerprint
+// Derive a stable player key — wallet address required
 function getLbPlayerKey() {
   if (lbMyKey) return lbMyKey;
-  // Use hero name + a stored local UID
-  let uid = localStorage.getItem('ironArena_uid');
-  if (!uid) {
-    uid = 'p_' + Math.random().toString(36).slice(2, 10);
-    localStorage.setItem('ironArena_uid', uid);
+  const profile = (typeof PveAuth !== 'undefined') ? PveAuth.getProfile() : null;
+  const walletAddr = profile?.address || shopState.walletAddress || '';
+  if (walletAddr) {
+    lbMyKey = LB_PREFIX + walletAddr.toLowerCase();
+    return lbMyKey;
   }
-  lbMyKey = LB_PREFIX + uid;
-  return lbMyKey;
+  return null; // no wallet = no leaderboard key
 }
 
 async function submitLeaderboardScore() {
   const key = getLbPlayerKey();
+  if (!key) return; // no wallet connected, skip leaderboard submit
   const name = shopState.heroName || 'Anonymous Warrior';
   const skin = SKINS[shopState.equippedSkin]?.emoji || '🧙';
   const totalSkillLv = SKILLS.reduce((s,k) => s + state.skills[k], 0);
@@ -2989,8 +3820,11 @@ async function submitLeaderboardScore() {
     enemiesDefeated: state.enemiesDefeated,
     wave:            Math.max(1, state.wave - 1),
     totalXP:         state.totalXP,
+    lifetimeXP:      state.lifetimeXP,
+    lifetimeXP:      state.lifetimeXP,
     totalSkillLv,
     guildCode:       guildState.myGuildCode || null,
+    wallet:          shopState.walletAddress || '',
     ts:              Date.now(),
   };
 
@@ -3021,14 +3855,14 @@ async function fetchLeaderboardEntries() {
 }
 
 function sortLeaderboard(entries, tab) {
-  const field = { wave:'wave', xp:'totalXP' }[tab];
+  const field = { wave:'wave', lifetime:'lifetimeXP' }[tab];
   return [...entries].sort((a, b) => (b[field] || 0) - (a[field] || 0));
 }
 
 function renderLeaderboardTable(entries, tab) {
-  const field  = { wave:'wave', xp:'totalXP' }[tab];
-  const label  = { wave:'Highest Wave Reached', xp:'Total XP Earned' }[tab];
-  const fmt    = { wave: v => `Wave ${v}`, xp: v => `${v.toLocaleString()} XP` }[tab];
+  const field  = { wave:'wave', lifetime:'lifetimeXP' }[tab];
+  const label  = { wave:'Highest Wave Reached', lifetime:'Lifetime XP Earned' }[tab];
+  const fmt    = { wave: v => `Wave ${v}`, lifetime: v => `${v.toLocaleString()} XP` }[tab];
 
   if (!entries.length) {
     return `<div class="lb-empty">No scores yet — be the first on the board!</div>`;
@@ -3039,7 +3873,7 @@ function renderLeaderboardTable(entries, tab) {
   const rankIcon = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}`;
   const rankCls  = i => i === 0 ? 'lb-rank lb-rank-1' : i === 1 ? 'lb-rank lb-rank-2' : i === 2 ? 'lb-rank lb-rank-3' : 'lb-rank';
 
-  const rows = sorted.slice(0, 20).map((e, i) => `
+  const rows = sorted.slice(0, 100).map((e, i) => `
     <tr class="${e._isMe ? 'lb-you-row' : ''}">
       <td class="${rankCls(i)}">${rankIcon(i)}</td>
       <td class="lb-skin">${e.skin || '🧙'}</td>
@@ -3064,9 +3898,9 @@ function renderLeaderboardTable(entries, tab) {
 async function openLeaderboard() {
   document.getElementById('lb-overlay').classList.remove('hidden');
   document.getElementById('lb-popup').classList.remove('hidden');
-  lbCurrentTab = 'wave';
+  lbCurrentTab = 'lifetime';
   document.querySelectorAll('.lb-tab').forEach((t,i) => {
-    t.classList.toggle('active', i === 0);
+    t.classList.toggle('active', i === 1); // default to Lifetime XP tab
   });
   await refreshLeaderboard();
   // Pre-load guild data in background
@@ -3093,7 +3927,7 @@ async function refreshLeaderboard() {
 
 async function switchLbTab(tab) {
   lbCurrentTab = tab;
-  const tabs = ['wave','xp','guilds'];
+  const tabs = ['wave','lifetime','guilds'];
   document.querySelectorAll('.lb-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
   document.getElementById('lb-content').innerHTML = '<div class="lb-loading">⏳ Loading...</div>';
   if (tab === 'guilds') {
@@ -3112,92 +3946,147 @@ function closeLeaderboard() {
 
 
 // ============================================================
-// SAVE / LOAD  (localStorage)
+// SAVE / LOAD — Firebase only, keyed to wallet address
 // ============================================================
-const SAVE_KEY = 'ironArena_v1';
 
-function saveGame() {
+// ── Save key helpers (mirrors Trade Together's _ttLocalKey pattern) ──
+function _arenaLocalKey() {
+  return shopState.walletAddress
+    ? 'arena:' + shopState.walletAddress.toLowerCase()
+    : 'arena:guest';
+}
+
+function _saveLocal(data) {
+  try { localStorage.setItem(_arenaLocalKey(), JSON.stringify(data)); } catch(e) {}
+}
+
+function _loadLocal() {
+  try {
+    const raw = localStorage.getItem(_arenaLocalKey());
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+async function saveGame() {
+  if (!shopState.walletAddress) {
+    showSaveToast('⚠ Connect wallet to save', '#e74c3c');
+    return;
+  }
   const data = {
-    skills:       state.skills,
-    skillClicks:  state.skillClicks,
-    totalXP:      state.totalXP,
+    skills:          state.skills,
+    skillClicks:     state.skillClicks,
+    totalXP:         state.totalXP,
+    lifetimeXP:      state.lifetimeXP,
     enemiesDefeated: state.enemiesDefeated,
-    wave:         state.wave,
+    wave:            state.wave,
     shop: {
       heroName:          shopState.heroName,
       nameChangeCount:   shopState.nameChangeCount,
       equippedSkin:      shopState.equippedSkin,
       ownedSkins:        shopState.ownedSkins,
       oneStrikeUnlocked: shopState.oneStrikeUnlocked,
+      walletAddress:     shopState.walletAddress,
     },
     guild: {
       code:     guildState.myGuildCode,
       name:     guildState.myGuildName,
       isLeader: guildState.isLeader,
-    }
+    },
+    potions: {
+      poisonOwned: potionState.poison.owned,
+      missOwned:   potionState.miss.owned,
+    },
+    savedAt: Date.now(),
   };
+
+  // Layer 1: localStorage — instant, survives refresh, no dependencies
+  _saveLocal(data);
+
+  // Layer 2: window.storage / PveStorage (wallet-keyed Firebase)
+  if (window.storage && shopState.walletAddress && !window.storage._isStub) {
+    const cloudKey = 'arena-save:' + shopState.walletAddress.toLowerCase();
+    try { await window.storage.set(cloudKey, JSON.stringify(data), false); } catch(e) {}
+  }
+
+  // Layer 3: Firebase REST leaderboard
+  submitLeaderboardScore();
+
+  showSaveToast('✔ Progress saved!', '#27ae60');
+}
+
+async function loadGame() {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-    showSaveToast('✔ Progress saved!', '#27ae60');
-    submitLeaderboardScore(); // push to shared leaderboard
+    const addr = shopState.walletAddress;
+
+    // Layer 2: window.storage / PveStorage (cloud, most authoritative)
+    if (window.storage && addr && !window.storage._isStub) {
+      try {
+        const cloudKey = 'arena-save:' + addr.toLowerCase();
+        const r = await window.storage.get(cloudKey, false);
+        if (r) {
+          const data = JSON.parse(r.value);
+          if (data && typeof data.wave === 'number') {
+            _applyLoadedData(data);
+            _saveLocal(data); // keep local in sync
+            return true;
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Layer 1: localStorage fallback
+    const ls = _loadLocal();
+    if (ls && typeof ls.wave === 'number') {
+      _applyLoadedData(ls);
+      return true;
+    }
+
+    return false;
   } catch(e) {
-    showSaveToast('⚠ Save failed', '#e74c3c');
+    console.warn('loadGame error:', e);
+    return false;
   }
 }
 
-function loadGame() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return false;
-    const data = JSON.parse(raw);
+function _applyLoadedData(data) {
+  Object.assign(state.skills,      data.skills      || {});
+  Object.assign(state.skillClicks, data.skillClicks || {});
+  state.totalXP          = data.totalXP          || 0;
+  state.lifetimeXP       = data.lifetimeXP       || state.totalXP;
+  state.enemiesDefeated  = data.enemiesDefeated  || 0;
+  state.wave             = data.wave             || 1;
 
-    // Restore state
-    Object.assign(state.skills,      data.skills      || {});
-    Object.assign(state.skillClicks, data.skillClicks || {});
-    state.totalXP          = data.totalXP          || 0;
-    state.enemiesDefeated  = data.enemiesDefeated  || 0;
-    state.wave             = data.wave             || 1;
-
-    // Restore shop
-    if (data.shop) {
-      shopState.heroName          = data.shop.heroName          || '';
-      shopState.nameChangeCount   = data.shop.nameChangeCount   || 0;
-      shopState.equippedSkin      = data.shop.equippedSkin      || 0;
-      shopState.ownedSkins        = data.shop.ownedSkins        || [0];
-      shopState.oneStrikeUnlocked = data.shop.oneStrikeUnlocked || false;
-    }
-
-    // Apply hero name
-    if (shopState.heroName) {
-      const nameEl = document.querySelector('.combatant-name');
-      if (nameEl) nameEl.textContent = shopState.heroName.toUpperCase();
-      document.getElementById('name-cost-label').textContent = 'Rename costs 10 XP';
-    }
-
-    // Apply equipped skin
-    if (shopState.equippedSkin > 0) {
-      document.getElementById('player-sprite').textContent = SKINS[shopState.equippedSkin].emoji;
-    }
-
-    // Restore guild membership
-    if (data.guild?.code) {
-      guildState.myGuildCode = data.guild.code;
-      guildState.myGuildName = data.guild.name;
-      guildState.isLeader    = data.guild.isLeader || false;
-      saveGuildLocally();
-    }
-
-    // Update wave / enemy count display
-    document.getElementById('wave-num').textContent = state.wave;
-    document.getElementById('enemy-count').textContent = state.enemiesDefeated;
-    document.getElementById('btn-fight').textContent = state.wave > 1
-      ? `⚔ CHALLENGE WAVE ${state.wave}` : '⚔ ENTER THE ARENA';
-
-    return true;
-  } catch(e) {
-    console.warn('Load failed:', e);
-    return false;
+  if (data.shop) {
+    shopState.heroName          = data.shop.heroName          || '';
+    shopState.nameChangeCount   = data.shop.nameChangeCount   || 0;
+    shopState.equippedSkin      = data.shop.equippedSkin      || 0;
+    shopState.ownedSkins        = data.shop.ownedSkins        || [0];
+    shopState.oneStrikeUnlocked = data.shop.oneStrikeUnlocked || false;
+    if (data.shop.walletAddress) shopState.walletAddress = data.shop.walletAddress;
   }
+  if (shopState.heroName) {
+    const nameEl = document.querySelector('.combatant-name');
+    if (nameEl) nameEl.textContent = shopState.heroName.toUpperCase();
+    const costEl = document.getElementById('name-cost-label');
+    if (costEl) costEl.textContent = 'Rename costs 10 XP';
+  }
+  if (shopState.equippedSkin > 0) {
+    document.getElementById('player-sprite').textContent = SKINS[shopState.equippedSkin].emoji;
+  }
+  if (data.guild?.code) {
+    guildState.myGuildCode = data.guild.code;
+    guildState.myGuildName = data.guild.name;
+    guildState.isLeader    = data.guild.isLeader || false;
+    saveGuildLocally();
+  }
+  if (data.potions) {
+    potionState.poison.owned = data.potions.poisonOwned || false;
+    potionState.miss.owned   = data.potions.missOwned   || false;
+  }
+  document.getElementById('wave-num').textContent    = state.wave;
+  document.getElementById('enemy-count').textContent = state.enemiesDefeated;
+  document.getElementById('btn-fight').textContent   = state.wave > 1
+    ? `⚔ CHALLENGE WAVE ${state.wave}` : '⚔ ENTER THE ARENA';
 }
 
 function deleteSave() {
@@ -3216,11 +4105,15 @@ function deleteSave() {
   );
   if (!second) return;
 
-  localStorage.removeItem(SAVE_KEY);
-  localStorage.removeItem('ironArena_uid');
-  localStorage.removeItem('ironArena_guildCode');
-  localStorage.removeItem('ironArena_guildName');
-  localStorage.removeItem('ironArena_guildLeader');
+  // Delete localStorage save
+  try { localStorage.removeItem(_arenaLocalKey()); } catch(e) {}
+  // Delete cloud save
+  try {
+    const addr = shopState.walletAddress;
+    if (addr && window.storage && !window.storage._isStub) {
+      window.storage.delete('arena-save:' + addr.toLowerCase(), false).catch(() => {});
+    }
+  } catch(e) {}
 
   SKILLS.forEach(s => {
     state.skills[s]      = 1;
@@ -3235,6 +4128,7 @@ function deleteSave() {
   });
 
   state.totalXP         = 0;
+  state.lifetimeXP      = 0;
   state.enemiesDefeated = 0;
   state.wave            = 1;
   state.fight.active    = false;
@@ -3246,6 +4140,7 @@ function deleteSave() {
   shopState.ownedSkins             = [0];
   shopState.oneStrikeUnlocked      = false;
   shopState.oneStrikeUsedThisMatch = false;
+  shopState.walletAddress          = '';
 
   guildState.myGuildCode = null;
   guildState.myGuildName = null;
@@ -3262,6 +4157,7 @@ function deleteSave() {
   document.getElementById('btn-next').classList.add('hidden');
   document.getElementById('btn-respawn').classList.add('hidden');
   document.getElementById('btn-one-strike').classList.add('hidden');
+  updatePotionFightButtons();
   document.getElementById('wave-num').textContent    = '1';
   document.getElementById('enemy-count').textContent = '0';
 
@@ -3300,31 +4196,723 @@ const _origPlayerWins = playerWins;
 const _patchSave = () => saveGame();
 
 
+
 // ============================================================
-// INIT
+// ADMIN SNAPSHOT  (secret key: Shift+Alt+A)
 // ============================================================
-(function() {
-  // Load save first, then render everything fresh
-  const loaded = loadGame();
-  renderSkills();
-  resetPlayerStats();
-  updateXPDisplay();
-  renderSkinGrid();
-  if (loaded) showSaveToast('⚔ Progress restored!', '#7a5c1e');
-  // Update Firebase banner status after SDK loads
-  setTimeout(() => {
-    const banner = document.getElementById('firebase-banner');
-    if (banner && window._fbReady) {
-      banner.classList.add('connected');
-      banner.innerHTML = '<span class="fb-icon">✅</span><strong>Firebase connected</strong> — Leaderboard &amp; Guilds are live!';
-    }
-  }, 1500);
-})();
+let adminUnlocked = false;
+
+document.addEventListener('keydown', function(e) {
+  if (e.shiftKey && e.altKey && e.key === 'A') {
+    adminUnlocked = !adminUnlocked;
+    const btn = document.getElementById('btn-admin-snapshot');
+    if (btn) btn.classList.toggle('visible', adminUnlocked);
+    const btn2 = document.getElementById('btn-skin-snapshot');
+    if (btn2) btn2.style.display = adminUnlocked ? 'inline-block' : 'none';
+    showSaveToast(adminUnlocked ? '🔓 Admin mode ON' : '🔒 Admin mode OFF', adminUnlocked ? '#8a8aff' : '#666');
+  }
+});
+
+async function downloadSnapshotCSV() {
+  if (!adminUnlocked) return;
+  if (!window._fbReady) {
+    showSaveToast('Firebase not connected', '#e74c3c'); return;
+  }
+
+  showSaveToast('⏳ Fetching snapshot...', '#8a8aff');
+
+  try {
+    // Fetch all scores
+    const scoresSnap = await window._fbGet(window._fbRef(window._fbDb, 'scores'));
+    const scores = scoresSnap.exists() ? scoresSnap.val() : {};
+
+    // Fetch all guilds for guild name lookup
+    const guildsSnap = await window._fbGet(window._fbRef(window._fbDb, 'guilds'));
+    const guilds = guildsSnap.exists() ? guildsSnap.val() : {};
+    const guildNameMap = {};
+    Object.values(guilds).forEach(g => { guildNameMap[g.code] = g.name; });
+
+    // Build CSV
+    const headers = ['Player Name','Skin','Wallet Address','Total XP','Highest Wave','Enemies Defeated','Skill Levels','Guild','Last Saved'];
+    const rows = Object.entries(scores).map(([uid, d]) => {
+      const guildName = d.guildCode ? (guildNameMap[d.guildCode] || d.guildCode) : '';
+      const lastSaved = d.ts ? new Date(d.ts).toLocaleString() : '';
+      return [
+        `"${(d.name || 'Unknown').replace(/"/g,'""')}"`,
+        d.skin || '',
+        `"${(d.wallet || '').replace(/"/g,'""')}"`,
+        d.lifetimeXP || d.totalXP || 0,
+        d.totalXP || 0,
+        d.wave || 0,
+        d.enemiesDefeated || 0,
+        d.totalSkillLv || 0,
+        `"${guildName.replace(/"/g,'""')}"`,
+        `"${lastSaved}"`,
+      ].join(',');
+    });
+
+    // Sort by XP descending
+    rows.sort((a, b) => {
+      const xpA = parseInt(a.split(',')[2]) || 0;
+      const xpB = parseInt(b.split(',')[2]) || 0;
+      return xpB - xpA;
+    });
+
+    const csv = [headers.join(','), ...rows].join('\n');
+    const ts  = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    const filename = `iron-arena-snapshot-${ts}.csv`;
+
+    // Download
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showSaveToast(`✓ Snapshot downloaded — ${rows.length} players`, '#8a8aff');
+  } catch(e) {
+    console.error('Snapshot failed:', e);
+    showSaveToast('Snapshot failed — check console', '#e74c3c');
+  }
+}
+
+// ============================================================
+// SKIN SNAPSHOT
+// ============================================================
+async function openSkinSnapshot() {
+  if (!adminUnlocked) return;
+  if (!window._fbReady) { showSaveToast('Firebase not connected', '#e74c3c'); return; }
+
+  showSaveToast('⏳ Fetching skin data...', '#8a8aff');
+
+  try {
+    const scoresSnap = await window._fbGet(window._fbRef(window._fbDb, 'scores'));
+    const scores = scoresSnap.exists() ? scoresSnap.val() : {};
+
+    const usersSnap = await window._fbGet(window._fbRef(window._fbDb, 'users'));
+    const users = usersSnap.exists() ? usersSnap.val() : {};
+
+    const playerMap = {};
+
+    Object.values(scores).forEach(d => {
+      const addr = (d.wallet || '').toLowerCase();
+      if (!addr) return;
+      playerMap[addr] = {
+        name:        d.name || 'Unknown',
+        wallet:      d.wallet || '',
+        wave:        d.wave || 0,
+        lifetimeXP:  d.lifetimeXP || d.totalXP || 0,
+        equippedSkin: d.skin || '🧙',
+        ownedSkins:  [0],
+      };
+    });
+
+    Object.entries(users).forEach(([addr, saveKeys]) => {
+      const addrLow = addr.toLowerCase();
+      const saveKey = Object.keys(saveKeys || {}).find(k => k.startsWith('arena-save:'));
+      if (!saveKey) return;
+      try {
+        const saveData = JSON.parse(saveKeys[saveKey]);
+        if (!saveData) return;
+        const owned    = saveData?.shop?.ownedSkins || [0];
+        const equipped = saveData?.shop?.equippedSkin || 0;
+        const wallet   = saveData?.shop?.walletAddress || addr;
+        const name     = saveData?.shop?.heroName || '';
+        const addrKey  = wallet.toLowerCase() || addrLow;
+        if (!playerMap[addrKey]) {
+          playerMap[addrKey] = {
+            name: name || 'Unknown', wallet,
+            wave: saveData?.wave || 0,
+            lifetimeXP: saveData?.lifetimeXP || saveData?.totalXP || 0,
+            equippedSkin: SKINS[equipped]?.emoji || '🧙',
+            ownedSkins: owned,
+          };
+        } else {
+          playerMap[addrKey].ownedSkins = owned;
+          if (name) playerMap[addrKey].name = name;
+        }
+      } catch(e) {}
+    });
+
+    const players = Object.values(playerMap).sort((a,b) => b.lifetimeXP - a.lifetimeXP);
+    if (!players.length) { showSaveToast('No player data found', '#e74c3c'); return; }
+
+    _showSkinModal(players);
+    showSaveToast(`✓ Loaded ${players.length} players`, '#8a8aff');
+  } catch(e) {
+    console.error('Skin snapshot failed:', e);
+    showSaveToast('Skin snapshot failed — check console', '#e74c3c');
+  }
+}
+
+function _showSkinModal(players) {
+  const old = document.getElementById('skin-snapshot-overlay');
+  if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'skin-snapshot-overlay';
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;
+    display:flex;flex-direction:column;align-items:center;padding:16px;
+    font-family:'Cinzel',serif;overflow-y:auto;
+  `;
+
+  const header = document.createElement('div');
+  header.style.cssText = 'width:100%;max-width:1100px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;';
+  header.innerHTML = `
+    <div style="font-size:1.1rem;color:#c8a96e;letter-spacing:.15em;">🎭 SKIN SNAPSHOT — ${players.length} PLAYERS</div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="_downloadSkinCSV()" style="font-family:'Cinzel',serif;font-size:.72rem;padding:8px 16px;background:rgba(200,169,110,.12);border:1px solid rgba(200,169,110,.4);color:#c8a96e;border-radius:4px;cursor:pointer;letter-spacing:.08em;">⬇ Download CSV</button>
+      <button onclick="document.getElementById('skin-snapshot-overlay').remove()" style="font-family:'Cinzel',serif;font-size:.72rem;padding:8px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:4px;cursor:pointer;">✕ Close</button>
+    </div>
+  `;
+  overlay.appendChild(header);
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'width:100%;max-width:1100px;overflow-x:auto;';
+
+  const skinHeaders = SKINS.map(s =>
+    `<th style="padding:8px 6px;font-size:.6rem;letter-spacing:.08em;white-space:nowrap;color:rgba(200,169,110,.7);border-bottom:1px solid rgba(200,169,110,.15);">${s.emoji}<br><span style="font-size:.5rem;opacity:.6;">${s.name}</span></th>`
+  ).join('');
+
+  let rows = '';
+  players.forEach((p, idx) => {
+    const walletShort = p.wallet ? p.wallet.slice(0,6) + '…' + p.wallet.slice(-4) : '—';
+    const skinCells = SKINS.map((s, i) => {
+      const owns     = p.ownedSkins.includes(i);
+      const equipped = p.equippedSkin === s.emoji;
+      const bg      = owns ? (equipped ? 'rgba(200,169,110,.18)' : 'rgba(39,174,96,.12)') : 'transparent';
+      const border  = owns ? (equipped ? 'rgba(200,169,110,.5)'  : 'rgba(39,174,96,.3)')  : 'rgba(255,255,255,.05)';
+      const content = owns ? (equipped ? `<span style="font-size:1.1rem;">${s.emoji}</span>` : '✓') : '·';
+      const color   = owns ? (equipped ? '#c8a96e' : '#27ae60') : 'rgba(255,255,255,.15)';
+      return `<td style="text-align:center;padding:6px 4px;background:${bg};border:1px solid ${border};border-radius:3px;color:${color};font-size:.75rem;">${content}</td>`;
+    }).join('');
+
+    const rowBg = idx % 2 === 0 ? 'rgba(255,255,255,.02)' : 'transparent';
+    rows += `<tr style="background:${rowBg};">
+      <td style="padding:8px 10px;font-size:.72rem;color:rgba(200,169,110,.6);text-align:center;">${idx+1}</td>
+      <td style="padding:8px 10px;font-size:.78rem;color:#e8e6f0;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis;">${(p.name||'Unknown').replace(/</g,'&lt;')}</td>
+      <td style="padding:8px 10px;font-size:.65rem;color:rgba(255,255,255,.4);font-family:monospace;">${walletShort}</td>
+      <td style="padding:8px 10px;font-size:.72rem;color:rgba(127,170,255,.8);text-align:center;">Wv ${p.wave}</td>
+      <td style="padding:8px 10px;font-size:.72rem;color:rgba(200,169,110,.7);text-align:right;white-space:nowrap;">${(p.lifetimeXP||0).toLocaleString()} XP</td>
+      <td style="padding:8px 10px;font-size:.72rem;color:#27ae60;text-align:center;">${p.ownedSkins.length} / ${SKINS.length}</td>
+      ${skinCells}
+    </tr>`;
+  });
+
+  wrap.innerHTML = `
+    <table style="border-collapse:separate;border-spacing:2px;width:100%;min-width:900px;">
+      <thead><tr>
+        <th style="padding:8px 10px;font-size:.62rem;letter-spacing:.1em;color:rgba(200,169,110,.7);text-align:center;border-bottom:1px solid rgba(200,169,110,.15);">#</th>
+        <th style="padding:8px 10px;font-size:.62rem;letter-spacing:.1em;color:rgba(200,169,110,.7);text-align:left;border-bottom:1px solid rgba(200,169,110,.15);">PLAYER</th>
+        <th style="padding:8px 10px;font-size:.62rem;letter-spacing:.1em;color:rgba(200,169,110,.7);border-bottom:1px solid rgba(200,169,110,.15);">WALLET</th>
+        <th style="padding:8px 10px;font-size:.62rem;letter-spacing:.1em;color:rgba(200,169,110,.7);text-align:center;border-bottom:1px solid rgba(200,169,110,.15);">WAVE</th>
+        <th style="padding:8px 10px;font-size:.62rem;letter-spacing:.1em;color:rgba(200,169,110,.7);text-align:right;border-bottom:1px solid rgba(200,169,110,.15);">LIFETIME XP</th>
+        <th style="padding:8px 10px;font-size:.62rem;letter-spacing:.1em;color:rgba(200,169,110,.7);text-align:center;border-bottom:1px solid rgba(200,169,110,.15);">OWNED</th>
+        ${skinHeaders}
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+
+  const legend = document.createElement('div');
+  legend.style.cssText = 'width:100%;max-width:1100px;display:flex;gap:20px;margin-top:12px;font-size:.65rem;color:rgba(255,255,255,.4);flex-wrap:wrap;';
+  legend.innerHTML = `
+    <span><span style="color:#c8a96e;font-size:.9rem;">🧙</span> = Currently equipped</span>
+    <span><span style="color:#27ae60;">✓</span> = Owned, not equipped</span>
+    <span style="color:rgba(255,255,255,.2);">· = Not owned</span>
+    <span>Sorted by lifetime XP</span>
+  `;
+  overlay.appendChild(wrap);
+  overlay.appendChild(legend);
+  document.body.appendChild(overlay);
+
+  window._skinSnapshotPlayers = players;
+}
+
+function _downloadSkinCSV() {
+  const players = window._skinSnapshotPlayers;
+  if (!players) return;
+
+  const skinNames = SKINS.map(s => `${s.emoji} ${s.name}`);
+  const headers = ['Rank','Player','Wallet','Wave','Lifetime XP','Skins Owned',...skinNames];
+
+  const rows = players.map((p, idx) => {
+    const skinCols = SKINS.map((s, i) => {
+      if (!p.ownedSkins.includes(i)) return 'No';
+      return p.equippedSkin === s.emoji ? 'Equipped' : 'Owned';
+    });
+    return [
+      idx + 1,
+      `"${(p.name||'Unknown').replace(/"/g,'""')}"`,
+      `"${(p.wallet||'').replace(/"/g,'""')}"`,
+      p.wave || 0,
+      p.lifetimeXP || 0,
+      p.ownedSkins.length,
+      ...skinCols,
+    ].join(',');
+  });
+
+  const csv  = [headers.join(','), ...rows].join('\n');
+  const ts   = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `iron-arena-skin-snapshot-${ts}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showSaveToast('✓ Skin CSV downloaded', '#8a8aff');
+}
+
+// ============================================================
 
 function toggleHTP(btn) {
   btn.classList.toggle('open');
   document.getElementById('htp-body').classList.toggle('open');
 }
+
+// ============================================================
+// ══ BOSS FIGHT SYSTEM ══
+// ════════════════════════════════════════════════════════════
+// Firebase path: bosses/active  → live boss object or null
+// bosses/active/currentHp       → live HP (all players see it)
+// bosses/active/players/{uid}   → per-player damage
+//
+// In demo mode (no active Firebase boss), use the dev console:
+//   window.BOSS_DEV_SPAWN()   — spawn a test boss
+//   window.BOSS_DEV_END()     — end the test boss
+// ============================================================
+
+const BossSystem = (() => {
+  // ── State ──────────────────────────────────────────────────
+  let _boss       = null;   // current boss object
+  let _active     = false;  // is a boss fight live?
+  let _myUid      = null;   // set from wallet / device id
+  let _myDamage   = 0;
+  let _rosterData = {};     // uid → { name, skin, damage }
+  let _attackCd   = false;
+  let _attackCdTimer = null;
+  const ATTACK_CD_MS = 3000;
+
+  // Dev / demo mock roster
+  let _mockMode   = false;
+  let _mockBoss   = null;
+
+  // ── Init: wire up Firebase listener once FB is ready ───────
+  function init() {
+    // Poll for Firebase ready
+    let tries = 0;
+    const poll = setInterval(() => {
+      if (window._fbReady && window._fbOnValue) {
+        clearInterval(poll);
+        _wireFirebase();
+      } else if (++tries > 60) {
+        clearInterval(poll);
+        console.warn('[BossSystem] Firebase not ready — boss sync disabled. Dev controls still work.');
+      }
+    }, 200);
+
+    // Set player UID from wallet or device id
+    const stored = sessionStorage.getItem('arena_wallet') ||
+                   localStorage.getItem('pve-wallet-v1') ||
+                   localStorage.getItem('arena-device-id');
+    _myUid = stored ? stored.toLowerCase().replace(/[.#$/[\]]/g,'_') : 'local_player';
+  }
+
+  function _wireFirebase() {
+    try {
+      const db = window._fbDb;
+      const onValue = window._fbOnValue;
+      const ref = (path) => window._fbRef(db, path);
+
+      // Listen to boss/active — when it changes, update entire UI
+      onValue(ref('bosses/active'), snap => {
+        const data = snap.val();
+        if (data) {
+          _onBossActive(data);
+        } else {
+          _onBossEnded();
+        }
+      });
+    } catch(e) {
+      console.warn('[BossSystem] Firebase listener error:', e);
+    }
+  }
+
+  // ── Boss becomes active ────────────────────────────────────
+  function _onBossActive(data) {
+    _boss   = data;
+    _active = true;
+    _rosterData = data.players || {};
+
+    // Recalculate my damage from firebase
+    if (_rosterData[_myUid]) {
+      _myDamage = _rosterData[_myUid].damage || 0;
+    }
+
+    _setArenaLocked(true);
+    _renderBossPanel(true);
+    _renderBossHp();
+    _renderRoster();
+    _showSkillBossMode(true);
+    _updateEnhancementsUI(true);
+
+    document.getElementById('boss-alert-banner').classList.add('active');
+    document.getElementById('boss-alert-name-text').textContent = (data.name || 'THE BOSS').toUpperCase();
+    document.getElementById('boss-attack-btn').classList.add('active');
+  }
+
+  // ── Boss ends ──────────────────────────────────────────────
+  function _onBossEnded() {
+    _active = false;
+    _boss   = null;
+    _myDamage = 0;
+    _rosterData = {};
+
+    _setArenaLocked(false);
+    _renderBossPanel(false);
+    _showSkillBossMode(false);
+    _updateEnhancementsUI(false);
+
+    document.getElementById('boss-alert-banner').classList.remove('active');
+    document.getElementById('boss-attack-btn').classList.remove('active');
+  }
+
+  // ── Arena lock ─────────────────────────────────────────────
+  function _setArenaLocked(locked) {
+    const overlay = document.getElementById('arena-locked-overlay');
+    if (overlay) overlay.classList.toggle('active', locked);
+
+    // Disable the enter arena button and action buttons
+    const fightBtn = document.getElementById('btn-fight');
+    if (fightBtn) fightBtn.disabled = locked;
+
+    // Show/hide enhancements disabled notice
+    const note = document.getElementById('enhancements-disabled-note');
+    if (note) note.classList.toggle('active', locked);
+  }
+
+  // ── Render boss panel ──────────────────────────────────────
+  function _renderBossPanel(show) {
+    const panel = document.getElementById('boss-fight-panel');
+    if (!panel) return;
+    panel.classList.toggle('active', show);
+    if (show && _boss) {
+      document.getElementById('boss-name-display').textContent = (_boss.name || 'THE BOSS').toUpperCase();
+      document.getElementById('boss-tier-display').textContent = _boss.tier || '⬛ WORLD BOSS';
+    }
+  }
+
+  // ── Render HP bar ─────────────────────────────────────────
+  function _renderBossHp() {
+    if (!_boss) return;
+    const pct = Math.max(0, Math.min(100, (_boss.currentHp / _boss.maxHp) * 100));
+    const fill = document.getElementById('boss-hp-fill');
+    const text = document.getElementById('boss-hp-value-text');
+    if (fill) {
+      fill.style.width = pct + '%';
+      fill.classList.toggle('enraged', pct <= 25);
+    }
+    if (text) text.textContent = `${Number(_boss.currentHp).toLocaleString()} / ${Number(_boss.maxHp).toLocaleString()}`;
+
+    // Phase badge
+    const badge = document.getElementById('boss-phase-badge');
+    if (badge) {
+      const phase = pct <= 25 ? 4 : pct <= 50 ? 3 : pct <= 75 ? 2 : 1;
+      badge.classList.toggle('visible', phase >= 3);
+      badge.textContent = phase === 4 ? '☠ ENRAGED — FINAL STAND' : '⚠ RAGE PHASE ACTIVE';
+    }
+  }
+
+  // ── Render roster ──────────────────────────────────────────
+  function _renderRoster() {
+    const el = document.getElementById('boss-roster');
+    if (!el) return;
+    const players = Object.entries(_rosterData);
+    const total = players.reduce((s, [, p]) => s + (p.damage || 0), 0);
+    const sorted = players.sort((a, b) => (b[1].damage || 0) - (a[1].damage || 0));
+    el.innerHTML = sorted.map(([uid, p]) => {
+      const pct = total > 0 ? ((p.damage / total) * 100).toFixed(1) : '0.0';
+      const me = uid === _myUid;
+      return `<div class="roster-entry${me ? ' me' : ''}">
+        <span class="roster-skin">${p.skin || '⚔️'}</span>
+        <span class="roster-name">${p.name || uid.slice(0,8)}</span>
+        ${me ? '<span class="me-tag">YOU</span>' : ''}
+        <span class="roster-dmg">${Number(p.damage||0).toLocaleString()}</span>
+        <span class="roster-pct">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Skill boss mode (show boss note in skills panel) ──────
+  function _showSkillBossMode(show) {
+    const note = document.getElementById('skill-boss-info');
+    if (note) note.classList.toggle('active', show);
+  }
+
+  // ── Disable One Strike + potions during boss ──────────────
+  function _updateEnhancementsUI(bossActive) {
+    // One Strike
+    const osBtn  = document.getElementById('btn-one-strike');
+    const osBuy  = document.getElementById('btn-buy-one-strike');
+    if (osBtn)  { osBtn.disabled  = bossActive; if (bossActive) osBtn.classList.add('hidden'); }
+    if (osBuy)  { osBuy.disabled  = bossActive; }
+
+    // Potions
+    ['btn-buy-poison', 'btn-buy-miss'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) b.disabled = bossActive;
+    });
+
+    // In-fight potion display
+    const potDisplay = document.getElementById('potion-active-display');
+    if (potDisplay && bossActive) potDisplay.classList.add('hidden');
+  }
+
+  // ── Player attacks the boss ────────────────────────────────
+  function doAttack() {
+    if (!_active || _attackCd) return;
+
+    // Calculate damage using player's live stats from Iron Arena state
+    const atkLv   = (typeof state !== 'undefined') ? (state.skills?.attack  || 1) : 1;
+    const critLv  = (typeof state !== 'undefined') ? (state.skills?.crit    || 1) : 1;
+    const critChance = Math.min(0.95, 0.05 + critLv * 0.02);
+    const baseDmg = (80 + atkLv * 25) * (0.8 + Math.random() * 0.4);
+    const isCrit  = Math.random() < critChance;
+    const dmg     = Math.floor(baseDmg * (isCrit ? 2.2 : 1));
+
+    _dealDamage(dmg, isCrit ? `💥 CRITICAL! ${dmg.toLocaleString()} damage!` : `⚔ You strike for ${dmg.toLocaleString()} damage`, isCrit ? 'bspecial' : 'bdmg');
+    _floatDmg(isCrit ? `CRIT! ${dmg.toLocaleString()}` : dmg.toLocaleString(), isCrit ? '#e8c96a' : '#e74c3c');
+
+    // Cooldown
+    _attackCd = true;
+    const btn = document.getElementById('boss-attack-btn');
+    const bar = document.getElementById('boss-btn-cd-bar');
+    if (btn) btn.disabled = true;
+
+    let elapsed = 0;
+    _attackCdTimer = setInterval(() => {
+      elapsed += 80;
+      if (bar) bar.style.width = (elapsed / ATTACK_CD_MS * 100) + '%';
+      if (elapsed >= ATTACK_CD_MS) {
+        clearInterval(_attackCdTimer);
+        _attackCd = false;
+        if (btn) { btn.disabled = false; }
+        if (bar) bar.style.width = '0%';
+      }
+    }, 80);
+  }
+
+  // ── Skill level-up bonus hit ───────────────────────────────
+  function onSkillLevelUp(skillName, newLevel) {
+    if (!_active) return;
+    const bonusDmg = Math.floor(400 + newLevel * 180 + Math.random() * 250);
+    _dealDamage(bonusDmg,
+      `⚡ LEVEL UP! ${skillName} Lv${newLevel} → bonus strike: ${bonusDmg.toLocaleString()} dmg`,
+      'bspecial');
+    _floatDmg(`LV UP!`, '#c9a84c', true);
+  }
+
+  // ── Deal damage (local + Firebase write) ──────────────────
+  function _dealDamage(dmg, logMsg, logType) {
+    if (!_boss) return;
+    _myDamage += dmg;
+    _boss.currentHp = Math.max(0, _boss.currentHp - dmg);
+
+    // Update roster data locally for instant render
+    if (!_rosterData[_myUid]) {
+      const skin = (typeof shopState !== 'undefined' && SKINS)
+        ? (SKINS[shopState.equippedSkin]?.emoji || '⚔️') : '⚔️';
+      const name = (typeof shopState !== 'undefined')
+        ? (shopState.heroName || 'Warrior') : 'Warrior';
+      _rosterData[_myUid] = { name, skin, damage: 0 };
+    }
+    _rosterData[_myUid].damage = _myDamage;
+
+    _addLog(logMsg, logType);
+    _renderBossHp();
+    _renderRoster();
+
+    // Shake on big hits
+    if (dmg > 3000) {
+      document.body.classList.add('boss-shake');
+      setTimeout(() => document.body.classList.remove('boss-shake'), 400);
+    }
+
+    // Write to Firebase (if available)
+    if (window._fbReady && window._fbDb) {
+      try {
+        const db = window._fbDb;
+        const refFn = (path) => window._fbRef(db, path);
+        // Atomic: decrement HP and update my damage share
+        window._fbSet(refFn(`bosses/active/currentHp`), _boss.currentHp);
+        window._fbSet(refFn(`bosses/active/players/${_myUid}/damage`), _myDamage);
+        // Set player info on first hit
+        if (!_rosterData[_myUid]?.name) {
+          const skin = SKINS?.[shopState?.equippedSkin]?.emoji || '⚔️';
+          const name = shopState?.heroName || 'Warrior';
+          window._fbSet(refFn(`bosses/active/players/${_myUid}`), { name, skin, damage: _myDamage });
+        }
+      } catch(e) { /* silent */ }
+    }
+
+    // Check if boss died
+    if (_boss.currentHp <= 0) {
+      _addLog(`☠ ${_boss.name} has been slain!`, 'bsystem');
+      const total = Object.values(_rosterData).reduce((s,p) => s + (p.damage||0), 0);
+      // Even split among all players who dealt at least 1 damage
+      const participants = Object.values(_rosterData).filter(p => (p.damage || 0) > 0);
+      const myParticipated = (_myDamage > 0);
+      if (_boss.lootPool && myParticipated && participants.length > 0) {
+        const evenShare = Math.floor(_boss.lootPool / participants.length);
+        _addLog(`💰 Even split: ${_boss.lootPool.toLocaleString()} ÷ ${participants.length} players = ${evenShare.toLocaleString()} $PvE each`, 'bheal');
+      } else if (_boss.lootPool && !myParticipated) {
+        _addLog(`⚠ You dealt no damage — no loot earned`, 'batk');
+      }
+      setTimeout(() => {
+        if (window._fbReady && window._fbDb) {
+          window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), null);
+        } else {
+          _onBossEnded();
+        }
+      }, 1200);
+    }
+  }
+
+  // ── Boss battle log ────────────────────────────────────────
+  function _addLog(msg, type) {
+    const wrap = document.getElementById('boss-log-wrap');
+    if (!wrap) return;
+    const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const el = document.createElement('div');
+    el.className = `boss-log-entry ${type}`;
+    el.textContent = `[${ts}] ${msg}`;
+    wrap.prepend(el);
+    while (wrap.children.length > 35) wrap.removeChild(wrap.lastChild);
+  }
+
+  // ── Floating damage numbers ────────────────────────────────
+  function _floatDmg(text, color, isLevelUp = false) {
+    const el = document.createElement('div');
+    el.className = 'boss-float-dmg';
+    el.textContent = text;
+    el.style.color  = color;
+    el.style.left   = (20 + Math.random() * 50) + '%';
+    el.style.top    = isLevelUp ? '35%' : (15 + Math.random() * 25) + '%';
+    el.style.fontSize = isLevelUp ? '1.4rem' : '1.1rem';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  }
+
+  // ── Dev helpers ────────────────────────────────────────────
+  function devSpawn(opts = {}) {
+    const boss = {
+      name:      opts.name      || 'The Iron Colossus',
+      tier:      opts.tier      || '⬛ TITAN TIER · WORLD BOSS',
+      maxHp:     opts.maxHp     || 500000,
+      currentHp: opts.currentHp || 500000,
+      lootPool:  opts.lootPool  || 25000,
+      players: {},
+    };
+    if (window._fbReady && window._fbDb) {
+      window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), boss);
+    } else {
+      _mockMode = true;
+      _onBossActive(boss);
+    }
+  }
+
+  function devEnd() {
+    if (window._fbReady && window._fbDb) {
+      window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), null);
+    } else {
+      _onBossEnded();
+    }
+  }
+
+  // ── Expose ─────────────────────────────────────────────────
+  return { init, doAttack, onSkillLevelUp, devSpawn, devEnd,
+    isActive: () => _active, addLog: _addLog };
+})();
+
+// Expose dev helpers to console
+window.BOSS_DEV_SPAWN = (opts) => BossSystem.devSpawn(opts);
+window.BOSS_DEV_END   = () => BossSystem.devEnd();
+
+// Global attack handler called by boss attack button
+function bossDoAttack() { BossSystem.doAttack(); }
+
+// ── Boss Spawn Modal ───────────────────────────────────────
+function toggleBossSpawnModal() {
+  const modal   = document.getElementById('boss-spawn-modal');
+  const overlay = document.getElementById('boss-spawn-overlay');
+  const isOpen  = modal.style.display === 'block';
+  if (isOpen) { closeBossSpawnModal(); return; }
+
+  // Update warning if boss already active
+  const warn = document.getElementById('boss-spawn-active-warning');
+  const confirmBtn = document.getElementById('boss-spawn-confirm-btn');
+  const isLive = typeof BossSystem !== 'undefined' && BossSystem.isActive();
+  warn.style.display = isLive ? 'block' : 'none';
+  confirmBtn.disabled = isLive;
+  confirmBtn.style.opacity = isLive ? '0.35' : '1';
+
+  modal.style.display   = 'block';
+  overlay.style.display = 'block';
+}
+
+function closeBossSpawnModal() {
+  document.getElementById('boss-spawn-modal').style.display   = 'none';
+  document.getElementById('boss-spawn-overlay').style.display = 'none';
+}
+
+function spawnBossFromModal() {
+  if (typeof BossSystem !== 'undefined' && BossSystem.isActive()) return;
+  const name    = document.getElementById('boss-spawn-name').value.trim() || 'The Iron Colossus';
+  const maxHp   = parseInt(document.getElementById('boss-spawn-hp').value)   || 1000000;
+  const loot    = parseInt(document.getElementById('boss-spawn-loot').value) || 25000;
+  const tier    = document.getElementById('boss-spawn-tier').value;
+  BossSystem.devSpawn({ name, maxHp, currentHp: maxHp, lootPool: loot, tier });
+  document.getElementById('btn-boss-spawn').classList.add('boss-live');
+  document.getElementById('btn-boss-spawn').textContent = '💀 BOSS LIVE';
+  closeBossSpawnModal();
+}
+
+function endBossFromModal() {
+  BossSystem.devEnd();
+  document.getElementById('btn-boss-spawn').classList.remove('boss-live');
+  document.getElementById('btn-boss-spawn').textContent = '☠ BOSS FIGHT';
+  closeBossSpawnModal();
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeBossSpawnModal();
+});
+
+// Screen shake keyframe (boss system)
+const _bossShakeStyle = document.createElement('style');
+_bossShakeStyle.textContent = `
+  @keyframes bossBodyShake {
+    0%,100%{transform:translate(0,0) rotate(0deg)}
+    20%{transform:translate(-3px,2px) rotate(-0.4deg)}
+    40%{transform:translate(3px,-2px) rotate(0.4deg)}
+    60%{transform:translate(-2px,3px) rotate(-0.3deg)}
+    80%{transform:translate(2px,-1px) rotate(0.3deg)}
+  }
+  body.boss-shake { animation: bossBodyShake 0.4s ease-in-out; }
+`;
+document.head.appendChild(_bossShakeStyle);
+
+// Start BossSystem when DOM is ready
+document.addEventListener('DOMContentLoaded', () => BossSystem.init());
+// Also init immediately in case DOM already loaded
+if (document.readyState !== 'loading') BossSystem.init();
+
 
 </script>
 
@@ -3337,7 +4925,7 @@ function toggleHTP(btn) {
 
   <div class="lb-tabs">
     <button class="lb-tab active" onclick="switchLbTab('wave')">🌊 Highest Wave</button>
-    <button class="lb-tab" onclick="switchLbTab('xp')">⚡ Total XP</button>
+    <button class="lb-tab" onclick="switchLbTab('lifetime')">⚡ Lifetime XP</button>
     <button class="lb-tab" onclick="switchLbTab('guilds')">⚔ Guilds</button>
   </div>
 
@@ -3351,5 +4939,529 @@ function toggleHTP(btn) {
   </div>
 </div>
 
+
+
+
+
+
+
+
+
+<!-- ── PVE STORAGE + AUTH ── -->
+<script>
+// ═══════════════════════════════════════════════════════════════
+// PvE STORAGE — Firebase Realtime Database adapter
+// Replaces window.storage across all pages
+// ═══════════════════════════════════════════════════════════════
+// Paths:
+//   Private (per-user):  /users/{sanitizedAddress}/{key}
+//   Shared  (global):    /shared/{key}
+//
+// API mirrors window.storage:
+//   PveStorage.get(key, shared)   → { value: jsonString } | null
+//   PveStorage.set(key, value, shared)
+//   PveStorage.delete(key, shared)
+//   PveStorage.list(prefix, shared) → { keys: [...] }
+// ═══════════════════════════════════════════════════════════════
+
+const PveStorage = (() => {
+  let _db = null;
+  let _fbGet, _fbSet, _fbRemove, _fbRef, _fbChild;
+  let _userAddr = null;
+  let _ready = false;
+  let _readyCallbacks = [];
+
+  // ── Firebase init — reuses the instance already loaded by the top <script type="module"> ──
+  async function init() {
+    if (_ready) return;
+    try {
+      // Poll until the top module script has finished setting window._fbReady
+      let tries = 0;
+      while (!window._fbReady && tries++ < 40) {
+        await new Promise(r => setTimeout(r, 150));
+      }
+      if (!window._fbReady) throw new Error('window._fbReady never became true');
+
+      _db       = window._fbDb;
+      _fbGet    = window._fbGet;
+      _fbSet    = window._fbSet;
+      _fbRemove = (ref) => window._fbSet(ref, null); // Firebase v9 delete = set null
+      _fbRef    = (path) => window._fbRef(window._fbDb, path);
+      _fbChild  = window._fbChild;
+      _ready    = true;
+      _readyCallbacks.forEach(fn => fn());
+      _readyCallbacks = [];
+    } catch(e) {
+      console.error('PveStorage: Firebase init failed', e);
+    }
+  }
+
+  function onReady(fn) {
+    if (_ready) fn();
+    else _readyCallbacks.push(fn);
+  }
+
+  function setUser(address) {
+    // Sanitize address for Firebase path (no dots, $, #, [, ], /)
+    _userAddr = address ? address.toLowerCase().replace(/[.#$/[\]]/g, '_') : null;
+  }
+
+  // ── Path helpers ───────────────────────────────────────────
+  function _sanitizeKey(key) {
+    // Firebase keys can't contain . # $ [ ] /
+    return key.replace(/[.#$[\]]/g, '_').replace(/\//g, '__');
+  }
+
+  function _path(key, shared) {
+    const k = _sanitizeKey(key);
+    if (shared) return `shared/${k}`;
+    if (!_userAddr) throw new Error('PveStorage: user address not set — call setUser() first');
+    return `users/${_userAddr}/${k}`;
+  }
+
+  // ── Public API ─────────────────────────────────────────────
+  async function get(key, shared = false) {
+    if (!_ready) await init();
+    try {
+      const snap = await _fbGet(_fbRef(_path(key, shared)));
+      if (!snap.exists()) return null;
+      return { value: snap.val() };
+    } catch(e) {
+      console.warn('PveStorage.get error', key, e);
+      return null;
+    }
+  }
+
+  async function set(key, value, shared = false) {
+    if (!_ready) await init();
+    try {
+      await _fbSet(_fbRef(_path(key, shared)), value);
+      return { key, value, shared };
+    } catch(e) {
+      console.warn('PveStorage.set error', key, e);
+      return null;
+    }
+  }
+
+  async function del(key, shared = false) {
+    if (!_ready) await init();
+    try {
+      await _fbRemove(_fbRef(_path(key, shared)));
+      return { key, deleted: true, shared };
+    } catch(e) {
+      console.warn('PveStorage.delete error', key, e);
+      return null;
+    }
+  }
+
+  async function list(prefix = '', shared = false) {
+    if (!_ready) await init();
+    try {
+      const basePath = shared ? 'shared' : `users/${_userAddr}`;
+      const snap = await _fbGet(_fbRef(basePath));
+      if (!snap.exists()) return { keys: [] };
+      const allKeys = Object.keys(snap.val() || {});
+      const sanitizedPrefix = _sanitizeKey(prefix);
+      const keys = allKeys
+        .filter(k => !sanitizedPrefix || k.startsWith(sanitizedPrefix))
+        .map(k => k); // return as-is (already sanitized)
+      return { keys, shared };
+    } catch(e) {
+      console.warn('PveStorage.list error', e);
+      return { keys: [] };
+    }
+  }
+
+  // ── Install as window.storage replacement ─────────────────
+  // Called once after wallet connects
+  function install(address) {
+    setUser(address);
+    const realStorage = {
+      get:    (k, s) => get(k, s),
+      set:    (k, v, s) => set(k, v, s),
+      delete: (k, s) => del(k, s),
+      list:   (p, s) => list(p, s),
+    };
+    window.storage = realStorage;
+    // Flush any queued calls that came in before install()
+    if (window._storageQueue && window._storageQueue.length) {
+      window._storageQueue.forEach(fn => fn());
+      window._storageQueue = [];
+    }
+  }
+
+  // Auto-init Firebase on load
+  init();
+
+  return { init, install, setUser, get, set, delete: del, list, onReady };
+})();
+window.PveStorage = PveStorage;
+const PveStorage2 = PveStorage; // alias suppress re-declaration
+(()=>{
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// PvE WALLET AUTH v3 — Zero dependency, direct window.ethereum
+// No CDN imports. No ad-blocker issues. MetaMask / any EIP-1193
+// wallet works. Falls back gracefully if no wallet installed.
+//   pve-wallet-v1  →  { address, displayName, skin, uid }
+// ═══════════════════════════════════════════════════════════════
+const PveAuth = (() => {
+  const WALLET_KEY      = 'pve-wallet-v1';
+  let _profile          = null;
+  let _onLoginCb        = null;
+  let _onLoginListeners = [];
+
+  function _shortAddr(a) { return a ? a.slice(0,6)+'…'+a.slice(-4) : 'Wallet'; }
+  function _load()  { try { return JSON.parse(localStorage.getItem(WALLET_KEY)); } catch { return null; } }
+  function _save(p) { p ? localStorage.setItem(WALLET_KEY, JSON.stringify(p)) : localStorage.removeItem(WALLET_KEY); }
+
+  function _eth() { return window.ethereum || null; }
+
+  async function _handleAddress(rawAddr) {
+    if (!rawAddr) return;
+    const addr     = rawAddr.toLowerCase();
+    const existing = _load();
+    const stableUid = 'w_' + addr.slice(2);
+    if (existing && existing.address && existing.address.toLowerCase() === addr) {
+      _profile = existing;
+      _profile.uid = stableUid;
+    } else {
+      _profile = { uid: stableUid, address: rawAddr, displayName: _shortAddr(rawAddr), skin: '⚔' };
+    }
+    _save(_profile);
+    const storageKey = addr;
+    if (typeof PveStorage !== 'undefined') PveStorage.install(storageKey);
+    _updateNavUser();
+    _dismissModal();
+    if (_onLoginCb) { _onLoginCb(_profile); _onLoginCb = null; }
+    _onLoginListeners.forEach(fn => { try { fn(_profile); } catch(e){} });
+  }
+
+  // Listen for wallet account changes (user switches in MetaMask extension)
+  function _listenAccountChanges() {
+    const eth = _eth();
+    if (!eth) return;
+    eth.on('accountsChanged', async (accounts) => {
+      if (accounts && accounts[0]) {
+        await _handleAddress(accounts[0]);
+      } else {
+        // User disconnected all accounts
+        _profile = null; _save(null); _updateNavUser();
+        location.reload();
+      }
+    });
+  }
+
+  // ── Connect flow ──────────────────────────────────────────────
+  async function _connect() {
+    const errEl = document.getElementById('a-err');
+    const btnEl = document.getElementById('a-btn');
+    const eth = _eth();
+
+    if (!eth) {
+      // No wallet detected — show install link
+      if (errEl) errEl.innerHTML = 'No wallet detected. <a href="https://metamask.io/download/" target="_blank" style="color:#c8a96e">Install MetaMask</a> or use a wallet browser.';
+      return;
+    }
+
+    try {
+      if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Connecting…'; }
+      if (errEl) errEl.textContent = '';
+      const accounts = await eth.request({ method: 'eth_requestAccounts' });
+      if (accounts && accounts[0]) {
+        await _handleAddress(accounts[0]);
+      }
+    } catch(e) {
+      const msg = e.code === 4001 ? 'Connection cancelled.' : 'Connection failed. Try again.';
+      if (errEl) errEl.textContent = msg;
+      if (btnEl) { btnEl.disabled = false; btnEl.textContent = '⬡ Connect Wallet'; }
+    }
+  }
+
+  // ── Modal UI ──────────────────────────────────────────────────
+  function _injectModal() {
+    if (document.getElementById('pve-auth-modal')) return;
+    const el = document.createElement('div');
+    el.id = 'pve-auth-modal';
+    el.innerHTML = `
+<style>
+#pve-auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
+#pve-auth-box{background:#0e0e18;border:1px solid rgba(200,169,110,0.25);border-radius:16px;width:100%;max-width:320px;font-family:'Cinzel',serif;overflow:hidden;}
+#pve-auth-box .ah{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center;}
+#pve-auth-box .ah-logo{font-size:2.4rem;margin-bottom:10px;}
+#pve-auth-box .ah-title{font-size:0.9rem;letter-spacing:0.2em;text-transform:uppercase;color:#e8c96a;margin-bottom:6px;}
+#pve-auth-box .ah-sub{font-size:0.62rem;color:#6b6880;letter-spacing:0.05em;line-height:1.8;font-family:monospace;}
+#pve-auth-box .abody{padding:24px 24px 28px;display:flex;flex-direction:column;gap:12px;}
+#pve-auth-box .abtn{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;padding:14px;border-radius:8px;cursor:pointer;transition:all 0.2s;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(200,169,110,0.5);background:linear-gradient(135deg,rgba(200,169,110,0.12),rgba(200,169,110,0.04));color:#c8a96e;}
+#pve-auth-box .abtn:hover:not(:disabled){background:linear-gradient(135deg,rgba(200,169,110,0.24),rgba(200,169,110,0.12));border-color:#c8a96e;color:#e8c96a;}
+#pve-auth-box .abtn:disabled{opacity:0.45;cursor:not-allowed;}
+#pve-auth-box .aerr{font-size:0.62rem;color:#e06c6c;min-height:16px;text-align:center;font-family:monospace;line-height:1.5;}
+#pve-auth-box .afoot{font-size:0.55rem;color:#3a3848;text-align:center;font-family:monospace;letter-spacing:0.05em;}
+</style>
+<div id="pve-auth-overlay">
+  <div id="pve-auth-box">
+    <div class="ah">
+      <div class="ah-logo">⚔</div>
+      <div class="ah-title">Iron Arena</div>
+      <div class="ah-sub">Connect your wallet to save progress<br>and claim $PvE rewards</div>
+    </div>
+    <div class="abody">
+      <button class="abtn" id="a-btn" onclick="PveAuth._openModal()">
+        <span>⬡</span> Connect Wallet
+      </button>
+      <div class="aerr" id="a-err"></div>
+      <div class="afoot">🔒 Non-custodial — we never access your funds</div>
+    </div>
+  </div>
+</div>`;
+    document.body.appendChild(el);
+  }
+
+  function _dismissModal() {
+    const el = document.getElementById('pve-auth-modal');
+    if (el) el.remove();
+  }
+
+  // ── Nav chip ──────────────────────────────────────────────────
+  function _updateNavUser() {
+    const nav = document.getElementById('site-nav');
+    if (!nav) return;
+    let chip = nav.querySelector('.sn-user');
+    if (!chip) {
+      chip = document.createElement('span');
+      chip.className = 'sn-user';
+      chip.style.cssText = 'font-size:0.6rem;letter-spacing:0.06em;color:#c8a96e;white-space:nowrap;flex-shrink:0;cursor:pointer;padding:4px 8px;border:1px solid rgba(200,169,110,0.2);border-radius:6px;transition:all 0.18s;';
+      chip.onmouseenter = () => { chip.style.borderColor='rgba(200,169,110,0.5)';chip.style.color='#e8e6f0'; };
+      chip.onmouseleave = () => { chip.style.borderColor='rgba(200,169,110,0.2)';chip.style.color='#c8a96e'; };
+      nav.appendChild(chip);
+    }
+    if (_profile) {
+      chip.textContent = (_profile.skin||'⚔') + ' ' + (_profile.displayName || _shortAddr(_profile.address));
+      chip.title = 'Connected: ' + (_profile.address||'') + '\nSwitch wallets in MetaMask, or click to disconnect';
+      chip.onclick = () => {
+        if (confirm('Disconnect wallet?\n\nYour progress is saved to Firebase and will restore when you reconnect.')) {
+          _profile = null; _save(null); _updateNavUser();
+          location.reload();
+        }
+      };
+    } else {
+      chip.textContent = '⬡ Connect';
+      chip.onclick = () => _openModal();
+    }
+  }
+
+  async function _openModal() { _injectModal(); await _connect(); }
+
+  // ── Public API ────────────────────────────────────────────────
+  async function init() {
+    _profile = _load();
+    // Listen for account switches in MetaMask immediately
+    _listenAccountChanges();
+    // If we have a cached profile, try to silently verify wallet is still connected
+    if (_profile && _profile.address) {
+      const storageKey = _profile.address.toLowerCase();
+      if (typeof PveStorage !== 'undefined') PveStorage.install(storageKey);
+      const eth = _eth();
+      if (eth) {
+        try {
+          const accounts = await eth.request({ method: 'eth_accounts' }); // non-prompting check
+          if (accounts && accounts[0] && accounts[0].toLowerCase() === _profile.address.toLowerCase()) {
+            console.log('[PveAuth] Wallet silently reconnected:', _shortAddr(accounts[0]));
+          } else if (accounts && accounts[0]) {
+            // Different account active in MetaMask — update silently
+            await _handleAddress(accounts[0]);
+          }
+        } catch(e) { /* silent fail */ }
+      }
+    }
+    _updateNavUser();
+    return _profile;
+  }
+
+  function getProfile()       { return _profile; }
+  async function saveProfile(p) { _profile = { ..._profile, ...p }; _save(_profile); _updateNavUser(); }
+  function logout()           { _profile = null; _save(null); _updateNavUser(); location.reload(); }
+  function onLogin(fn)        { _onLoginListeners.push(fn); }
+
+  async function requireLogin() {
+    if (_profile && _profile.address) return _profile;
+    _injectModal();
+    return new Promise(resolve => {
+      _onLoginCb = (p) => { resolve(p); };
+    });
+  }
+
+  return { init, getProfile, saveProfile, logout, requireLogin, onLogin, _openModal, _shortAddr };
+})();
+window.PveAuth = PveAuth;
+
+window.PveStorage = PveStorage;
+
+
+
+// Phase 1: Render game immediately — playable before any wallet check
+(function() {
+  renderSkills();
+  resetPlayerStats();
+  updateXPDisplay();
+  renderSkinGrid();
+  updateFightButtonWalletGate();
+})();
+
+// Boot: mirrors Trade Together's window.addEventListener('load') pattern.
+// Check pve-wallet-v1 first (shared ecosystem key), then sessionStorage fallback.
+// Never blocks gameplay — save loads silently in background.
+window.addEventListener('load', function() {
+  var _sharedWallet = null;
+  try { _sharedWallet = JSON.parse(localStorage.getItem('pve-wallet-v1') || 'null'); } catch(e) {}
+
+  if (_sharedWallet && _sharedWallet.address) {
+    // Already connected via another PvE app — boot straight in
+    shopState.walletAddress = _sharedWallet.address;
+    sessionStorage.setItem('arena_wallet', _sharedWallet.address);
+    const storageKey = _sharedWallet.address.toLowerCase();
+    if (typeof PveStorage !== 'undefined') PveStorage.install(storageKey);
+    renderWalletDisplay();
+    updateFightButtonWalletGate();
+    _bootLoadSave(_sharedWallet.address);
+    return;
+  }
+
+  // Fall back to sessionStorage (same-tab reload)
+  var savedWallet = sessionStorage.getItem('arena_wallet');
+  if (savedWallet) {
+    shopState.walletAddress = savedWallet;
+    const storageKey = savedWallet.toLowerCase();
+    if (typeof PveStorage !== 'undefined') PveStorage.install(storageKey);
+    renderWalletDisplay();
+    updateFightButtonWalletGate();
+    _bootLoadSave(savedWallet);
+    return;
+  }
+
+  // No cached wallet — init PveAuth silently (won't prompt, just checks MetaMask)
+  (async () => {
+    try {
+      await PveAuth.init('arena');
+      const profile = PveAuth.getProfile();
+      if (profile && profile.address) {
+        shopState.walletAddress = profile.address;
+        sessionStorage.setItem('arena_wallet', profile.address);
+        if (typeof PveStorage !== 'undefined') PveStorage.install(profile.address.toLowerCase());
+        renderWalletDisplay();
+        updateFightButtonWalletGate();
+        _bootLoadSave(profile.address);
+      }
+    } catch(e) {}
+  })();
+});
+
+async function _bootLoadSave(addr) {
+  // Wait for Firebase (up to 5s), then load save
+  if (!window._fbReady) {
+    await new Promise(resolve => {
+      const check = setInterval(() => {
+        if (window._fbReady) { clearInterval(check); resolve(); }
+      }, 100);
+      setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+    });
+  }
+  const loaded = await loadGame().catch(() => false);
+  if (loaded) {
+    renderSkills();
+    resetPlayerStats();
+    updateXPDisplay();
+    renderSkinGrid();
+    renderWalletDisplay();
+    updateFightButtonWalletGate();
+    showSaveToast('⚔ Progress restored!', '#7a5c1e');
+    claimGuildXP();
+  }
+  const _skinEmoji = SKINS[shopState.equippedSkin]?.emoji || '🧙';
+  PveAuth.saveProfile({ skin: _skinEmoji }).catch(() => {});
+  setTimeout(() => {
+    const banner = document.getElementById('firebase-banner');
+    if (banner && window._fbReady) {
+      banner.classList.add('connected');
+      banner.innerHTML = '<span class="fb-icon">✅</span><strong>Firebase connected</strong> — Leaderboard & Guilds are live!';
+    }
+  }, 1500);
+}
+
+// ── Wallet switch handler ──────────────────────────────────────────
+PveAuth.onLogin(async (profile) => {
+  const newAddr = (profile.address || '').toLowerCase();
+  if (!newAddr) return;
+
+  const currentAddr = (shopState.walletAddress || '').toLowerCase();
+  // Use localStorage to detect same wallet on fresh load (shopState may be empty)
+  const savedAddr = (() => {
+    try {
+      const raw = localStorage.getItem('arena:' + currentAddr);
+      const d = raw ? JSON.parse(raw) : null;
+      return (d?.shop?.walletAddress || '').toLowerCase();
+    } catch(e) { return ''; }
+  })();
+  const isSameWallet = newAddr === currentAddr || newAddr === savedAddr;
+
+  if (isSameWallet) {
+    // Same wallet reconnecting — wire up storage without resetting state
+    shopState.walletAddress = profile.address;
+    sessionStorage.setItem('arena_wallet', profile.address);
+    if (typeof PveStorage !== 'undefined') PveStorage.install(newAddr);
+    renderWalletDisplay();
+    updateFightButtonWalletGate();
+    return;
+  }
+
+  // Different wallet — save current progress, then switch
+  showSaveToast('🔄 Wallet switched — saving...', '#c9a84c');
+  await saveGame().catch(() => {});
+
+  lbMyKey = null;
+  shopState.walletAddress = profile.address;
+  sessionStorage.setItem('arena_wallet', profile.address);
+
+  Object.assign(state.skills,      { stamina:1, attack:1, defense:1, crit:1 });
+  Object.assign(state.skillClicks, { stamina:0, attack:0, defense:0, crit:0 });
+  state.totalXP = 0; state.lifetimeXP = 0;
+  state.enemiesDefeated = 0; state.wave = 1;
+  shopState.heroName = ''; shopState.nameChangeCount = 0;
+  shopState.equippedSkin = 0; shopState.ownedSkins = [0];
+  shopState.oneStrikeUnlocked = false; shopState.oneStrikeUsedThisMatch = false;
+  potionState.poison.owned = false; potionState.poison.activeThisFight = false;
+  potionState.miss.owned   = false; potionState.miss.activeThisFight   = false;
+  guildState.myGuildCode = null; guildState.myGuildName = null; guildState.isLeader = false;
+
+  const combatantNameEl = document.querySelector('.combatant-name');
+  if (combatantNameEl) combatantNameEl.textContent = 'THE WARRIOR';
+  const heroNameInput = document.getElementById('hero-name-input');
+  if (heroNameInput) heroNameInput.value = '';
+  const nameCostLabel = document.getElementById('name-cost-label');
+  if (nameCostLabel) nameCostLabel.textContent = 'Free first name';
+  document.getElementById('wave-num').textContent    = '1';
+  document.getElementById('enemy-count').textContent = '0';
+  document.getElementById('btn-fight').textContent   = '⚔ ENTER THE ARENA';
+  document.getElementById('player-sprite').textContent = '🧙';
+
+  if (typeof PveStorage !== 'undefined') PveStorage.install(newAddr);
+
+  const loaded = await loadGame().catch(() => false);
+  renderSkills();
+  resetPlayerStats();
+  updateXPDisplay();
+  renderSkinGrid();
+  renderWalletDisplay();
+  updateFightButtonWalletGate();
+
+  showSaveToast(loaded ? '✔ Wallet switched — save loaded!' : '✔ New wallet — fresh start!', '#27ae60');
+  if (loaded) claimGuildXP();
+
+  const _skinEmoji = SKINS[shopState.equippedSkin]?.emoji || '🧙';
+  await PveAuth.saveProfile({ skin: _skinEmoji }).catch(() => {});
+});
+</script>
 </body>
 </html>
