@@ -2204,14 +2204,6 @@
 
     <!-- Combatants -->
     <div class="panel arena-panel" style="position:relative;">
-
-      <!-- Arena locked overlay during boss fight -->
-      <div id="arena-locked-overlay">
-        <div class="arena-locked-icon">🔒</div>
-        <div class="arena-locked-title">ARENA LOCKED</div>
-        <div class="arena-locked-sub">A Boss Fight is in progress. The regular arena is suspended until the boss falls.</div>
-        <button class="arena-locked-btn" onclick="document.getElementById('boss-fight-panel').scrollIntoView({behavior:'smooth'})">View Boss Fight ↑</button>
-      </div>
       <div class="combatants">
         <!-- Player -->
         <div class="combatant-card" id="player-card">
@@ -4504,32 +4496,55 @@ const BossSystem = (() => {
 
   // ── Init: wire up Firebase listener once FB is ready ───────
   function init() {
-    // Poll for Firebase ready
+    _resolveMyUid();
+
+    // If Firebase is already ready (module loaded before this runs), wire immediately
+    if (window._fbReady && window._fbOnValue) {
+      _wireFirebase();
+      return;
+    }
+
+    // Otherwise poll
     let tries = 0;
     const poll = setInterval(() => {
       if (window._fbReady && window._fbOnValue) {
         clearInterval(poll);
         _wireFirebase();
-      } else if (++tries > 60) {
+      } else if (++tries > 80) {
         clearInterval(poll);
-        console.warn('[BossSystem] Firebase not ready — boss sync disabled. Dev controls still work.');
+        console.warn('[BossSystem] Firebase not ready after 16s — live sync disabled.');
       }
     }, 200);
+  }
 
-    // Set player UID from wallet or device id
-    const stored = sessionStorage.getItem('arena_wallet') ||
-                   localStorage.getItem('pve-wallet-v1') ||
-                   localStorage.getItem('arena-device-id');
-    _myUid = stored ? stored.toLowerCase().replace(/[.#$/[\]]/g,'_') : 'local_player';
+  function _resolveMyUid() {
+    // Try every storage key the game uses for player identity
+    const raw =
+      sessionStorage.getItem('arena_wallet') ||
+      localStorage.getItem('arena_wallet')   ||
+      localStorage.getItem('pve-wallet-v1')  ||
+      localStorage.getItem('arena-device-id');
+    if (raw) {
+      _myUid = raw.toLowerCase().replace(/[.#$/[\]]/g, '_').slice(0, 60);
+    } else {
+      // Generate a stable device ID so the player can always participate
+      let devId = localStorage.getItem('boss-device-id');
+      if (!devId) {
+        devId = 'dev_' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('boss-device-id', devId);
+      }
+      _myUid = devId;
+    }
   }
 
   function _wireFirebase() {
     try {
+      _resolveMyUid(); // wallet may have connected since init() ran
       const db = window._fbDb;
       const onValue = window._fbOnValue;
       const ref = (path) => window._fbRef(db, path);
 
-      // Listen to boss/active — when it changes, update entire UI
+      // Listen to bosses/active — fires immediately with current value, then on every change
       onValue(ref('bosses/active'), snap => {
         const data = snap.val();
         if (data) {
@@ -4584,14 +4599,9 @@ const BossSystem = (() => {
 
   // ── Arena lock ─────────────────────────────────────────────
   function _setArenaLocked(locked) {
-    const overlay = document.getElementById('arena-locked-overlay');
-    if (overlay) overlay.classList.toggle('active', locked);
-
-    // Disable the enter arena button and action buttons
-    const fightBtn = document.getElementById('btn-fight');
-    if (fightBtn) fightBtn.disabled = locked;
-
-    // Show/hide enhancements disabled notice
+    // Soft interrupt only — arena stays fully open during boss fights.
+    // The boss panel + alert banner are sufficient signal.
+    // Only show/hide the optional enhancements note.
     const note = document.getElementById('enhancements-disabled-note');
     if (note) note.classList.toggle('active', locked);
   }
@@ -4810,33 +4820,38 @@ const BossSystem = (() => {
 
   // ── Dev helpers ────────────────────────────────────────────
   function devSpawn(opts = {}) {
+    _resolveMyUid(); // make sure UID is fresh before spawning
     const boss = {
       name:      opts.name      || 'The Iron Colossus',
       tier:      opts.tier      || '⬛ TITAN TIER · WORLD BOSS',
       maxHp:     opts.maxHp     || 500000,
       currentHp: opts.currentHp || 500000,
       lootPool:  opts.lootPool  || 25000,
-      players: {},
+      players:   {},
     };
+    // Always activate locally for instant UI response
+    _onBossActive(boss);
+    // Also write to Firebase so other players see it
     if (window._fbReady && window._fbDb) {
-      window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), boss);
-    } else {
-      _mockMode = true;
-      _onBossActive(boss);
+      try {
+        window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), boss);
+      } catch(e) { console.warn('[BossSystem] Firebase write failed:', e); }
     }
   }
 
   function devEnd() {
+    _onBossEnded();
     if (window._fbReady && window._fbDb) {
-      window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), null);
-    } else {
-      _onBossEnded();
+      try {
+        window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), null);
+      } catch(e) { console.warn('[BossSystem] Firebase end failed:', e); }
     }
   }
 
   // ── Expose ─────────────────────────────────────────────────
   return { init, doAttack, onSkillLevelUp, devSpawn, devEnd,
-    isActive: () => _active, addLog: _addLog };
+    isActive: () => _active, addLog: _addLog,
+    _resolveMyUid };
 })();
 
 // Expose dev helpers to console
@@ -4912,6 +4927,13 @@ document.head.appendChild(_bossShakeStyle);
 document.addEventListener('DOMContentLoaded', () => BossSystem.init());
 // Also init immediately in case DOM already loaded
 if (document.readyState !== 'loading') BossSystem.init();
+
+// Update boss UID when wallet connects
+if (typeof PveAuth !== 'undefined') {
+  PveAuth.onLogin(profile => {
+    if (profile?.address) BossSystem._resolveMyUid?.();
+  });
+}
 
 
 </script>
