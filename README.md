@@ -1891,7 +1891,155 @@
     background:var(--red2); transition:width 0.1s linear; width:0%;
   }
 
-  /* Boss spawn button in save bar */
+  #boss-heavy-btn {
+    display:none;
+    width:100%; padding:12px;
+    background:linear-gradient(135deg,#0d0000,#1a0800);
+    border:1px solid #7a1a10; color:#c0392b;
+    font-family:'Cinzel Decorative',serif; font-size:0.8rem; letter-spacing:2px;
+    cursor:pointer; text-transform:uppercase; position:relative; overflow:hidden;
+    transition:all 0.2s; margin-bottom:10px;
+  }
+  #boss-heavy-btn.active { display:block; }
+  #boss-heavy-btn:not(:disabled):hover {
+    background:linear-gradient(135deg,#1a0000,#300500);
+    box-shadow:0 0 18px rgba(139,0,0,0.5); border-color:var(--red2); color:var(--red2);
+  }
+  #boss-heavy-btn:not(:disabled):active { transform:scale(0.98); }
+  #boss-heavy-btn:disabled { opacity:0.35; cursor:not-allowed; }
+
+  /* ═══════════════════════════════════════
+     BOSS ANIMATED GRAPHIC
+  ═══════════════════════════════════════ */
+
+  .boss-graphic-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 130px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+
+  /* Aura ring behind the boss */
+  .boss-aura {
+    position: absolute;
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,0,0,0.35) 0%, transparent 70%);
+    animation: bossAuraPulse 2.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .boss-aura.rage {
+    background: radial-gradient(circle, rgba(255,80,0,0.45) 0%, transparent 70%);
+    animation: bossAuraPulse 0.8s ease-in-out infinite;
+  }
+  @keyframes bossAuraPulse {
+    0%,100% { transform: scale(1);   opacity: 0.6; }
+    50%     { transform: scale(1.25); opacity: 1;   }
+  }
+
+  /* Ground shadow */
+  .boss-shadow {
+    position: absolute;
+    bottom: 8px;
+    width: 80px; height: 14px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.7) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: bossShadowBreath 2.5s ease-in-out infinite;
+  }
+  @keyframes bossShadowBreath {
+    0%,100% { transform: scaleX(1);   opacity: 0.7; }
+    50%     { transform: scaleX(1.15); opacity: 0.4; }
+  }
+
+  /* The sprite itself */
+  .boss-sprite-el {
+    font-size: 5.5rem;
+    line-height: 1;
+    display: block;
+    position: relative;
+    z-index: 2;
+    transform-origin: center bottom;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(139,0,0,0.6));
+    animation: bossIdle 3s ease-in-out infinite;
+    will-change: transform, filter;
+    cursor: default;
+    user-select: none;
+  }
+  .boss-sprite-el.rage {
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.8)) drop-shadow(0 0 30px rgba(255,80,0,0.9));
+    animation: bossIdleRage 1.2s ease-in-out infinite;
+  }
+
+  /* Idle float */
+  @keyframes bossIdle {
+    0%,100% { transform: translateY(0)   scale(1)    rotate(0deg); }
+    30%     { transform: translateY(-8px) scale(1.02) rotate(-1deg); }
+    60%     { transform: translateY(-5px) scale(1.01) rotate(0.5deg); }
+  }
+  /* Enraged idle — faster, more erratic */
+  @keyframes bossIdleRage {
+    0%,100% { transform: translateY(0)    scale(1)    rotate(0deg); }
+    25%     { transform: translateY(-10px) scale(1.05) rotate(-2deg); }
+    75%     { transform: translateY(-4px)  scale(1.03) rotate(2deg); }
+  }
+
+  /* Hit flash */
+  .boss-sprite-el.boss-taking-hit {
+    animation: bossTakingHit 0.5s ease forwards !important;
+  }
+  @keyframes bossTakingHit {
+    0%   { transform: translateX(0)    scale(1)    rotate(0deg);  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(139,0,0,0.6)); }
+    15%  { transform: translateX(18px) scale(0.88) rotate(4deg);  filter: brightness(3) saturate(0) drop-shadow(0 0 30px white); }
+    35%  { transform: translateX(-12px)scale(0.92) rotate(-3deg); filter: brightness(2) drop-shadow(0 0 20px rgba(255,80,0,1)); }
+    60%  { transform: translateX(7px)  scale(0.97) rotate(1deg);  filter: brightness(1.4); }
+    100% { transform: translateX(0)    scale(1)    rotate(0deg);  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(139,0,0,0.6)); }
+  }
+
+  /* Boss attacks */
+  .boss-sprite-el.boss-attacking {
+    animation: bossAttack 0.7s cubic-bezier(0.22,1,0.36,1) forwards !important;
+  }
+  @keyframes bossAttack {
+    0%   { transform: translateX(0)     translateY(0)     scale(1)   rotate(0deg);  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.8)); }
+    15%  { transform: translateX(20px)  translateY(-25px) scale(1.5) rotate(8deg);  filter: drop-shadow(0 0 20px rgba(255,60,0,0.7)) brightness(1.4); }
+    25%  { transform: translateX(20px)  translateY(-38px) scale(1.7) rotate(12deg); filter: drop-shadow(0 0 40px rgba(255,20,0,1))   brightness(2); }
+    50%  { transform: translateX(-80px) translateY(-8px)  scale(2.0) rotate(-5deg); filter: drop-shadow(0 0 60px rgba(255,0,0,1))   brightness(2.5); }
+    65%  { transform: translateX(-60px) translateY(0)     scale(1.4) rotate(-2deg); filter: drop-shadow(0 0 25px rgba(255,60,0,0.6)); }
+    82%  { transform: translateX(-8px)  translateY(0)     scale(1.05) rotate(0deg); }
+    100% { transform: translateX(0)     translateY(0)     scale(1)    rotate(0deg); filter: drop-shadow(0 6px 16px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(139,0,0,0.6)); }
+  }
+
+  /* Particle burst on hit */
+  .boss-hit-particle {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10;
+    animation: bossParticleBurst 0.8s ease-out forwards;
+  }
+  @keyframes bossParticleBurst {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: var(--p-end) scale(0); opacity: 0; }
+  }
+
+  /* Boss name + health label under graphic */
+  .boss-graphic-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-align: center;
+    margin-top: 4px;
+    position: relative;
+    z-index: 2;
+  }
+
+
   .btn-boss-spawn {
     background: linear-gradient(135deg, #1a0000, #2d0000);
     border: 1px solid var(--red);
@@ -2179,6 +2327,14 @@
     <div class="boss-tier-display" id="boss-tier-display">⬛ TITAN TIER · WORLD BOSS</div>
     <div class="boss-phase-badge" id="boss-phase-badge">⚠ RAGE PHASE ACTIVE</div>
 
+    <!-- Boss animated graphic -->
+    <div class="boss-graphic-wrap" id="boss-graphic-wrap">
+      <div class="boss-aura" id="boss-aura"></div>
+      <span class="boss-sprite-el" id="boss-sprite-el">👁️</span>
+      <div class="boss-shadow"></div>
+      <div class="boss-graphic-label" id="boss-graphic-label">THE IRON COLOSSUS</div>
+    </div>
+
     <div class="boss-hp-row">
       <span class="boss-hp-label"><span class="live-dot"></span> BOSS HP — LIVE</span>
       <span class="boss-hp-value" id="boss-hp-value-text">1,000,000 / 1,000,000</span>
@@ -2190,9 +2346,14 @@
     <div class="roster-section-title">⚔ ACTIVE COMBATANTS</div>
     <div class="boss-roster" id="boss-roster"></div>
 
-    <button id="boss-attack-btn" onclick="bossDoAttack()">
+    <button id="boss-attack-btn" onclick="bossDoAttack('light')">
       ⚔ STRIKE THE BOSS ⚔
       <div class="boss-btn-cd-bar" id="boss-btn-cd-bar"></div>
+    </button>
+    <button id="boss-heavy-btn" onclick="bossDoAttack('heavy')">
+      💀 HEAVY STRIKE 💀
+      <div style="font-size:0.68rem;opacity:0.65;margin-top:2px;font-family:'IM Fell English',serif;font-style:italic;">2× damage · 8s cooldown</div>
+      <div class="boss-btn-cd-bar" id="boss-heavy-cd-bar"></div>
     </button>
 
     <div class="boss-panel-title" style="margin-top:8px;">📜 BATTLE FEED</div>
@@ -4486,9 +4647,12 @@ const BossSystem = (() => {
   let _myUid      = null;   // set from wallet / device id
   let _myDamage   = 0;
   let _rosterData = {};     // uid → { name, skin, damage }
-  let _attackCd   = false;
+  let _attackCd      = false;
+  let _heavyAttackCd = false;
   let _attackCdTimer = null;
+  let _heavyCdTimer  = null;
   const ATTACK_CD_MS = 3000;
+  const HEAVY_CD_MS  = 8000;
 
   // Dev / demo mock roster
   let _mockMode   = false;
@@ -4571,6 +4735,7 @@ const BossSystem = (() => {
 
     _setArenaLocked(true);
     _renderBossPanel(true);
+    _renderBossSprite();
     _renderBossHp();
     _renderRoster();
     _showSkillBossMode(true);
@@ -4579,6 +4744,7 @@ const BossSystem = (() => {
     document.getElementById('boss-alert-banner').classList.add('active');
     document.getElementById('boss-alert-name-text').textContent = (data.name || 'THE BOSS').toUpperCase();
     document.getElementById('boss-attack-btn').classList.add('active');
+    document.getElementById('boss-heavy-btn').classList.add('active');
   }
 
   // ── Boss ends ──────────────────────────────────────────────
@@ -4595,6 +4761,7 @@ const BossSystem = (() => {
 
     document.getElementById('boss-alert-banner').classList.remove('active');
     document.getElementById('boss-attack-btn').classList.remove('active');
+    document.getElementById('boss-heavy-btn').classList.remove('active');
   }
 
   // ── Arena lock ─────────────────────────────────────────────
@@ -4628,6 +4795,12 @@ const BossSystem = (() => {
       fill.classList.toggle('enraged', pct <= 25);
     }
     if (text) text.textContent = `${Number(_boss.currentHp).toLocaleString()} / ${Number(_boss.maxHp).toLocaleString()}`;
+
+    // Sync sprite rage state
+    const spriteEl = document.getElementById('boss-sprite-el');
+    const auraEl   = document.getElementById('boss-aura');
+    if (spriteEl) spriteEl.classList.toggle('rage', pct <= 25);
+    if (auraEl)   auraEl.classList.toggle('rage', pct <= 25);
 
     // Phase badge
     const badge = document.getElementById('boss-phase-badge');
@@ -4684,34 +4857,62 @@ const BossSystem = (() => {
   }
 
   // ── Player attacks the boss ────────────────────────────────
-  function doAttack() {
-    if (!_active || _attackCd) return;
+  function doAttack(type = 'light') {
+    const isHeavy = type === 'heavy';
+    if (!_active) return;
+    if (isHeavy && _heavyAttackCd) return;
+    if (!isHeavy && _attackCd) return;
 
-    // Calculate damage using player's live stats from Iron Arena state
-    const atkLv   = (typeof state !== 'undefined') ? (state.skills?.attack  || 1) : 1;
-    const critLv  = (typeof state !== 'undefined') ? (state.skills?.crit    || 1) : 1;
-    const critChance = Math.min(0.95, 0.05 + critLv * 0.02);
-    const baseDmg = (80 + atkLv * 25) * (0.8 + Math.random() * 0.4);
-    const isCrit  = Math.random() < critChance;
-    const dmg     = Math.floor(baseDmg * (isCrit ? 2.2 : 1));
+    // Pull live stats from Iron Arena game state
+    const atkLv      = (typeof state !== 'undefined') ? (state.skills?.attack || 1) : 1;
+    const critLv     = (typeof state !== 'undefined') ? (state.skills?.crit   || 1) : 1;
+    const playerName = (typeof shopState !== 'undefined' && shopState.heroName)
+                       ? shopState.heroName : 'Warrior';
 
-    _dealDamage(dmg, isCrit ? `💥 CRITICAL! ${dmg.toLocaleString()} damage!` : `⚔ You strike for ${dmg.toLocaleString()} damage`, isCrit ? 'bspecial' : 'bdmg');
-    _floatDmg(isCrit ? `CRIT! ${dmg.toLocaleString()}` : dmg.toLocaleString(), isCrit ? '#e8c96a' : '#e74c3c');
+    // Crit chance scales with crit skill: 5% base + 2% per level, cap 80%
+    const critChance = Math.min(0.80, 0.05 + critLv * 0.02);
+    // Crit multiplier scales too: 1.5× base + 0.05 per level, cap 3×
+    const critMult   = Math.min(3.0, 1.5 + critLv * 0.05);
 
-    // Cooldown
-    _attackCd = true;
-    const btn = document.getElementById('boss-attack-btn');
-    const bar = document.getElementById('boss-btn-cd-bar');
+    // Base damage — heavy is 2× base but same crit system
+    const baseDmg    = isHeavy
+      ? (160 + atkLv * 50) * (0.8 + Math.random() * 0.4)
+      : (80  + atkLv * 25) * (0.8 + Math.random() * 0.4);
+    const isCrit     = Math.random() < critChance;
+    const dmg        = Math.floor(baseDmg * (isCrit ? critMult : 1));
+
+    const hitWord    = isHeavy ? 'HEAVY STRIKE' : 'strikes';
+    const logMsg     = isCrit
+      ? `💥 ${playerName} CRITICAL ${isHeavy ? 'HEAVY ' : ''}HIT — ${dmg.toLocaleString()} dmg! (×${critMult.toFixed(1)})`
+      : `${isHeavy ? '💀' : '⚔'} ${playerName} ${hitWord} for ${dmg.toLocaleString()} dmg`;
+    const logType    = isCrit ? 'bspecial' : 'bdmg';
+
+    _dealDamage(dmg, logMsg, logType);
+    _floatDmg(
+      isCrit ? `CRIT! ${dmg.toLocaleString()}` : dmg.toLocaleString(),
+      isCrit ? '#e8c96a' : (isHeavy ? '#ff6b00' : '#e74c3c')
+    );
+
+    // Start cooldown for the button used
+    const cdMs  = isHeavy ? HEAVY_CD_MS : ATTACK_CD_MS;
+    const btnId = isHeavy ? 'boss-heavy-btn'  : 'boss-attack-btn';
+    const barId = isHeavy ? 'boss-heavy-cd-bar' : 'boss-btn-cd-bar';
+    const btn   = document.getElementById(btnId);
+    const bar   = document.getElementById(barId);
+
+    if (isHeavy) _heavyAttackCd = true;
+    else         _attackCd      = true;
     if (btn) btn.disabled = true;
 
     let elapsed = 0;
-    _attackCdTimer = setInterval(() => {
+    const timer = setInterval(() => {
       elapsed += 80;
-      if (bar) bar.style.width = (elapsed / ATTACK_CD_MS * 100) + '%';
-      if (elapsed >= ATTACK_CD_MS) {
-        clearInterval(_attackCdTimer);
-        _attackCd = false;
-        if (btn) { btn.disabled = false; }
+      if (bar) bar.style.width = (elapsed / cdMs * 100) + '%';
+      if (elapsed >= cdMs) {
+        clearInterval(timer);
+        if (isHeavy) _heavyAttackCd = false;
+        else         _attackCd      = false;
+        if (btn) btn.disabled = false;
         if (bar) bar.style.width = '0%';
       }
     }, 80);
@@ -4720,9 +4921,11 @@ const BossSystem = (() => {
   // ── Skill level-up bonus hit ───────────────────────────────
   function onSkillLevelUp(skillName, newLevel) {
     if (!_active) return;
+    const playerName = (typeof shopState !== 'undefined' && shopState.heroName)
+                       ? shopState.heroName : 'Warrior';
     const bonusDmg = Math.floor(400 + newLevel * 180 + Math.random() * 250);
     _dealDamage(bonusDmg,
-      `⚡ LEVEL UP! ${skillName} Lv${newLevel} → bonus strike: ${bonusDmg.toLocaleString()} dmg`,
+      `⚡ ${playerName} — ${skillName} Lv${newLevel} bonus strike: ${bonusDmg.toLocaleString()} dmg`,
       'bspecial');
     _floatDmg(`LV UP!`, '#c9a84c', true);
   }
@@ -4746,6 +4949,7 @@ const BossSystem = (() => {
     _addLog(logMsg, logType);
     _renderBossHp();
     _renderRoster();
+    _bossSpriteHit(); // animate boss taking the hit
 
     // Shake on big hits
     if (dmg > 3000) {
@@ -4803,6 +5007,8 @@ const BossSystem = (() => {
     el.textContent = `[${ts}] ${msg}`;
     wrap.prepend(el);
     while (wrap.children.length > 35) wrap.removeChild(wrap.lastChild);
+    // Animate boss lunging when it attacks
+    if (type === 'batk') _bossSpriteAttack();
   }
 
   // ── Floating damage numbers ────────────────────────────────
@@ -4816,6 +5022,94 @@ const BossSystem = (() => {
     el.style.fontSize = isLevelUp ? '1.4rem' : '1.1rem';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1200);
+  }
+
+  // ── Boss sprite map ────────────────────────────────────────
+  const BOSS_SPRITES = {
+    'the iron colossus':    '🗿',
+    'world breaker':        '🌍',
+    'astral executioner':   '⚡',
+    'undying behemoth':     '🦣',
+    'void architect':       '🌀',
+    'the first evil':       '👁️',
+    'void emperor':         '🌑',
+    'eclipse wraith':       '🌘',
+    'blood leviathan':      '🩸',
+    'eternal devourer':     '🕳️',
+    'demon lord':           '😈',
+    'chaos titan':          '🔥',
+    'soul reaper':          '💀',
+    'abyssal kraken':       '🐙',
+    'inferno phoenix':      '🦅',
+    'storm colossus':       '⛈️',
+    'shadow dragon':        '🐉',
+    'arcane lich':          '☠️',
+  };
+  const TIER_SPRITES = {
+    'titan': '👁️', 'mythic': '🌑', 'legendary': '😈', 'epic': '🐉', 'rare': '🗡️',
+  };
+
+  function _getBossSprite(name, tier) {
+    const key = (name || '').toLowerCase().trim();
+    if (BOSS_SPRITES[key]) return BOSS_SPRITES[key];
+    for (const [k, v] of Object.entries(BOSS_SPRITES)) {
+      if (key.includes(k) || k.includes(key.split(' ')[0])) return v;
+    }
+    const t = (tier || '').toLowerCase();
+    for (const [k, v] of Object.entries(TIER_SPRITES)) {
+      if (t.includes(k)) return v;
+    }
+    return '💀';
+  }
+
+  function _renderBossSprite() {
+    if (!_boss) return;
+    const el    = document.getElementById('boss-sprite-el');
+    const label = document.getElementById('boss-graphic-label');
+    const aura  = document.getElementById('boss-aura');
+    if (!el) return;
+    el.textContent = _getBossSprite(_boss.name, _boss.tier);
+    if (label) label.textContent = (_boss.name || 'BOSS').toUpperCase();
+    const pct = _boss.maxHp > 0 ? (_boss.currentHp / _boss.maxHp) * 100 : 100;
+    el.classList.toggle('rage', pct <= 25);
+    if (aura) aura.classList.toggle('rage', pct <= 25);
+  }
+
+  function _bossSpriteHit() {
+    const el = document.getElementById('boss-sprite-el');
+    if (!el) return;
+    el.classList.remove('boss-taking-hit', 'boss-attacking');
+    void el.offsetWidth;
+    el.classList.add('boss-taking-hit');
+    setTimeout(() => el.classList.remove('boss-taking-hit'), 520);
+    _spawnHitParticles();
+  }
+
+  function _bossSpriteAttack() {
+    const el = document.getElementById('boss-sprite-el');
+    if (!el) return;
+    el.classList.remove('boss-taking-hit', 'boss-attacking');
+    void el.offsetWidth;
+    el.classList.add('boss-attacking');
+    setTimeout(() => el.classList.remove('boss-attacking'), 720);
+  }
+
+  function _spawnHitParticles() {
+    const wrap = document.getElementById('boss-graphic-wrap');
+    if (!wrap) return;
+    const colors = ['#e74c3c','#f39c12','#e8c96a','#ff6b00','#ffffff'];
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('div');
+      p.className = 'boss-hit-particle';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.left = '50%'; p.style.top = '40%';
+      const angle = Math.random() * Math.PI * 2;
+      const dist  = 30 + Math.random() * 55;
+      p.style.setProperty('--p-end', `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`);
+      p.style.animationDelay = (Math.random() * 80) + 'ms';
+      wrap.appendChild(p);
+      setTimeout(() => p.remove(), 900);
+    }
   }
 
   // ── Dev helpers ────────────────────────────────────────────
@@ -4859,7 +5153,7 @@ window.BOSS_DEV_SPAWN = (opts) => BossSystem.devSpawn(opts);
 window.BOSS_DEV_END   = () => BossSystem.devEnd();
 
 // Global attack handler called by boss attack button
-function bossDoAttack() { BossSystem.doAttack(); }
+function bossDoAttack(type) { BossSystem.doAttack(type || 'light'); }
 
 // ── Boss Spawn Modal ───────────────────────────────────────
 function toggleBossSpawnModal() {
