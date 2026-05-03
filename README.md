@@ -8,7 +8,7 @@
 <!-- Firebase SDK — initialized via Cloudflare Worker -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, set, get, child, query, orderByKey, limitToFirst, onValue, push, serverTimestamp }
+  import { getDatabase, ref, set, get, child, query, orderByKey, limitToFirst, onValue, push, serverTimestamp, runTransaction }
     from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
   window._fbReady = false;
@@ -38,6 +38,7 @@
     window._fbOnValue      = onValue;
     window._fbPush         = push;
     window._fbServerTs     = serverTimestamp;
+    window._fbTransaction  = runTransaction;
     window._fbReady       = true;
     window.WORKER_URL     = null; // Worker not in use — direct config active
     console.log('Firebase connected ✓');
@@ -1792,7 +1793,15 @@
     letter-spacing:2px; margin-bottom:3px;
     text-shadow:0 0 12px rgba(192,57,43,0.5);
   }
-  .boss-tier-display { font-size:0.62rem; color:var(--gold2); letter-spacing:3px; margin-bottom:12px; }
+  .boss-tier-display { font-size:0.62rem; color:var(--gold2); letter-spacing:3px; margin-bottom:6px; }
+  .boss-loot-display {
+    font-size:0.75rem; color:var(--gold); letter-spacing:1px;
+    margin-bottom:10px; font-family:'Cinzel',serif;
+    padding:5px 10px; border:1px solid var(--gold3);
+    background:rgba(201,168,76,0.06); border-radius:2px;
+    text-align:center;
+  }
+  .boss-loot-display span { font-weight:700; color:var(--gold2); }
   .boss-phase-badge {
     display:none; font-size:0.6rem; letter-spacing:2px; color:#ff6b00;
     border:1px solid #ff6b00; padding:2px 8px; margin-bottom:10px;
@@ -1842,12 +1851,12 @@
   .me-tag { font-size:0.52rem; color:var(--gold); border:1px solid var(--gold3); padding:1px 4px; letter-spacing:1px; }
 
   /* Boss log */
-  .boss-log-wrap { max-height:100px; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:3px; }
+  .boss-log-wrap { max-height:160px; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:4px; }
   .boss-log-wrap::-webkit-scrollbar { width:3px; }
   .boss-log-wrap::-webkit-scrollbar-thumb { background:var(--border); }
   .boss-log-entry {
-    font-family:'IM Fell English',serif; font-size:0.68rem;
-    padding:3px 7px; border-radius:2px; line-height:1.4;
+    font-family:'IM Fell English',serif; font-size:0.88rem;
+    padding:5px 9px; border-radius:2px; line-height:1.5;
   }
   .boss-log-entry.bdmg    { color:var(--red2);  background:rgba(192,57,43,0.06); }
   .boss-log-entry.bheal   { color:var(--green2); background:rgba(46,204,113,0.06); }
@@ -2325,6 +2334,7 @@
     </div>
     <div class="boss-name-display" id="boss-name-display">THE IRON COLOSSUS</div>
     <div class="boss-tier-display" id="boss-tier-display">⬛ TITAN TIER · WORLD BOSS</div>
+    <div class="boss-loot-display" id="boss-loot-display">🏆 Loot Pool: <span id="boss-loot-amount">25,000</span> $PvE — even split among participants</div>
     <div class="boss-phase-badge" id="boss-phase-badge">⚠ RAGE PHASE ACTIVE</div>
 
     <!-- Boss animated graphic -->
@@ -4781,6 +4791,8 @@ const BossSystem = (() => {
     if (show && _boss) {
       document.getElementById('boss-name-display').textContent = (_boss.name || 'THE BOSS').toUpperCase();
       document.getElementById('boss-tier-display').textContent = _boss.tier || '⬛ WORLD BOSS';
+      const lootEl = document.getElementById('boss-loot-amount');
+      if (lootEl) lootEl.textContent = Number(_boss.lootPool || 25000).toLocaleString();
     }
   }
 
@@ -4957,28 +4969,41 @@ const BossSystem = (() => {
       setTimeout(() => document.body.classList.remove('boss-shake'), 400);
     }
 
-    // Write to Firebase (if available)
-    if (window._fbReady && window._fbDb) {
+    // Write to Firebase atomically
+    if (window._fbReady && window._fbDb && window._fbTransaction) {
       try {
-        const db = window._fbDb;
+        const db    = window._fbDb;
         const refFn = (path) => window._fbRef(db, path);
-        // Atomic: decrement HP and update my damage share
-        window._fbSet(refFn(`bosses/active/currentHp`), _boss.currentHp);
-        window._fbSet(refFn(`bosses/active/players/${_myUid}/damage`), _myDamage);
-        // Set player info on first hit
+
+        // ── Atomic HP decrement via runTransaction ──────────────
+        // If two players hit at the same instant, both transactions
+        // read the current server value and each subtracts their own
+        // damage — no write can overwrite another player's hit.
+        window._fbTransaction(refFn('bosses/active/currentHp'), (currentHp) => {
+          if (currentHp === null) return; // boss already ended, abort
+          return Math.max(0, currentHp - dmg);
+        }).catch(() => {});
+
+        // ── Write this player's cumulative damage + identity ────
+        // Damage is also transactional so concurrent hits accumulate
+        window._fbTransaction(
+          refFn(`bosses/active/players/${_myUid}/damage`),
+          (current) => (current || 0) + dmg
+        ).catch(() => {});
+
+        // Write name/skin on first hit (safe to use set — identity doesn't conflict)
         if (!_rosterData[_myUid]?.name) {
           const skin = SKINS?.[shopState?.equippedSkin]?.emoji || '⚔️';
           const name = shopState?.heroName || 'Warrior';
-          window._fbSet(refFn(`bosses/active/players/${_myUid}`), { name, skin, damage: _myDamage });
+          window._fbSet(refFn(`bosses/active/players/${_myUid}/name`), name).catch(() => {});
+          window._fbSet(refFn(`bosses/active/players/${_myUid}/skin`), skin).catch(() => {});
         }
       } catch(e) { /* silent */ }
     }
 
-    // Check if boss died
+    // Check if boss died (local check — Firebase transaction is the source of truth)
     if (_boss.currentHp <= 0) {
       _addLog(`☠ ${_boss.name} has been slain!`, 'bsystem');
-      const total = Object.values(_rosterData).reduce((s,p) => s + (p.damage||0), 0);
-      // Even split among all players who dealt at least 1 damage
       const participants = Object.values(_rosterData).filter(p => (p.damage || 0) > 0);
       const myParticipated = (_myDamage > 0);
       if (_boss.lootPool && myParticipated && participants.length > 0) {
@@ -4987,9 +5012,19 @@ const BossSystem = (() => {
       } else if (_boss.lootPool && !myParticipated) {
         _addLog(`⚠ You dealt no damage — no loot earned`, 'batk');
       }
+      // Only the player whose transaction brings HP to 0 clears the boss node
+      // The onValue listener on all clients will fire _onBossEnded automatically
       setTimeout(() => {
         if (window._fbReady && window._fbDb) {
-          window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), null);
+          // Guard: re-check server HP before clearing to avoid false endings
+          window._fbGet(window._fbChild(window._fbRef(window._fbDb), 'bosses/active/currentHp'))
+            .then(snap => {
+              if ((snap.val() || 0) <= 0) {
+                window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), null);
+              }
+            }).catch(() => {
+              window._fbSet(window._fbRef(window._fbDb, 'bosses/active'), null);
+            });
         } else {
           _onBossEnded();
         }
